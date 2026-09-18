@@ -1,0 +1,169 @@
+// Prisma schema for CAS-Print — matches the architecture described in README.md.
+// Not wired up yet: the app currently reads from lib/data.ts (mock data).
+// To go live: set DATABASE_URL in .env, run `npx prisma migrate dev`, then
+// replace the functions in lib/data.ts with prisma.* queries of the same shape.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum ProductBaseCategory {
+  T_SHIRTS
+  HOODIES
+  BASICS
+}
+
+enum PrintCategory {
+  ANIME
+  TEXT
+  MEMES
+  UKRAINIAN
+  CARTOONS
+  MOVIES
+  MUSIC
+  OTHER
+}
+
+enum Fit {
+  UNISEX
+  WOMEN
+}
+
+enum OrderStatusCode {
+  NEW
+  CONFIRMED
+  PAID
+  PROCESSING
+  READY
+  SHIPPED
+  DELIVERED
+  CANCELLED
+  RETURNED
+}
+
+model Print {
+  id          String        @id @default(cuid())
+  name        String
+  category    PrintCategory
+  image       String
+  gallery     String[]      @default([])
+  description String
+  status      String        @default("active")
+  products    Product[]
+  createdAt   DateTime      @default(now())
+}
+
+model Product {
+  id            String              @id @default(cuid())
+  slug          String              @unique
+  name          String
+  description   String
+  baseCategory  ProductBaseCategory
+  printId       String?
+  print         Print?              @relation(fields: [printId], references: [id])
+  basePrice     Int
+  images        String[]            @default([])
+  variants      Variant[]
+  popular       Boolean             @default(false)
+  status        String              @default("active")
+  createdAt     DateTime            @default(now())
+}
+
+model Variant {
+  id        String   @id @default(cuid())
+  productId String
+  product   Product  @relation(fields: [productId], references: [id])
+  size      String
+  fit       Fit
+  colorName String
+  colorHex  String
+  price     Int
+  stockQty  Int      @default(0)
+  sku       String   @unique
+
+  @@index([productId])
+}
+
+model Customer {
+  id         String    @id @default(cuid())
+  firstName  String
+  lastName   String
+  patronymic String?
+  phone      String    @unique
+  email      String?
+  addresses  Address[]
+  orders     Order[]
+  createdAt  DateTime  @default(now())
+}
+
+model Address {
+  id             String   @id @default(cuid())
+  customerId     String
+  customer       Customer @relation(fields: [customerId], references: [id])
+  carrier        String   @default("nova-poshta")
+  city           String
+  postomatNumber String
+}
+
+model Order {
+  id            String          @id @default(cuid())
+  orderNumber   String          @unique
+  customerId    String
+  customer      Customer        @relation(fields: [customerId], references: [id])
+  status        OrderStatusCode @default(NEW)
+  items         OrderItem[]
+  subtotal      Int
+  deliveryCost  Int?
+  total         Int
+  contactMethod String // "viber" | "telegram" | "whatsapp"
+  comment       String?
+  paymentStatus String          @default("pending")
+  createdAt     DateTime        @default(now())
+}
+
+model OrderItem {
+  id           String  @id @default(cuid())
+  orderId      String
+  order        Order   @relation(fields: [orderId], references: [id])
+  variantId    String
+  quantity     Int
+  priceAtOrder Int
+}
+
+model CustomPrintRequest {
+  id            String   @id @default(cuid())
+  productId     String
+  size          String
+  colorName     String
+  fileUrl       String
+  text          String?
+  comment       String?
+  customerName  String
+  customerPhone String
+  customerEmail String
+  status        String   @default("new")
+  createdAt     DateTime @default(now())
+}
+
+model PromoCode {
+  id           String   @id @default(cuid())
+  code         String   @unique
+  discountType String
+  value        Int
+  validFrom    DateTime
+  validTo      DateTime
+}
+
+model Payment {
+  id         String   @id @default(cuid())
+  orderId    String
+  provider   String
+  status     String
+  externalId String?
+  createdAt  DateTime @default(now())
+}
