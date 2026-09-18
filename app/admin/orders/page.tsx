@@ -16,11 +16,16 @@ export default async function AdminOrdersPage() {
       orderBy: { createdAt: "desc" },
       take: 50
     });
+  } catch (error) {
+    dbError = true;
+  }
 
   return (
     <main className="px-5 md:px-8 min-h-screen">
       <div className="max-w-4xl mx-auto py-16">
-        <h1 className="font-display font-extrabold text-3xl mb-10">ЗАМОВЛЕННЯ</h1>
+        <h1 className="font-display font-extrabold text-3xl mb-10">
+          ЗАМОВЛЕННЯ
+        </h1>
 
         {dbError && (
           <p className="text-accent text-sm mb-8">
@@ -31,7 +36,8 @@ export default async function AdminOrdersPage() {
 
         {!dbError && orders.length === 0 && (
           <p className="text-muted text-sm">
-            Замовлень ще немає. Оформіть тестове замовлення через /checkout, щоб побачити його тут.
+            Замовлень ще немає. Оформіть тестове замовлення через /checkout,
+            щоб побачити його тут.
           </p>
         )}
 
@@ -47,21 +53,33 @@ export default async function AdminOrdersPage() {
                 <th className="py-3">Коментар</th>
               </tr>
             </thead>
+
             <tbody>
               {orders.map((o) => (
                 <tr key={o.id} className="border-b border-line">
                   <td className="py-3.5 font-semibold">{o.orderNumber}</td>
+
                   <td className="py-3.5 text-muted">
                     {o.customer.firstName} {o.customer.lastName}
                   </td>
-                  <td className="py-3.5 text-muted">{formatPrice(o.total)}</td>
-                  <td className="py-3.5">
-                    {ORDER_STATUS_LABELS[o.status as OrderStatus["code"]] ?? o.status}
+
+                  <td className="py-3.5 text-muted">
+                    {formatPrice(o.total)}
                   </td>
+
+                  <td className="py-3.5">
+                    {ORDER_STATUS_LABELS[o.status as OrderStatus["code"]] ??
+                      o.status}
+                  </td>
+
                   <td className="py-3.5 text-muted">
                     {new Date(o.createdAt).toLocaleDateString("uk-UA")}
                   </td>
-                  <td className="py-3.5 text-muted max-w-[220px] truncate" title={o.comment ?? ""}>
+
+                  <td
+                    className="py-3.5 text-muted max-w-[220px] truncate"
+                    title={o.comment ?? ""}
+                  >
                     {o.comment ?? "—"}
                   </td>
                 </tr>
