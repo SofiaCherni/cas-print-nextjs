@@ -1,12 +1,13 @@
 import { prisma } from "@/lib/prisma";
 import { ORDER_STATUS_LABELS, OrderStatus } from "@/lib/types";
 import { formatPrice } from "@/lib/data";
+import { Prisma } from "@prisma/client";
 
 export const metadata = { title: "Замовлення — Адмінпанель CAS-Print" };
-export const dynamic = "force-dynamic"; // always show latest orders, never cache
+export const dynamic = "force-dynamic";
 
 export default async function AdminOrdersPage() {
-  let orders: Awaited<ReturnType<typeof prisma.order.findMany>> = [];
+  let orders: Prisma.OrderGetPayload<{ include: { customer: true } }>[] = [];
   let dbError = false;
 
   try {
@@ -15,10 +16,6 @@ export default async function AdminOrdersPage() {
       orderBy: { createdAt: "desc" },
       take: 50
     });
-  } catch (err) {
-    console.error("[admin/orders] DB not reachable:", err);
-    dbError = true;
-  }
 
   return (
     <main className="px-5 md:px-8 min-h-screen">
