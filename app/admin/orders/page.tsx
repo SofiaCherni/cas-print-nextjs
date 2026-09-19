@@ -1,13 +1,15 @@
+import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { ORDER_STATUS_LABELS, OrderStatus } from "@/lib/types";
 import { formatPrice } from "@/lib/data";
-import { Prisma } from "@prisma/client";
 
 export const metadata = { title: "Замовлення — Адмінпанель CAS-Print" };
-export const dynamic = "force-dynamic";
+export const dynamic = "force-dynamic"; // always show latest orders, never cache
+
+type OrderWithCustomer = Prisma.OrderGetPayload<{ include: { customer: true } }>;
 
 export default async function AdminOrdersPage() {
-  let orders: Prisma.OrderGetPayload<{ include: { customer: true } }>[] = [];
+  let orders: OrderWithCustomer[] = [];
   let dbError = false;
 
   try {
@@ -16,16 +18,15 @@ export default async function AdminOrdersPage() {
       orderBy: { createdAt: "desc" },
       take: 50
     });
-  } catch (error) {
+  } catch (err) {
+    console.error("[admin/orders] DB not reachable:", err);
     dbError = true;
   }
 
   return (
     <main className="px-5 md:px-8 min-h-screen">
       <div className="max-w-4xl mx-auto py-16">
-        <h1 className="font-display font-extrabold text-3xl mb-10">
-          ЗАМОВЛЕННЯ
-        </h1>
+        <h1 className="font-display font-extrabold text-3xl mb-10">ЗАМОВЛЕННЯ</h1>
 
         {dbError && (
           <p className="text-accent text-sm mb-8">
@@ -36,8 +37,7 @@ export default async function AdminOrdersPage() {
 
         {!dbError && orders.length === 0 && (
           <p className="text-muted text-sm">
-            Замовлень ще немає. Оформіть тестове замовлення через /checkout,
-            щоб побачити його тут.
+            Замовлень ще немає. Оформіть тестове замовлення через /checkout, щоб побачити його тут.
           </p>
         )}
 
@@ -53,33 +53,21 @@ export default async function AdminOrdersPage() {
                 <th className="py-3">Коментар</th>
               </tr>
             </thead>
-
             <tbody>
               {orders.map((o) => (
                 <tr key={o.id} className="border-b border-line">
                   <td className="py-3.5 font-semibold">{o.orderNumber}</td>
-
                   <td className="py-3.5 text-muted">
                     {o.customer.firstName} {o.customer.lastName}
                   </td>
-
-                  <td className="py-3.5 text-muted">
-                    {formatPrice(o.total)}
-                  </td>
-
+                  <td className="py-3.5 text-muted">{formatPrice(o.total)}</td>
                   <td className="py-3.5">
-                    {ORDER_STATUS_LABELS[o.status as OrderStatus["code"]] ??
-                      o.status}
+                    {ORDER_STATUS_LABELS[o.status as OrderStatus["code"]] ?? o.status}
                   </td>
-
                   <td className="py-3.5 text-muted">
                     {new Date(o.createdAt).toLocaleDateString("uk-UA")}
                   </td>
-
-                  <td
-                    className="py-3.5 text-muted max-w-[220px] truncate"
-                    title={o.comment ?? ""}
-                  >
+                  <td className="py-3.5 text-muted max-w-[220px] truncate" title={o.comment ?? ""}>
                     {o.comment ?? "—"}
                   </td>
                 </tr>
