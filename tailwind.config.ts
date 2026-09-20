@@ -8,13 +8,14 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        bg: "#0A0A0A",
-        bgSoft: "#141412",
-        panel: "#171613",
-        line: "#2A2926",
-        paper: "#F2F0EB",
-        muted: "#8A8A8A",
-        accent: "#B3402E"
+        bg: "#080808",
+        bgSoft: "#111111",
+        panel: "#151515",
+        line: "#1E1E1E",
+        paper: "#F2EEE8",
+        muted: "#A8A19A",
+        accent: "#710009",
+        accentHover: "#8A0B12"
       },
       fontFamily: {
         display: ["var(--font-archivo)", "sans-serif"],

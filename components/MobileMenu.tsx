@@ -62,9 +62,8 @@ export default function MobileMenu({ open, onClose }: { open: boolean; onClose: 
         <Link
           href="/sale"
           onClick={onClose}
-          className="font-display font-extrabold text-3xl py-4 border-b border-line nav-sale-link"
+          className="font-display font-extrabold text-3xl py-4 border-b border-line text-accent"
         >
-          <span className="nav-sale-dot" aria-hidden="true" />
           SALE
         </Link>
         <MobileGroup label="ПОКУПЦЯМ" items={BUYERS_ITEMS} onNavigate={onClose} />

@@ -67,7 +67,6 @@ export default function NavDropdown({ label, items }: { label: string; items: Dr
         onClick={() => setOpen((v) => !v)}
       >
         {label}
-        <span className="nav-dropdown-caret" aria-hidden="true" />
       </button>
       <div className={`nav-dropdown-panel${open ? " open" : ""}`} role="menu">
         {items.map((item) => (

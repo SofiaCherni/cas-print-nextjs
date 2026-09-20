@@ -13,8 +13,6 @@ export const CATALOG_ITEMS: DropdownItem[] = [
 ];
 
 export const BUYERS_ITEMS: DropdownItem[] = [
-  { label: "Доставка", href: "/delivery-and-payment#delivery" },
-  { label: "Оплата", href: "/delivery-and-payment#payment" },
-  { label: "Обмін і повернення", href: "/returns" },
-  { label: "Контакти", href: "/contacts" }
+  { label: "Оплата і доставка", href: "/delivery-and-payment" },
+  { label: "Обмін та повернення", href: "/returns" }
 ];

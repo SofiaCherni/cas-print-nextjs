@@ -7,13 +7,34 @@ html {
 }
 
 body {
-  background-color: #0A0A0A;
-  color: #F2F0EB;
+  background-color: #080808;
+  color: #F2EEE8;
 }
 
 ::selection {
-  background: #B3402E;
-  color: #F2F0EB;
+  background: #710009;
+  color: #F2EEE8;
+}
+
+/* ---------------- Main site nav (КАТАЛОГ / СТВОРИТИ СВІЙ / SALE / ПОКУПЦЯМ) ---------------- */
+.main-nav {
+  position: relative;
+}
+
+.main-nav-underline {
+  position: absolute;
+  bottom: -10px;
+  left: 0;
+  height: 2px;
+  background: #710009;
+  transition: transform 480ms cubic-bezier(0.22, 1, 0.36, 1), width 480ms cubic-bezier(0.22, 1, 0.36, 1);
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .main-nav-underline {
+    transition: none;
+  }
 }
 
 /* ---------------- AdminNav (admin section tabs) ---------------- */
@@ -22,7 +43,7 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 22px;
-  border-bottom: 1px solid #2A2926;
+  border-bottom: 1px solid #1E1E1E;
   padding-bottom: 0;
   max-width: 100%;
   overflow-x: auto;
@@ -39,18 +60,18 @@ body {
   font-weight: 700;
   letter-spacing: 0.04em;
   white-space: nowrap;
-  color: #8A8A8A;
+  color: #A8A19A;
   transition: color 0.2s ease;
 }
 .admin-nav-item:hover {
-  color: #F2F0EB;
+  color: #F2EEE8;
 }
 .admin-nav-item:focus-visible {
-  outline: 2px solid #B3402E;
+  outline: 2px solid #710009;
   outline-offset: 2px;
 }
 .admin-nav-item.active {
-  color: #F2F0EB;
+  color: #F2EEE8;
 }
 
 .admin-nav-underline {
@@ -58,7 +79,7 @@ body {
   bottom: -1px;
   left: 0;
   height: 2px;
-  background: #B3402E;
+  background: #710009;
   transition: transform 320ms ease, width 320ms ease;
   pointer-events: none;
 }
@@ -77,12 +98,11 @@ body {
 .nav-dropdown-trigger {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
   background: none;
   border: none;
   padding: 0;
   font: inherit;
-  color: #F2F0EB;
+  color: #F2EEE8;
   opacity: 0.85;
   cursor: pointer;
   transition: opacity 0.2s ease;
@@ -92,21 +112,8 @@ body {
   opacity: 1;
 }
 .nav-dropdown-trigger:focus-visible {
-  outline: 2px solid #B3402E;
+  outline: 2px solid #710009;
   outline-offset: 4px;
-}
-
-.nav-dropdown-caret {
-  width: 7px;
-  height: 7px;
-  border-right: 1.5px solid currentColor;
-  border-bottom: 1.5px solid currentColor;
-  transform: rotate(45deg) translateY(-2px);
-  opacity: 0.7;
-  transition: transform 0.2s ease;
-}
-.nav-dropdown-trigger.open .nav-dropdown-caret {
-  transform: rotate(-135deg) translateY(1px);
 }
 
 .nav-dropdown-panel {
@@ -116,8 +123,8 @@ body {
   transform: translate(-50%, -6px);
   min-width: 200px;
   padding: 10px;
-  background: #141412;
-  border: 1px solid #2A2926;
+  background: #111111;
+  border: 1px solid #1E1E1E;
   border-radius: 10px;
   box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
   opacity: 0;
@@ -137,43 +144,22 @@ body {
   font-size: 13px;
   font-weight: 600;
   letter-spacing: 0.01em;
-  color: #C9C7C1;
+  color: #C7C3BC;
   border-radius: 6px;
   white-space: nowrap;
   transition: color 0.2s ease, background-color 0.2s ease;
 }
 .nav-dropdown-item:hover,
 .nav-dropdown-item:focus-visible {
-  color: #F2F0EB;
-  background-color: rgba(242, 240, 235, 0.06);
+  color: #F2EEE8;
+  background-color: rgba(242, 238, 232, 0.06);
   outline: none;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .nav-dropdown-panel,
-  .nav-dropdown-caret {
+  .nav-dropdown-panel {
     transition: none;
   }
-}
-
-/* ---------------- SALE link (subtle accent, no aggressive red) ---------------- */
-.nav-sale-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  color: #B3402E;
-  opacity: 0.9;
-  transition: opacity 0.2s ease;
-}
-.nav-sale-link:hover {
-  opacity: 1;
-}
-.nav-sale-dot {
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: #B3402E;
-  box-shadow: 0 0 6px rgba(179, 64, 46, 0.6);
 }
 
 /* ---------------- Mobile menu accordion groups ---------------- */
