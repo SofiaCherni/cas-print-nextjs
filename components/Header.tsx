@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useCart } from "@/lib/cart-context";
 import MobileMenu from "./MobileMenu";
+import NavDropdown from "./NavDropdown";
+import { CATALOG_ITEMS, BUYERS_ITEMS } from "@/lib/nav";
 
 export default function Header() {
   const [compact, setCompact] = useState(false);
@@ -26,12 +28,16 @@ export default function Header() {
         CAS·PRINT
       </Link>
 
-      <nav className="hidden md:flex gap-9 text-[13px] font-semibold tracking-wide">
-        <Link href="/catalog" className="opacity-85 hover:opacity-100">КАТАЛОГ</Link>
-        <Link href="/catalog/t-shirts" className="opacity-85 hover:opacity-100">ФУТБОЛКИ</Link>
-        <Link href="/catalog/hoodies" className="opacity-85 hover:opacity-100">ХУДІ</Link>
-        <Link href="/catalog" className="opacity-85 hover:opacity-100">ПРИНТИ</Link>
-        <Link href="/custom-print" className="opacity-85 hover:opacity-100">СТВОРИТИ СВІЙ</Link>
+      <nav className="hidden md:flex items-center gap-8 text-[13px] font-semibold tracking-wide">
+        <NavDropdown label="КАТАЛОГ" items={CATALOG_ITEMS} />
+        <Link href="/custom-print" className="opacity-85 hover:opacity-100">
+          СТВОРИТИ СВІЙ
+        </Link>
+        <Link href="/sale" className="nav-sale-link">
+          <span className="nav-sale-dot" aria-hidden="true" />
+          SALE
+        </Link>
+        <NavDropdown label="ПОКУПЦЯМ" items={BUYERS_ITEMS} />
       </nav>
 
       <div className="flex items-center gap-5 text-[13px] font-semibold tracking-wide">

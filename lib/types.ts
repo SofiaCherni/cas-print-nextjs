@@ -1,4 +1,4 @@
-export type ProductBaseCategory = "t-shirts" | "hoodies" | "basics";
+export type ProductBaseCategory = "t-shirts" | "sweatshirts" | "hoodies" | "basics";
 
 export type PrintCategory =
   | "anime"
@@ -44,6 +44,11 @@ export interface Product {
   baseCategory: ProductBaseCategory;
   printId: string | null;
   basePrice: number;
+  // TODO: NEED REAL BUSINESS DATA — mark real sale items as onSale: true
+  // (and set salePrice) once CAS-Print confirms which products/discounts
+  // apply. Left unset for all current mock products on purpose.
+  onSale?: boolean;
+  salePrice?: number;
   images: string[];
   variants: Variant[];
   popular?: boolean;

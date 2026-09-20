@@ -33,8 +33,9 @@ export const PRINT_CATEGORIES: { value: PrintCategory; label: string }[] = [
 
 export const BASE_CATEGORIES: { value: ProductBaseCategory; label: string; slug: string }[] = [
   { value: "t-shirts", label: "Футболки", slug: "t-shirts" },
+  { value: "sweatshirts", label: "Світшоти", slug: "sweatshirts" },
   { value: "hoodies", label: "Худі", slug: "hoodies" },
-  { value: "basics", label: "Базові речі", slug: "basics" }
+  { value: "basics", label: "Інші товари", slug: "basics" }
 ];
 
 export const PRINTS: Print[] = [

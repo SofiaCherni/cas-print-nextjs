@@ -1,9 +1,9 @@
-import ElectricNav from "@/components/admin/ElectricNav";
+import AdminNav from "@/components/admin/AdminNav";
 
-// Existing labels/routes only — matches the titles already used on the
-// admin dashboard cards (app/admin/page.tsx) and the actual page routes.
+// "Дашборд" removed from the nav per request — only Товари and Замовлення.
+// The /admin overview page itself still exists at its URL, just isn't linked
+// here anymore.
 const ADMIN_NAV_ITEMS = [
-  { label: "ДАШБОРД", href: "/admin" },
   { label: "ТОВАРИ", href: "/admin/products" },
   { label: "ЗАМОВЛЕННЯ", href: "/admin/orders" }
 ];
@@ -13,7 +13,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     <div>
       <div className="px-5 md:px-8 pt-8">
         <div className="max-w-4xl mx-auto">
-          <ElectricNav items={ADMIN_NAV_ITEMS} />
+          <AdminNav items={ADMIN_NAV_ITEMS} />
         </div>
       </div>
       {children}

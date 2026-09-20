@@ -6,7 +6,7 @@ export default function DeliveryAndPaymentPage() {
       <div className="max-w-2xl mx-auto py-16 pb-28">
         <h1 className="font-display font-extrabold text-3xl md:text-4xl mb-14">ОПЛАТА І ДОСТАВКА</h1>
 
-        <div className="py-7 border-t border-line">
+        <div id="delivery" className="py-7 border-t border-line scroll-mt-24">
           <h2 className="font-display font-bold text-lg mb-3">ДОСТАВКА</h2>
           <ul className="text-muted text-sm leading-relaxed space-y-2 list-disc pl-5">
             <li>Доставка тільки через Нову Пошту.</li>
@@ -15,7 +15,7 @@ export default function DeliveryAndPaymentPage() {
           </ul>
         </div>
 
-        <div className="py-7 border-t border-line last:border-b">
+        <div id="payment" className="py-7 border-t border-line last:border-b scroll-mt-24">
           <h2 className="font-display font-bold text-lg mb-3">ОПЛАТА</h2>
           <ul className="text-muted text-sm leading-relaxed space-y-2 list-disc pl-5">
             <li>Повна оплата онлайн.</li>
