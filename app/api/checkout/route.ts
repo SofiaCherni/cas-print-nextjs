@@ -25,7 +25,7 @@ interface CheckoutBody {
  *
  * No online payment yet by design (brief update): payment method is agreed
  * with the customer over Viber/Telegram/WhatsApp after the order is placed,
- * per the current "Оплата і доставка" policy (full prepayment online is
+ * per the current "Доставка та оплата" policy (full prepayment online is
  * listed there as a *future* option, not wired into checkout yet).
  */
 export async function POST(req: NextRequest) {

@@ -22,7 +22,7 @@ export default function Footer() {
           <div>
             <h5 className="text-xs tracking-wide text-muted font-bold mb-4">ПОКУПЦЯМ</h5>
             <ul className="space-y-2.5 text-sm opacity-85">
-              <li><Link href="/delivery-and-payment">Оплата і доставка</Link></li>
+              <li><Link href="/delivery-and-payment">Доставка та оплата</Link></li>
               <li><Link href="/returns">Обмін та повернення</Link></li>
               <li><Link href="/size-guide">Розмірна сітка</Link></li>
               <li><Link href="/contacts">Контакти</Link></li>

@@ -15,7 +15,17 @@ export interface DropdownItem {
  * fade + slight translateY — no animation library, respects
  * prefers-reduced-motion (see .nav-dropdown-panel in globals.css).
  */
-export default function NavDropdown({ label, items }: { label: string; items: DropdownItem[] }) {
+export default function NavDropdown({
+  label,
+  items,
+  triggerHref
+}: {
+  label: string;
+  items: DropdownItem[];
+  /** When set, the trigger itself is a link (e.g. КАТАЛОГ → /catalog) and
+   * navigates on click, while hover still opens the panel underneath it. */
+  triggerHref?: string;
+}) {
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -59,15 +69,26 @@ export default function NavDropdown({ label, items }: { label: string; items: Dr
       onMouseLeave={closeSoon}
       onBlur={onRootBlur}
     >
-      <button
-        type="button"
-        className={`nav-dropdown-trigger${open ? " open" : ""}`}
-        aria-haspopup="true"
-        aria-expanded={open}
-        onClick={() => setOpen((v) => !v)}
-      >
-        {label}
-      </button>
+      {triggerHref ? (
+        <Link
+          href={triggerHref}
+          className={`nav-dropdown-trigger${open ? " open" : ""}`}
+          aria-haspopup="true"
+          aria-expanded={open}
+        >
+          {label}
+        </Link>
+      ) : (
+        <button
+          type="button"
+          className={`nav-dropdown-trigger${open ? " open" : ""}`}
+          aria-haspopup="true"
+          aria-expanded={open}
+          onClick={() => setOpen((v) => !v)}
+        >
+          {label}
+        </button>
+      )}
       <div className={`nav-dropdown-panel${open ? " open" : ""}`} role="menu">
         {items.map((item) => (
           <Link

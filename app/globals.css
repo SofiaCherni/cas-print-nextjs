@@ -43,8 +43,6 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 22px;
-  border-bottom: 1px solid #1E1E1E;
-  padding-bottom: 0;
   max-width: 100%;
   overflow-x: auto;
   scrollbar-width: none;

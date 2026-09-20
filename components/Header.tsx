@@ -7,6 +7,7 @@ import { useCart } from "@/lib/cart-context";
 import MobileMenu from "./MobileMenu";
 import NavDropdown from "./NavDropdown";
 import { CATALOG_ITEMS, BUYERS_ITEMS } from "@/lib/nav";
+import { SearchIcon, HeartIcon, BagIcon } from "./icons";
 
 function getActiveSlot(pathname: string): number {
   if (pathname.startsWith("/catalog")) return 0;
@@ -69,7 +70,7 @@ export default function Header() {
             slotRefs.current[0] = el;
           }}
         >
-          <NavDropdown label="КАТАЛОГ" items={CATALOG_ITEMS} />
+          <NavDropdown label="КАТАЛОГ" items={CATALOG_ITEMS} triggerHref="/catalog" />
         </div>
 
         <div
@@ -112,17 +113,28 @@ export default function Header() {
         )}
       </nav>
 
-      <div className="flex items-center gap-5 text-[13px] font-semibold tracking-wide">
-        <button className="hidden sm:inline opacity-85 hover:opacity-100" aria-label="Пошук">
-          ПОШУК
+      <div className="flex items-center gap-5">
+        <button
+          className="hidden sm:inline-flex opacity-85 hover:opacity-100 transition-opacity"
+          aria-label="Пошук"
+        >
+          <SearchIcon className="w-[19px] h-[19px]" />
         </button>
-        <Link href="/account/favorites" className="hidden sm:inline opacity-85 hover:opacity-100">
-          ОБРАНЕ
+        <Link
+          href="/account/favorites"
+          className="hidden sm:inline-flex opacity-85 hover:opacity-100 transition-opacity"
+          aria-label="Обране"
+        >
+          <HeartIcon className="w-[19px] h-[19px]" />
         </Link>
-        <Link href="/cart" className="opacity-85 hover:opacity-100">
-          КОШИК
+        <Link
+          href="/cart"
+          className="relative inline-flex opacity-85 hover:opacity-100 transition-opacity"
+          aria-label="Кошик"
+        >
+          <BagIcon className="w-[19px] h-[19px]" />
           {count > 0 && (
-            <span className="ml-1 inline-flex items-center justify-center w-4 h-4 rounded-full bg-accent text-paper text-[10px] font-extrabold">
+            <span className="absolute -top-1.5 -right-1.5 inline-flex items-center justify-center w-4 h-4 rounded-full bg-accent text-paper text-[10px] font-extrabold">
               {count}
             </span>
           )}

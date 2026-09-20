@@ -1,10 +1,10 @@
-export const metadata = { title: "Оплата і доставка — CAS-Print" };
+export const metadata = { title: "Доставка та оплата — CAS-Print" };
 
 export default function DeliveryAndPaymentPage() {
   return (
     <main className="px-5 md:px-8">
       <div className="max-w-2xl mx-auto py-16 pb-28">
-        <h1 className="font-display font-extrabold text-3xl md:text-4xl mb-14">ОПЛАТА І ДОСТАВКА</h1>
+        <h1 className="font-display font-extrabold text-3xl md:text-4xl mb-14">ДОСТАВКА ТА ОПЛАТА</h1>
 
         <div id="delivery" className="py-7 border-t border-line scroll-mt-24">
           <h2 className="font-display font-bold text-lg mb-3">ДОСТАВКА</h2>

@@ -32,7 +32,7 @@ export default function HomePage() {
             Футболки та худі з готовими принтами або твоїм власним дизайном.
           </p>
           <div className="flex flex-wrap gap-3.5">
-            <Button href="/catalog" variant="solid">ДИВИТИСЯ ПРИНТИ</Button>
+            <Button href="/catalog" variant="solid">НАШІ ТОВАРИ</Button>
             <Button href="/custom-print" variant="ghost">СТВОРИТИ СВІЙ</Button>
           </div>
         </div>
