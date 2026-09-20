@@ -7,7 +7,7 @@ import { useCart } from "@/lib/cart-context";
 import MobileMenu from "./MobileMenu";
 import NavDropdown from "./NavDropdown";
 import { CATALOG_ITEMS, BUYERS_ITEMS } from "@/lib/nav";
-import { SearchIcon, HeartIcon, BagIcon } from "./icons";
+import { SearchIcon, BagIcon } from "./icons";
 
 function getActiveSlot(pathname: string): number {
   if (pathname.startsWith("/catalog")) return 0;
@@ -90,7 +90,7 @@ export default function Header() {
         >
           <Link
             href="/sale"
-            className="text-accent opacity-85 hover:opacity-100 hover:text-accentHover transition-colors"
+            className="font-extrabold text-accent opacity-90 hover:opacity-100 hover:text-accentHover transition-colors"
           >
             SALE
           </Link>
@@ -120,13 +120,6 @@ export default function Header() {
         >
           <SearchIcon className="w-[19px] h-[19px]" />
         </button>
-        <Link
-          href="/account/favorites"
-          className="hidden sm:inline-flex opacity-85 hover:opacity-100 transition-opacity"
-          aria-label="Обране"
-        >
-          <HeartIcon className="w-[19px] h-[19px]" />
-        </Link>
         <Link
           href="/cart"
           className="relative inline-flex opacity-85 hover:opacity-100 transition-opacity"

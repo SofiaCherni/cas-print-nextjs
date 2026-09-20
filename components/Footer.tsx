@@ -6,7 +6,9 @@ export default function Footer() {
       <div className="max-w-[1360px] mx-auto">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12">
           <div>
-            <h5 className="font-display font-extrabold text-lg mb-2">CAS·PRINT</h5>
+            <h5 className="font-display font-extrabold text-lg mb-2">
+              <Link href="/" className="hover:text-accent transition-colors">CAS·PRINT</Link>
+            </h5>
             <p className="text-sm opacity-60">Український streetwear-бренд одягу з принтами.</p>
           </div>
           <div>

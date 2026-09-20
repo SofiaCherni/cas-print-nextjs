@@ -14,5 +14,6 @@ export const CATALOG_ITEMS: DropdownItem[] = [
 
 export const BUYERS_ITEMS: DropdownItem[] = [
   { label: "Доставка та оплата", href: "/delivery-and-payment" },
-  { label: "Обмін та повернення", href: "/returns" }
+  { label: "Обмін та повернення", href: "/returns" },
+  { label: "Розмірна сітка", href: "/size-guide" }
 ];

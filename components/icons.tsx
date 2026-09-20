@@ -1,4 +1,4 @@
-// Small inline line icons for the header (search / favorites / cart).
+// Small inline line icons for the header (search / cart).
 // No icon library dependency — plain SVG, inherits color via currentColor.
 import type { SVGProps } from "react";
 
@@ -15,22 +15,6 @@ export function SearchIcon(props: SVGProps<SVGSVGElement>) {
     >
       <circle cx="9" cy="9" r="6.25" />
       <line x1="18" y1="18" x2="13.6" y2="13.6" />
-    </svg>
-  );
-}
-
-export function HeartIcon(props: SVGProps<SVGSVGElement>) {
-  return (
-    <svg
-      viewBox="0 0 20 20"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.6"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      {...props}
-    >
-      <path d="M10 17.2 3.2 10.6a4.2 4.2 0 0 1 5.9-5.9L10 5.6l0.9-0.9a4.2 4.2 0 0 1 5.9 5.9L10 17.2Z" />
     </svg>
   );
 }
