@@ -18,11 +18,10 @@ const variants: Record<Variant, string> = {
   // Primary CTA everywhere on the site (hero, add to cart, checkout, custom
   // print submit) — true invert on hover, not just a lighter shade.
   accent: "bg-accent text-paper border-accent hover:bg-paper hover:text-accent hover:border-accent",
-  // Secondary CTA paired with `accent` (e.g. hero's "СТВОРИ СВІЙ"). Solid
-  // light fill (not transparent) so the burgundy text stays readable over
-  // busy backgrounds like the hero video — inverts the opposite way on
-  // hover, mirroring the primary button's normal state.
-  accentGhost: "bg-paper text-accent border-accent hover:bg-accent hover:text-paper hover:border-accent"
+  // Secondary CTA paired with `accent` (e.g. hero's "СТВОРИ СВІЙ"). Neutral
+  // in its normal state (blends with the "ghost" look already used
+  // elsewhere) — the burgundy only appears on hover, as an invert.
+  accentGhost: "bg-transparent text-paper border-paper/40 hover:bg-paper hover:text-accent hover:border-accent"
 };
 
 export default function Button({ href, variant = "solid", className = "", children, ...rest }: Props) {

@@ -64,7 +64,7 @@ export default function Header() {
         CAS·PRINT
       </Link>
 
-      <nav ref={navRef} className="main-nav hidden md:flex items-center gap-8 text-[13px] font-semibold tracking-wide">
+      <nav ref={navRef} className="main-nav hidden md:flex items-center gap-9 text-[14px] font-semibold tracking-wide">
         <div
           ref={(el) => {
             slotRefs.current[0] = el;
@@ -90,7 +90,7 @@ export default function Header() {
         >
           <Link
             href="/sale"
-            className="inline-flex items-center rounded-full bg-accent text-paper px-3.5 py-[5px] leading-none transition-colors duration-300 hover:bg-paper hover:text-accent"
+            className="inline-flex items-center rounded-full bg-accent text-paper px-4 py-[6px] leading-none transition-colors duration-300 hover:bg-paper hover:text-accent"
           >
             SALE
           </Link>

@@ -123,7 +123,7 @@ export default function HomePage() {
           <p className="text-paper/75 leading-relaxed max-w-sm mb-8">
             Маєш власне фото, напис, ілюстрацію чи логотип? Надішли нам — і ми нанесемо його на одяг.
           </p>
-          <Button href="/custom-print" variant="solid" className="w-fit">
+          <Button href="/custom-print" variant="accent" className="w-fit">
             ЗАМОВИТИ ВЛАСНИЙ ПРИНТ
           </Button>
         </div>
@@ -204,7 +204,7 @@ export default function HomePage() {
           ЗНАЙДИ ТЕ, ЩО ТВОЄ
         </h2>
         <div className="flex flex-wrap gap-3.5 justify-center">
-          <Button href="/catalog" variant="solid">ПЕРЕГЛЯНУТИ КАТАЛОГ</Button>
+          <Button href="/catalog" variant="accent">ПЕРЕГЛЯНУТИ КАТАЛОГ</Button>
           <Button href="/custom-print" variant="ghost">СТВОРИТИ СВІЙ ПРИНТ</Button>
         </div>
       </section>
