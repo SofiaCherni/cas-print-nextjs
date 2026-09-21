@@ -90,7 +90,7 @@ export default function Header() {
         >
           <Link
             href="/sale"
-            className="font-extrabold text-accent opacity-90 hover:opacity-100 hover:text-accentHover transition-colors"
+            className="inline-flex items-center rounded-full bg-accent text-paper px-3.5 py-[5px] leading-none transition-colors duration-300 hover:bg-paper hover:text-accent"
           >
             SALE
           </Link>
