@@ -1,229 +1,29 @@
-import { Print, PrintCategory, Product, ProductBaseCategory, Size, Fit } from "./types";
+import { Prisma } from "@prisma/client";
+import { prisma } from "./prisma";
+import { baseCategoryToDb, fitToDb, mapPrint, mapProduct, printCategoryToDb } from "./db-mappers";
+import { Fit, Print, PrintCategory, Product, ProductBaseCategory, Size } from "./types";
+import {
+  BASE_CATEGORIES,
+  COLOR_PALETTE,
+  formatPrice,
+  generateOrderNumber,
+  PRINT_CATEGORIES
+} from "./catalog-constants";
 
 /**
- * MOCK DATA LAYER
- * ----------------
- * This file stands in for the real database (see prisma/schema.prisma for the
- * intended production schema: products, variants, prints, orders, etc).
- * Replace these arrays and helper functions with real Prisma/DB queries when
- * a database is connected. Nothing here should be treated as real CAS-Print
- * catalog data — it exists to make the prototype browsable end to end.
+ * DATA LAYER — now backed by Postgres via Prisma (see prisma/schema.prisma).
+ * Function names/shapes match what every page already expects (see
+ * lib/db-mappers.ts for the DB <-> app-type conversion), so pages only
+ * needed an `await` added at each call site, not a rewrite.
+ *
+ * Pure constants/helpers (no Prisma import) live in lib/catalog-constants.ts
+ * and are re-exported here for server-side code; client components import
+ * straight from lib/catalog-constants to avoid bundling Prisma.
  */
+export { BASE_CATEGORIES, COLOR_PALETTE, formatPrice, generateOrderNumber, PRINT_CATEGORIES };
 
-const COLORS = [
-  { name: "Чорний", hex: "#0A0A0A" },
-  { name: "Молочний", hex: "#F2F0EB" },
-  { name: "Сірий", hex: "#8A8A8A" },
-  { name: "Теракотовий", hex: "#B3402E" },
-  { name: "Хакі", hex: "#2F3B2A" }
-];
-
-const SIZES: Size[] = ["XS", "S", "M", "L", "XL", "XXL", "3XL", "4XL", "5XL"];
-
-export const PRINT_CATEGORIES: { value: PrintCategory; label: string }[] = [
-  { value: "anime", label: "Аніме" },
-  { value: "text", label: "Текст" },
-  { value: "memes", label: "Меми" },
-  { value: "ukrainian", label: "Українське" },
-  { value: "cartoons", label: "Мультфільми" },
-  { value: "movies", label: "Кіно" },
-  { value: "music", label: "Музика" },
-  { value: "other", label: "Інше" }
-];
-
-export const BASE_CATEGORIES: { value: ProductBaseCategory; label: string; slug: string }[] = [
-  { value: "t-shirts", label: "Футболки", slug: "t-shirts" },
-  { value: "sweatshirts", label: "Світшоти", slug: "sweatshirts" },
-  { value: "hoodies", label: "Худі", slug: "hoodies" },
-  { value: "basics", label: "Інші товари", slug: "basics" }
-];
-
-export const PRINTS: Print[] = [
-  {
-    id: "print-sakura",
-    name: "Сакура",
-    category: "anime",
-    image: "/assets/placeholder-print.svg",
-    description: "Ілюстрація в аніме-стилі.",
-    status: "active",
-    availableProductIds: ["p-tshirt-sakura", "p-hoodie-sakura"]
-  },
-  {
-    id: "print-zaraz-yak-dam",
-    name: "Зараз як дам",
-    category: "ukrainian",
-    image: "/assets/placeholder-print.svg",
-    description: "Український принт із народним мотивом.",
-    status: "active",
-    availableProductIds: ["p-hoodie-zaraz"]
-  },
-  {
-    id: "print-meme-oversize",
-    name: "Оверсайз мем",
-    category: "memes",
-    image: "/assets/placeholder-print.svg",
-    description: "Популярний мем-принт.",
-    status: "active",
-    availableProductIds: ["p-tshirt-meme"]
-  },
-  {
-    id: "print-text-napys",
-    name: "Напис",
-    category: "text",
-    image: "/assets/placeholder-print.svg",
-    description: "Типографічний принт.",
-    status: "active",
-    availableProductIds: ["p-hoodie-text"]
-  },
-  {
-    id: "print-cartoon",
-    name: "Мультфільм",
-    category: "cartoons",
-    image: "/assets/placeholder-print.svg",
-    description: "Принт із мотивами мультфільму.",
-    status: "active",
-    availableProductIds: ["p-tshirt-cartoon"]
-  },
-  {
-    id: "print-movie",
-    name: "Кіно",
-    category: "movies",
-    image: "/assets/placeholder-print.svg",
-    description: "Кіно-принт.",
-    status: "active",
-    availableProductIds: ["p-tshirt-movie"]
-  }
-];
-
-function makeVariants(basePrice: number, printId: string, fits: Fit[] = ["unisex"]) {
-  const variants = [];
-  let i = 0;
-  for (const fit of fits) {
-    for (const size of SIZES) {
-      for (const color of COLORS) {
-        i++;
-        const isExtended = size === "3XL" || size === "4XL" || size === "5XL";
-        variants.push({
-          id: `${printId}-${fit}-${size}-${color.name}`,
-          size,
-          fit,
-          color,
-          price: isExtended ? basePrice + 50 : basePrice,
-          stockQty: 20,
-          sku: `${printId.toUpperCase()}-${fit[0].toUpperCase()}-${size}-${i}`
-        });
-      }
-    }
-  }
-  return variants;
-}
-
-export const PRODUCTS: Product[] = [
-  {
-    id: "p-tshirt-sakura",
-    slug: "futbolka-sakura",
-    name: "Футболка «Сакура»",
-    description:
-      "Пряма футболка щільністю 180 г/м² з принтом «Сакура». Бавовна 100%.",
-    baseCategory: "t-shirts",
-    printId: "print-sakura",
-    basePrice: 890,
-    images: ["/assets/placeholder-product.svg", "/assets/placeholder-product.svg"],
-    variants: makeVariants(890, "sakura", ["unisex", "women"]),
-    popular: true,
-    createdAt: "2026-06-01"
-  },
-  {
-    id: "p-hoodie-sakura",
-    slug: "hudi-sakura",
-    name: "Худі «Сакура»",
-    description: "Оверсайз худі з флісу 350 г/м² з принтом «Сакура».",
-    baseCategory: "hoodies",
-    printId: "print-sakura",
-    basePrice: 1690,
-    images: ["/assets/placeholder-product.svg", "/assets/placeholder-product.svg"],
-    variants: makeVariants(1690, "sakura-hoodie", ["unisex"]),
-    createdAt: "2026-06-01"
-  },
-  {
-    id: "p-hoodie-zaraz",
-    slug: "hudi-zaraz-yak-dam",
-    name: "Худі «Зараз як дам»",
-    description:
-      "Оверсайз худі з щільного флісу 350 г/м². Принт на основі авторської ілюстрації в українській тематиці.",
-    baseCategory: "hoodies",
-    printId: "print-zaraz-yak-dam",
-    basePrice: 1690,
-    images: ["/assets/placeholder-product.svg", "/assets/placeholder-product.svg"],
-    variants: makeVariants(1690, "zaraz", ["unisex"]),
-    popular: true,
-    createdAt: "2026-07-10"
-  },
-  {
-    id: "p-tshirt-meme",
-    slug: "futbolka-oversize-mem",
-    name: "Футболка «Оверсайз мем»",
-    description: "Оверсайзна футболка з популярним мем-принтом.",
-    baseCategory: "t-shirts",
-    printId: "print-meme-oversize",
-    basePrice: 890,
-    images: ["/assets/placeholder-product.svg", "/assets/placeholder-product.svg"],
-    variants: makeVariants(890, "meme", ["unisex", "women"]),
-    popular: true,
-    createdAt: "2026-05-20"
-  },
-  {
-    id: "p-hoodie-text",
-    slug: "hudi-napys",
-    name: "Худі «Напис»",
-    description: "Худі з типографічним принтом.",
-    baseCategory: "hoodies",
-    printId: "print-text-napys",
-    basePrice: 1690,
-    images: ["/assets/placeholder-product.svg", "/assets/placeholder-product.svg"],
-    variants: makeVariants(1690, "napys", ["unisex"]),
-    createdAt: "2026-04-15"
-  },
-  {
-    id: "p-tshirt-cartoon",
-    slug: "futbolka-multfilm",
-    name: "Футболка «Мультфільм»",
-    description: "Футболка з принтом у мотивах улюбленого мультфільму.",
-    baseCategory: "t-shirts",
-    printId: "print-cartoon",
-    basePrice: 950,
-    images: ["/assets/placeholder-product.svg", "/assets/placeholder-product.svg"],
-    variants: makeVariants(950, "cartoon", ["unisex", "women"]),
-    popular: true,
-    createdAt: "2026-03-02"
-  },
-  {
-    id: "p-tshirt-movie",
-    slug: "futbolka-kino",
-    name: "Футболка «Кіно»",
-    description: "Футболка з кіно-принтом.",
-    baseCategory: "t-shirts",
-    printId: "print-movie",
-    basePrice: 950,
-    images: ["/assets/placeholder-product.svg", "/assets/placeholder-product.svg"],
-    variants: makeVariants(950, "movie", ["unisex"]),
-    popular: true,
-    createdAt: "2026-02-18"
-  },
-  {
-    id: "p-tshirt-basic-black",
-    slug: "futbolka-klasychna-chorna",
-    name: "Футболка класична чорна",
-    description: "Базова футболка без принту, щільність 180 г/м².",
-    baseCategory: "basics",
-    printId: null,
-    basePrice: 690,
-    images: ["/assets/placeholder-product.svg", "/assets/placeholder-product.svg"],
-    variants: makeVariants(690, "basic-black", ["unisex", "women"]),
-    popular: true,
-    createdAt: "2026-01-10"
-  }
-];
+const ALL_SIZES: Size[] = ["XS", "S", "M", "L", "XL", "XXL", "3XL", "4XL", "5XL"];
+const EXTENDED_SIZE_SURCHARGE = 50;
 
 export interface CatalogQuery {
   baseCategory?: ProductBaseCategory;
@@ -238,88 +38,238 @@ export interface CatalogQuery {
   pageSize?: number;
 }
 
-/**
- * Simulates server-side filtering + pagination. In production this becomes a
- * Prisma query against `products`/`variants` with the same filter shape, so
- * that the API contract (and the URL query params) do not need to change.
- */
-export function queryProducts(query: CatalogQuery) {
-  let results = [...PRODUCTS];
+function buildWhere(query: CatalogQuery, includeHidden: boolean): Prisma.ProductWhereInput {
+  const where: Prisma.ProductWhereInput = includeHidden ? {} : { status: "active" };
 
-  if (query.baseCategory) {
-    results = results.filter((p) => p.baseCategory === query.baseCategory);
-  }
+  if (query.baseCategory) where.baseCategory = baseCategoryToDb(query.baseCategory);
   if (query.printCategory) {
-    const printIds = PRINTS.filter((pr) => pr.category === query.printCategory).map((pr) => pr.id);
-    results = results.filter((p) => p.printId && printIds.includes(p.printId));
+    where.print = { category: printCategoryToDb(query.printCategory) };
   }
-  if (query.size) {
-    results = results.filter((p) => p.variants.some((v) => v.size === query.size));
-  }
-  if (query.fit) {
-    results = results.filter((p) => p.variants.some((v) => v.fit === query.fit));
-  }
-  if (query.colorName) {
-    results = results.filter((p) => p.variants.some((v) => v.color.name === query.colorName));
-  }
-  if (typeof query.minPrice === "number") {
-    results = results.filter((p) => p.basePrice >= query.minPrice!);
-  }
-  if (typeof query.maxPrice === "number") {
-    results = results.filter((p) => p.basePrice <= query.maxPrice!);
+  if (typeof query.minPrice === "number" || typeof query.maxPrice === "number") {
+    const range: { gte?: number; lte?: number } = {};
+    if (typeof query.minPrice === "number") range.gte = query.minPrice;
+    if (typeof query.maxPrice === "number") range.lte = query.maxPrice;
+    where.basePrice = range;
   }
 
-  switch (query.sort) {
-    case "new":
-      results.sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
-      break;
-    case "price-asc":
-      results.sort((a, b) => a.basePrice - b.basePrice);
-      break;
-    case "price-desc":
-      results.sort((a, b) => b.basePrice - a.basePrice);
-      break;
-    default:
-      results.sort((a, b) => Number(b.popular) - Number(a.popular));
+  const variantFilters: Prisma.VariantWhereInput = {};
+  if (query.size) variantFilters.size = query.size;
+  if (query.fit) variantFilters.fit = fitToDb(query.fit);
+  if (query.colorName) variantFilters.colorName = query.colorName;
+  if (Object.keys(variantFilters).length > 0) {
+    where.variants = { some: variantFilters };
   }
+
+  return where;
+}
+
+/**
+ * Server-side filtering + pagination against Postgres — mirrors the same
+ * filter shape the catalog URL query params and /api/products already use.
+ */
+export async function queryProducts(query: CatalogQuery, includeHidden = false) {
+  const where = buildWhere(query, includeHidden);
+
+  const orderBy =
+    query.sort === "new"
+      ? [{ createdAt: "desc" as const }]
+      : query.sort === "price-asc"
+      ? [{ basePrice: "asc" as const }]
+      : query.sort === "price-desc"
+      ? [{ basePrice: "desc" as const }]
+      : [{ popular: "desc" as const }, { createdAt: "desc" as const }];
 
   const page = query.page ?? 1;
   const pageSize = query.pageSize ?? 12;
-  const start = (page - 1) * pageSize;
-  const paged = results.slice(start, start + pageSize);
 
-  return { items: paged, total: results.length, page, pageSize };
+  const [rows, total] = await Promise.all([
+    prisma.product.findMany({
+      where,
+      include: { variants: true },
+      orderBy,
+      skip: (page - 1) * pageSize,
+      take: pageSize
+    }),
+    prisma.product.count({ where })
+  ]);
+
+  return { items: rows.map(mapProduct), total, page, pageSize };
 }
 
-export function getProductBySlug(slug: string): Product | undefined {
-  return PRODUCTS.find((p) => p.slug === slug);
+export async function getProductBySlug(slug: string): Promise<Product | undefined> {
+  const row = await prisma.product.findUnique({ where: { slug }, include: { variants: true } });
+  return row ? mapProduct(row) : undefined;
 }
 
-export function getPrint(printId: string | null): Print | undefined {
+export async function getPrint(printId: string | null): Promise<Print | undefined> {
   if (!printId) return undefined;
-  return PRINTS.find((pr) => pr.id === printId);
+  const row = await prisma.print.findUnique({ where: { id: printId }, include: { products: true } });
+  return row ? mapPrint(row) : undefined;
 }
 
-export function getPopularProducts(limit = 4): Product[] {
-  return PRODUCTS.filter((p) => p.popular).slice(0, limit);
+export async function getPrints(): Promise<Print[]> {
+  const rows = await prisma.print.findMany({ include: { products: true }, orderBy: { createdAt: "desc" } });
+  return rows.map(mapPrint);
 }
 
-export function searchCatalog(q: string) {
-  const term = q.trim().toLowerCase();
-  if (!term) return { products: [], prints: [], categories: [] };
-  const products = PRODUCTS.filter(
-    (p) => p.name.toLowerCase().includes(term) || p.description.toLowerCase().includes(term)
+export async function getPopularProducts(limit = 4): Promise<Product[]> {
+  const rows = await prisma.product.findMany({
+    where: { status: "active", popular: true },
+    include: { variants: true },
+    orderBy: { createdAt: "desc" },
+    take: limit
+  });
+  return rows.map(mapProduct);
+}
+
+export async function getSaleProducts(): Promise<Product[]> {
+  const rows = await prisma.product.findMany({
+    where: { status: "active", onSale: true },
+    include: { variants: true },
+    orderBy: { createdAt: "desc" }
+  });
+  return rows.map(mapProduct);
+}
+
+/** Full list for the admin products table — includes hidden products. */
+export async function getAllProductsForAdmin(): Promise<Product[]> {
+  const rows = await prisma.product.findMany({
+    include: { variants: true },
+    orderBy: { createdAt: "desc" }
+  });
+  return rows.map(mapProduct);
+}
+
+/** Lightweight slug + date list for sitemap.ts. */
+export async function getAllProductSlugs(): Promise<{ slug: string; createdAt: Date }[]> {
+  return prisma.product.findMany({
+    where: { status: "active" },
+    select: { slug: true, createdAt: true }
+  });
+}
+
+export async function getCatalogCounts() {
+  const [products, prints] = await Promise.all([prisma.product.count(), prisma.print.count()]);
+  return { products, prints };
+}
+
+export async function searchCatalog(q: string) {
+  const term = q.trim();
+  if (!term) return { products: [] as Product[], prints: [] as Print[], categories: [] as typeof PRINT_CATEGORIES };
+  const [productRows, printRows] = await Promise.all([
+    prisma.product.findMany({
+      where: {
+        status: "active",
+        OR: [
+          { name: { contains: term, mode: "insensitive" } },
+          { description: { contains: term, mode: "insensitive" } }
+        ]
+      },
+      include: { variants: true },
+      take: 20
+    }),
+    prisma.print.findMany({
+      where: { name: { contains: term, mode: "insensitive" } },
+      include: { products: true },
+      take: 20
+    })
+  ]);
+  const categories = PRINT_CATEGORIES.filter((c) => c.label.toLowerCase().includes(term.toLowerCase()));
+  return { products: productRows.map(mapProduct), prints: printRows.map(mapPrint), categories };
+}
+
+// ---------------------------------------------------------------------------
+// Admin: create / update / delete products (used by /admin/products/new and
+// the hide/show + delete actions on /admin/products).
+// ---------------------------------------------------------------------------
+
+export interface CreateProductInput {
+  name: string;
+  description: string;
+  baseCategory: ProductBaseCategory;
+  basePrice: number;
+  images: string[];
+  fits: Fit[];
+  colors: { name: string; hex: string }[];
+  popular: boolean;
+  onSale: boolean;
+  salePrice?: number;
+}
+
+function slugify(name: string): string {
+  const translit: Record<string, string> = {
+    а: "a", б: "b", в: "v", г: "h", ґ: "g", д: "d", е: "e", є: "ie", ж: "zh",
+    з: "z", и: "y", і: "i", ї: "i", й: "i", к: "k", л: "l", м: "m", н: "n",
+    о: "o", п: "p", р: "r", с: "s", т: "t", у: "u", ф: "f", х: "kh", ц: "ts",
+    ч: "ch", ш: "sh", щ: "shch", ь: "", ю: "iu", я: "ia", "'": ""
+  };
+  const transliterated = name
+    .toLowerCase()
+    .split("")
+    .map((ch) => translit[ch] ?? ch)
+    .join("");
+  return (
+    transliterated
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "")
+      .slice(0, 60) || "product"
   );
-  const prints = PRINTS.filter((pr) => pr.name.toLowerCase().includes(term));
-  const categories = PRINT_CATEGORIES.filter((c) => c.label.toLowerCase().includes(term));
-  return { products, prints, categories };
 }
 
-export function formatPrice(value: number): string {
-  return `${value.toLocaleString("uk-UA")} ₴`;
+/**
+ * Creates a product plus one Variant per (fit × size × color) combination —
+ * same generation rule the original mock catalog used, including the
+ * +50₴ surcharge on 3XL–5XL (brief section 6 / product page notice).
+ */
+export async function createProduct(input: CreateProductInput): Promise<Product> {
+  const baseSlug = slugify(input.name);
+  let slug = baseSlug;
+  let suffix = 2;
+  while (await prisma.product.findUnique({ where: { slug } })) {
+    slug = `${baseSlug}-${suffix++}`;
+  }
+
+  const variantsData = [];
+  for (const fit of input.fits) {
+    for (const size of ALL_SIZES) {
+      for (const color of input.colors) {
+        const extended = size === "3XL" || size === "4XL" || size === "5XL";
+        variantsData.push({
+          size,
+          fit: fitToDb(fit),
+          colorName: color.name,
+          colorHex: color.hex,
+          price: extended ? input.basePrice + EXTENDED_SIZE_SURCHARGE : input.basePrice,
+          stockQty: 20,
+          sku: `${slug}-${fit}-${size}-${color.name}`.toUpperCase().replace(/\s+/g, "")
+        });
+      }
+    }
+  }
+
+  const row = await prisma.product.create({
+    data: {
+      slug,
+      name: input.name,
+      description: input.description,
+      baseCategory: baseCategoryToDb(input.baseCategory),
+      basePrice: input.basePrice,
+      images: input.images,
+      popular: input.popular,
+      onSale: input.onSale,
+      salePrice: input.onSale ? input.salePrice : null,
+      variants: { create: variantsData }
+    },
+    include: { variants: true }
+  });
+
+  return mapProduct(row);
 }
 
-export function generateOrderNumber(): string {
-  const n = Math.floor(10000 + Math.random() * 89999);
-  return `CAS-${n}`;
+export async function setProductStatus(id: string, status: "active" | "hidden") {
+  await prisma.product.update({ where: { id }, data: { status } });
+}
+
+export async function deleteProduct(id: string) {
+  await prisma.product.delete({ where: { id } });
 }

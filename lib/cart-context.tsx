@@ -1,8 +1,7 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
+import React, { createContext, useContext, useEffect, useState } from "react";
 import { CartLineItem, Product, Variant } from "./types";
-import { PRODUCTS } from "./data";
 
 interface CartContextValue {
   items: CartLineItem[];
@@ -13,6 +12,10 @@ interface CartContextValue {
   count: number;
   subtotal: number;
   lines: { product: Product; variant: Variant; quantity: number }[];
+  /** True once localStorage hydration + the first server resolve finished —
+   * check this before rendering an "empty cart" state, so a cart that has
+   * items doesn't flash empty while its data is still being fetched. */
+  cartReady: boolean;
   phone: string;
   setPhone: (value: string) => void;
   comment: string;
@@ -24,16 +27,22 @@ const STORAGE_KEY = "cas-print-cart";
 const DETAILS_KEY = "cas-print-cart-details";
 
 /**
- * Cart persistence for a guest user (localStorage), matching section 24 of
- * the brief. Phone and comment are entered on the cart page and carried
- * through to checkout, so the customer doesn't retype the phone number
- * (comment is a note for the order — e.g. "подзвонити після 18:00").
+ * Cart persistence for a guest user (localStorage) — only the lightweight
+ * {productId, variantId, quantity} lines are stored client-side (section 24
+ * of the brief). Product name/price/image are no longer bundled into the
+ * client at build time (the catalog is a live database now, not a static
+ * array), so `lines`/`subtotal` are resolved from the server via
+ * POST /api/cart/resolve whenever the cart changes — the same server-side
+ * price source /api/checkout already trusts.
  */
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<CartLineItem[]>([]);
   const [phone, setPhoneState] = useState("");
   const [comment, setCommentState] = useState("");
   const [hydrated, setHydrated] = useState(false);
+  const [lines, setLines] = useState<{ product: Product; variant: Variant; quantity: number }[]>([]);
+  const [subtotal, setSubtotal] = useState(0);
+  const [cartReady, setCartReady] = useState(false);
 
   useEffect(() => {
     try {
@@ -60,6 +69,37 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     if (!hydrated) return;
     window.localStorage.setItem(DETAILS_KEY, JSON.stringify({ phone, comment }));
   }, [phone, comment, hydrated]);
+
+  // Resolve product/variant details + price straight from the server
+  // whenever the cart's contents change.
+  useEffect(() => {
+    if (!hydrated) return;
+    if (items.length === 0) {
+      setLines([]);
+      setSubtotal(0);
+      setCartReady(true);
+      return;
+    }
+    let cancelled = false;
+    fetch("/api/cart/resolve", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ items })
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (cancelled) return;
+        setLines(data.lines ?? []);
+        setSubtotal(data.subtotal ?? 0);
+        setCartReady(true);
+      })
+      .catch(() => {
+        if (!cancelled) setCartReady(true);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [items, hydrated]);
 
   const addItem: CartContextValue["addItem"] = (productId, variantId, quantity = 1) => {
     setItems((prev) => {
@@ -91,19 +131,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     // phone is intentionally kept — likely the same customer ordering again
   };
 
-  const lines = useMemo(() => {
-    return items
-      .map((item) => {
-        const product = PRODUCTS.find((p) => p.id === item.productId);
-        const variant = product?.variants.find((v) => v.id === item.variantId);
-        if (!product || !variant) return null;
-        return { product, variant, quantity: item.quantity };
-      })
-      .filter((x): x is { product: Product; variant: Variant; quantity: number } => x !== null);
-  }, [items]);
-
-  const count = lines.reduce((sum, l) => sum + l.quantity, 0);
-  const subtotal = lines.reduce((sum, l) => sum + l.variant.price * l.quantity, 0);
+  // Instant, no server round-trip needed — just a count of local quantities.
+  const count = items.reduce((sum, i) => sum + i.quantity, 0);
 
   return (
     <CartContext.Provider
@@ -116,6 +145,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         count,
         subtotal,
         lines,
+        cartReady,
         phone,
         setPhone: setPhoneState,
         comment,

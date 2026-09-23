@@ -52,6 +52,7 @@ export interface Product {
   images: string[];
   variants: Variant[];
   popular?: boolean;
+  status?: "active" | "hidden";
   createdAt: string;
 }
 

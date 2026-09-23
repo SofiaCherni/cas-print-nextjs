@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useCart } from "@/lib/cart-context";
-import { formatPrice } from "@/lib/data";
+import { formatPrice } from "@/lib/catalog-constants";
 import Button from "@/components/Button";
 import EmptyState from "@/components/EmptyState";
 
@@ -15,7 +15,7 @@ const CONTACT_METHODS: { value: ContactMethod; label: string }[] = [
 ];
 
 export default function CheckoutPage() {
-  const { lines, subtotal, items, clear, phone: cartPhone, comment } = useCart();
+  const { lines, subtotal, items, clear, phone: cartPhone, comment, cartReady } = useCart();
 
   const [lastName, setLastName] = useState("");
   const [firstName, setFirstName] = useState("");
@@ -78,6 +78,14 @@ export default function CheckoutPage() {
           </p>
           <Button href="/catalog" variant="ghost">ПЕРЕГЛЯНУТИ КАТАЛОГ</Button>
         </div>
+      </main>
+    );
+  }
+
+  if (!cartReady) {
+    return (
+      <main className="px-5 md:px-8 py-14">
+        <p className="text-muted text-sm text-center">Завантаження…</p>
       </main>
     );
   }

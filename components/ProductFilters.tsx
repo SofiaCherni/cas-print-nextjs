@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
-import { PRINT_CATEGORIES } from "@/lib/data";
+import { PRINT_CATEGORIES } from "@/lib/catalog-constants";
 import { Fit, Size } from "@/lib/types";
 
 const SIZES: Size[] = ["XS", "S", "M", "L", "XL", "XXL", "3XL", "4XL", "5XL"];

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { PRODUCTS, generateOrderNumber } from "@/lib/data";
+import { generateOrderNumber } from "@/lib/data";
 import { CartLineItem } from "@/lib/types";
 import { prisma } from "@/lib/prisma";
 import { sendEmail, orderNotificationEmail } from "@/lib/email";
@@ -45,8 +45,15 @@ export async function POST(req: NextRequest) {
   let subtotal = 0;
   const validatedItems: { variantId: string; quantity: number; price: number }[] = [];
 
+  const productIds = [...new Set(body.items.map((i) => i.productId))];
+  const products = await prisma.product.findMany({
+    where: { id: { in: productIds } },
+    include: { variants: true }
+  });
+  const productById = new Map(products.map((p) => [p.id, p]));
+
   for (const line of body.items) {
-    const product = PRODUCTS.find((p) => p.id === line.productId);
+    const product = productById.get(line.productId);
     const variant = product?.variants.find((v) => v.id === line.variantId);
     if (!product || !variant) {
       return NextResponse.json({ error: "Один із товарів більше недоступний." }, { status: 409 });
@@ -64,48 +71,65 @@ export async function POST(req: NextRequest) {
   const orderNumber = generateOrderNumber();
 
   try {
-    const customer = await prisma.customer.upsert({
-      where: { phone },
-      update: {
-        firstName,
-        lastName,
-        patronymic: body.contact.patronymic || undefined
-      },
-      create: {
-        firstName,
-        lastName,
-        patronymic: body.contact.patronymic || undefined,
-        phone
-      }
-    });
+    const order = await prisma.$transaction(async (tx) => {
+      const customer = await tx.customer.upsert({
+        where: { phone },
+        update: {
+          firstName,
+          lastName,
+          patronymic: body.contact.patronymic || undefined
+        },
+        create: {
+          firstName,
+          lastName,
+          patronymic: body.contact.patronymic || undefined,
+          phone
+        }
+      });
 
-    await prisma.address.create({
-      data: {
-        customerId: customer.id,
-        carrier: "nova-poshta",
-        city: body.delivery.city,
-        postomatNumber: body.delivery.postomatNumber
-      }
-    });
+      await tx.address.create({
+        data: {
+          customerId: customer.id,
+          carrier: "nova-poshta",
+          city: body.delivery.city,
+          postomatNumber: body.delivery.postomatNumber
+        }
+      });
 
-    const order = await prisma.order.create({
-      data: {
-        orderNumber,
-        customerId: customer.id,
-        status: "NEW",
-        subtotal,
-        total: subtotal, // delivery cost — за тарифами Нової Пошти, уточнюється окремо
-        contactMethod,
-        comment: body.comment || undefined,
-        paymentStatus: "pending",
-        items: {
-          create: validatedItems.map((i) => ({
-            variantId: i.variantId,
-            quantity: i.quantity,
-            priceAtOrder: i.price
-          }))
+      const createdOrder = await tx.order.create({
+        data: {
+          orderNumber,
+          customerId: customer.id,
+          status: "NEW",
+          subtotal,
+          total: subtotal, // delivery cost — за тарифами Нової Пошти, уточнюється окремо
+          contactMethod,
+          comment: body.comment || undefined,
+          paymentStatus: "pending",
+          items: {
+            create: validatedItems.map((i) => ({
+              variantId: i.variantId,
+              quantity: i.quantity,
+              priceAtOrder: i.price
+            }))
+          }
+        }
+      });
+
+      // Reserve stock now that the order is confirmed — re-checked against
+      // the latest count inside the same transaction to avoid overselling
+      // if two people order the last item at once.
+      for (const i of validatedItems) {
+        const updated = await tx.variant.updateMany({
+          where: { id: i.variantId, stockQty: { gte: i.quantity } },
+          data: { stockQty: { decrement: i.quantity } }
+        });
+        if (updated.count === 0) {
+          throw new Error(`OUT_OF_STOCK:${i.variantId}`);
         }
       }
+
+      return createdOrder;
     });
 
     const notifyEmail = process.env.ORDERS_NOTIFICATION_EMAIL;
@@ -119,6 +143,12 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ orderNumber: order.orderNumber, subtotal, status: order.status }, { status: 201 });
   } catch (err) {
+    if (err instanceof Error && err.message.startsWith("OUT_OF_STOCK:")) {
+      return NextResponse.json(
+        { error: "Хтось щойно забрав останню одиницю цього товару. Онови кошик і спробуй ще раз." },
+        { status: 409 }
+      );
+    }
     console.error("[checkout] failed to persist order:", err);
     return NextResponse.json(
       { error: "Не вдалося зберегти замовлення. Спробуйте ще раз або зв'яжіться з нами напряму." },

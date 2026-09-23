@@ -12,7 +12,7 @@ const SORT_OPTIONS: { value: NonNullable<CatalogQuery["sort"]>; label: string }[
   { value: "price-desc", label: "ВІД ДОРОГИХ" }
 ];
 
-export default function CatalogView({
+export default async function CatalogView({
   baseCategory,
   searchParams
 }: {
@@ -30,7 +30,7 @@ export default function CatalogView({
     sort: (searchParams.sort as CatalogQuery["sort"]) ?? "popular"
   };
 
-  const { items, total } = queryProducts(query);
+  const { items, total } = await queryProducts(query);
 
   return (
     <main className="px-5 md:px-8">

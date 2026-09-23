@@ -2,13 +2,27 @@
 
 import Image from "next/image";
 import { useCart } from "@/lib/cart-context";
-import { formatPrice } from "@/lib/data";
+import { formatPrice } from "@/lib/catalog-constants";
 import QuantityStepper from "@/components/QuantityStepper";
 import Button from "@/components/Button";
 import EmptyState from "@/components/EmptyState";
 
 export default function CartPage() {
-  const { lines, subtotal, updateQuantity, removeItem, phone, setPhone, comment, setComment } = useCart();
+  const { lines, subtotal, updateQuantity, removeItem, phone, setPhone, comment, setComment, cartReady } =
+    useCart();
+
+  if (!cartReady) {
+    return (
+      <main className="px-5 md:px-8 py-14">
+        <div className="max-w-[560px] mx-auto bg-bgSoft border border-line">
+          <div className="px-6 py-6 border-b border-line">
+            <h1 className="font-display font-extrabold text-lg">КОШИК</h1>
+          </div>
+          <p className="text-muted text-sm px-6 py-10 text-center">Завантаження…</p>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="px-5 md:px-8 py-14">

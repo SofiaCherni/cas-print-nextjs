@@ -20,6 +20,6 @@ export async function GET(req: NextRequest) {
     sort: (sp.get("sort") as CatalogQuery["sort"]) ?? "popular",
     page: sp.get("page") ? Number(sp.get("page")) : 1
   };
-  const result = queryProducts(query);
+  const result = await queryProducts(query);
   return NextResponse.json(result);
 }

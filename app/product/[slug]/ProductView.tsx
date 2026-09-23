@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { Product, Size, Fit } from "@/lib/types";
-import { formatPrice } from "@/lib/data";
+import { formatPrice } from "@/lib/catalog-constants";
 import SizeSelector from "@/components/SizeSelector";
 import FitToggle from "@/components/FitToggle";
 import ColorSwatches from "@/components/ColorSwatches";

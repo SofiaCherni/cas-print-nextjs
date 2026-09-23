@@ -4,8 +4,8 @@ import Button from "@/components/Button";
 import ProductGrid from "@/components/ProductGrid";
 import { getPopularProducts, PRINT_CATEGORIES } from "@/lib/data";
 
-export default function HomePage() {
-  const popular = getPopularProducts(4);
+export default async function HomePage() {
+  const popular = await getPopularProducts(4);
 
   return (
     <main>

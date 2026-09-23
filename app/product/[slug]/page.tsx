@@ -1,21 +1,22 @@
 import { notFound } from "next/navigation";
-import { getProductBySlug, PRODUCTS } from "@/lib/data";
+import { getProductBySlug } from "@/lib/data";
 import ProductView from "./ProductView";
 
-export function generateStaticParams() {
-  return PRODUCTS.map((p) => ({ slug: p.slug }));
-}
+// No generateStaticParams: products now come from the database and can be
+// added anytime through /admin — pages render on-demand per slug instead of
+// needing a rebuild for every new product.
+export const dynamic = "force-dynamic";
 
-export function generateMetadata({ params }: { params: { slug: string } }) {
-  const product = getProductBySlug(params.slug);
+export async function generateMetadata({ params }: { params: { slug: string } }) {
+  const product = await getProductBySlug(params.slug);
   return {
     title: product ? `${product.name} — CAS-Print` : "Товар — CAS-Print",
     description: product?.description
   };
 }
 
-export default function ProductPage({ params }: { params: { slug: string } }) {
-  const product = getProductBySlug(params.slug);
+export default async function ProductPage({ params }: { params: { slug: string } }) {
+  const product = await getProductBySlug(params.slug);
   if (!product) notFound();
 
   // Product schema.org structured data (brief section 31).
