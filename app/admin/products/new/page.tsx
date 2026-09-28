@@ -11,11 +11,35 @@ const BASE_CATEGORIES = [
 ];
 
 const COLOR_PALETTE = [
+  { name: "Пильно жовтий", hex: "#CBB26A" },
+  { name: "Білий", hex: "#FFFFFF" },
+  { name: "Жовтий", hex: "#F5D000" },
+  { name: "Червоний", hex: "#D0021B" },
+  { name: "Сірий однотон", hex: "#9B9B9B" },
+  { name: "Графіт", hex: "#4A4A4A" },
+  { name: "Помаранчевий", hex: "#F5821F" },
+  { name: "Ультрамарин", hex: "#3F51B5" },
+  { name: "Темно-синій", hex: "#1B2A4A" },
+  { name: "Блакитний", hex: "#7EC8E3" },
+  { name: "Ківі", hex: "#8DC63F" },
+  { name: "Зелений", hex: "#2E8B33" },
+  { name: "Хакі", hex: "#707B4A" },
+  { name: "Сірий меланж", hex: "#ADA9A0" },
+  { name: "Шоколад", hex: "#4B3621" },
+  { name: "Фіолетовий", hex: "#6A0DAD" },
+  { name: "Синій", hex: "#2255A4" },
+  { name: "Кораловий", hex: "#FF7F66" },
+  { name: "Темно-зелений", hex: "#1F4620" },
   { name: "Чорний", hex: "#0A0A0A" },
-  { name: "Молочний", hex: "#F2F0EB" },
-  { name: "Сірий", hex: "#8A8A8A" },
-  { name: "Теракотовий", hex: "#B3402E" },
-  { name: "Хакі", hex: "#2F3B2A" }
+  { name: "Глибокий темно-синій", hex: "#0B1930" },
+  { name: "Лайм", hex: "#B4E600" },
+  { name: "Марсал", hex: "#6F2232" },
+  { name: "Білий меланж", hex: "#EDEBE6" },
+  { name: "Рожевий", hex: "#F28FB2" },
+  { name: "Бежевий", hex: "#E8DCC5" },
+  { name: "Джинс", hex: "#46647A" },
+  { name: "Сталевий", hex: "#71797E" },
+  { name: "Бордо", hex: "#5C0A17" }
 ];
 
 const FITS = [
@@ -35,6 +59,7 @@ export default function NewProductPage() {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [baseCategory, setBaseCategory] = useState(BASE_CATEGORIES[0].value);
+  const [cutStyle, setCutStyle] = useState<string>("");
   const [basePrice, setBasePrice] = useState("");
   const [fits, setFits] = useState<string[]>(["unisex"]);
   const [colors, setColors] = useState<string[]>([COLOR_PALETTE[0].name]);
@@ -96,6 +121,10 @@ export default function NewProductPage() {
       setError("Заповніть назву, опис і ціну.");
       return;
     }
+    if (baseCategory === "t-shirts" && !cutStyle) {
+      setError("Оберіть крій: класичний чи оверсайз.");
+      return;
+    }
 
     setSubmitting(true);
     try {
@@ -106,6 +135,7 @@ export default function NewProductPage() {
           name,
           description,
           baseCategory,
+          cutStyle: baseCategory === "t-shirts" ? cutStyle : undefined,
           basePrice: Number(basePrice),
           images: readyImages,
           fits,
@@ -180,6 +210,32 @@ export default function NewProductPage() {
               <p className="text-xs text-muted mt-1.5">Розміри 3XL–5XL автоматично +50 ₴.</p>
             </div>
           </div>
+
+          {baseCategory === "t-shirts" && (
+            <div>
+              <label className="block text-xs tracking-wide text-muted font-bold mb-2">КРІЙ</label>
+              <div className="flex gap-2.5">
+                {[
+                  { value: "classic", label: "Класичний" },
+                  { value: "oversize", label: "Оверсайз" }
+                ].map((c) => (
+                  <button
+                    type="button"
+                    key={c.value}
+                    onClick={() => setCutStyle(c.value)}
+                    className={`px-4 py-2.5 border text-sm font-semibold ${
+                      cutStyle === c.value ? "bg-paper text-bg border-paper" : "border-line"
+                    }`}
+                  >
+                    {c.label}
+                  </button>
+                ))}
+              </div>
+              <p className="text-xs text-muted mt-1.5">
+                Визначає підгрупу футболки в каталозі («Класичні» / «Оверсайз»).
+              </p>
+            </div>
+          )}
 
           <div>
             <label className="block text-xs tracking-wide text-muted font-bold mb-2">ФАСОН</label>

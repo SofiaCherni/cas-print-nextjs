@@ -31,6 +31,11 @@ enum PrintCategory {
   OTHER
 }
 
+enum CutStyle {
+  CLASSIC
+  OVERSIZE
+}
+
 enum Fit {
   UNISEX
   WOMEN
@@ -66,6 +71,7 @@ model Product {
   name          String
   description   String
   baseCategory  ProductBaseCategory
+  cutStyle      CutStyle?
   printId       String?
   print         Print?              @relation(fields: [printId], references: [id])
   basePrice     Int

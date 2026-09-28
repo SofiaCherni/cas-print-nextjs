@@ -37,6 +37,81 @@ body {
   }
 }
 
+/* ---------------- Expanding search bar ---------------- */
+.search-bar {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  max-height: 0;
+  overflow: hidden;
+  background: #111111;
+  border-bottom: 1px solid #1E1E1E;
+  transition: max-height 300ms ease;
+  z-index: 55;
+}
+.search-bar.open {
+  max-height: 90px;
+}
+.search-bar-inner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 18px 20px;
+}
+@media (min-width: 768px) {
+  .search-bar-inner {
+    padding: 20px 32px;
+  }
+}
+.search-bar-input {
+  flex: 1;
+  background: none;
+  border: none;
+  border-bottom: 1px solid #1E1E1E;
+  padding: 8px 2px;
+  font-size: 15px;
+  color: #F2EEE8;
+}
+.search-bar-input:focus {
+  outline: none;
+  border-bottom-color: #710009;
+}
+.search-bar-input::placeholder {
+  color: #A8A19A;
+}
+.search-bar-submit {
+  flex: none;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  color: #710009;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+.search-bar-submit:hover {
+  color: #8A0B12;
+}
+.search-bar-close {
+  flex: none;
+  font-size: 22px;
+  line-height: 1;
+  color: #A8A19A;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+.search-bar-close:hover {
+  color: #F2EEE8;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .search-bar {
+    transition: none;
+  }
+}
+
 /* ---------------- AdminNav (admin section tabs) ---------------- */
 .admin-nav {
   position: relative;

@@ -1,7 +1,7 @@
 import { Prisma } from "@prisma/client";
 import { prisma } from "./prisma";
-import { baseCategoryToDb, fitToDb, mapPrint, mapProduct, printCategoryToDb } from "./db-mappers";
-import { Fit, Print, PrintCategory, Product, ProductBaseCategory, Size } from "./types";
+import { baseCategoryToDb, cutStyleToDb, fitToDb, mapPrint, mapProduct, printCategoryToDb } from "./db-mappers";
+import { CutStyle, Fit, Print, PrintCategory, Product, ProductBaseCategory, Size } from "./types";
 import {
   BASE_CATEGORIES,
   COLOR_PALETTE,
@@ -27,6 +27,7 @@ const EXTENDED_SIZE_SURCHARGE = 50;
 
 export interface CatalogQuery {
   baseCategory?: ProductBaseCategory;
+  cutStyle?: CutStyle;
   printCategory?: PrintCategory;
   size?: Size;
   fit?: Fit;
@@ -42,6 +43,7 @@ function buildWhere(query: CatalogQuery, includeHidden: boolean): Prisma.Product
   const where: Prisma.ProductWhereInput = includeHidden ? {} : { status: "active" };
 
   if (query.baseCategory) where.baseCategory = baseCategoryToDb(query.baseCategory);
+  if (query.cutStyle) where.cutStyle = cutStyleToDb(query.cutStyle);
   if (query.printCategory) {
     where.print = { category: printCategoryToDb(query.printCategory) };
   }
@@ -122,6 +124,53 @@ export async function getPopularProducts(limit = 4): Promise<Product[]> {
   return rows.map(mapProduct);
 }
 
+/**
+ * Slugs eligible for the homepage "ОБЕРИ СВІЙ ПРИНТ" rotation. Plain
+ * hardcoded list (no new DB field/table per request) — edit this array to
+ * change which products can appear there. Find a product's slug in
+ * /admin/products (Slug column) or in its page URL (/product/<slug>).
+ */
+const HOMEPAGE_PICKS_SLUGS: string[] = [
+  "futbolka-sakura",
+  "hudi-sakura",
+  "hudi-zaraz-yak-dam",
+  "futbolka-oversize-mem",
+  "hudi-napys",
+  "futbolka-multfilm",
+  "futbolka-kino",
+  "futbolka-klasychna-chorna"
+];
+
+/**
+ * Picks `count` distinct random products for the homepage "ОБЕРИ СВІЙ
+ * ПРИНТ" block, chosen server-side (Server Component) so the client never
+ * runs its own randomness — no hydration mismatch risk (the HTML the server
+ * sends is already final). A fresh shuffle happens on every request because
+ * app/page.tsx marks itself `dynamic = "force-dynamic"`.
+ *
+ * Falls back to getPopularProducts() if HOMEPAGE_PICKS_SLUGS is empty or
+ * every listed slug is currently hidden/deleted, so the block is never
+ * empty just because the hardcoded list went stale.
+ */
+export async function getHomepagePicks(count = 4): Promise<Product[]> {
+  if (HOMEPAGE_PICKS_SLUGS.length === 0) return getPopularProducts(count);
+
+  const rows = await prisma.product.findMany({
+    where: { status: "active", slug: { in: HOMEPAGE_PICKS_SLUGS } },
+    include: { variants: true }
+  });
+
+  if (rows.length === 0) return getPopularProducts(count);
+
+  const shuffled = [...rows];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+
+  return shuffled.slice(0, count).map(mapProduct);
+}
+
 export async function getSaleProducts(): Promise<Product[]> {
   const rows = await prisma.product.findMany({
     where: { status: "active", onSale: true },
@@ -187,6 +236,7 @@ export interface CreateProductInput {
   name: string;
   description: string;
   baseCategory: ProductBaseCategory;
+  cutStyle?: CutStyle;
   basePrice: number;
   images: string[];
   fits: Fit[];
@@ -253,6 +303,7 @@ export async function createProduct(input: CreateProductInput): Promise<Product>
       name: input.name,
       description: input.description,
       baseCategory: baseCategoryToDb(input.baseCategory),
+      cutStyle: input.cutStyle ? cutStyleToDb(input.cutStyle) : undefined,
       basePrice: input.basePrice,
       images: input.images,
       popular: input.popular,

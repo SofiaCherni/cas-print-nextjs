@@ -7,6 +7,8 @@ export interface DropdownItem {
 // desktop Header (NavDropdown) and MobileMenu so they never drift apart.
 export const CATALOG_ITEMS: DropdownItem[] = [
   { label: "Футболки", href: "/catalog/t-shirts" },
+  { label: "— Класичні", href: "/catalog/t-shirts?cut=classic" },
+  { label: "— Оверсайз", href: "/catalog/t-shirts?cut=oversize" },
   { label: "Світшоти", href: "/catalog/sweatshirts" },
   { label: "Худі", href: "/catalog/hoodies" },
   { label: "Інші товари", href: "/catalog/basics" }

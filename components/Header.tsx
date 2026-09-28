@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useCart } from "@/lib/cart-context";
@@ -8,6 +9,7 @@ import MobileMenu from "./MobileMenu";
 import NavDropdown from "./NavDropdown";
 import { CATALOG_ITEMS, BUYERS_ITEMS } from "@/lib/nav";
 import { SearchIcon, BagIcon } from "./icons";
+import SearchBar from "./SearchBar";
 
 function getActiveSlot(pathname: string): number {
   if (pathname.startsWith("/catalog")) return 0;
@@ -20,6 +22,7 @@ function getActiveSlot(pathname: string): number {
 export default function Header() {
   const [compact, setCompact] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
   const { count } = useCart();
   const pathname = usePathname();
 
@@ -56,12 +59,19 @@ export default function Header() {
 
   return (
     <header
-      className={`sticky top-0 z-40 flex items-center justify-between transition-all ${
+      className={`relative sticky top-0 z-40 flex items-center justify-between transition-all ${
         compact ? "py-3 bg-bg/85 backdrop-blur border-b border-line" : "py-6"
       } px-5 md:px-8`}
     >
-      <Link href="/" className="font-display font-black text-lg md:text-xl tracking-tight">
-        CAS·PRINT
+      <Link href="/" className="flex items-center">
+        <Image
+          src="/assets/logo.png"
+          alt="CAS·PRINT — Print / Wear / Be You"
+          width={220}
+          height={64}
+          priority
+          className="h-7 md:h-8 w-auto"
+        />
       </Link>
 
       <nav ref={navRef} className="main-nav hidden md:flex items-center gap-9 text-[14px] font-semibold tracking-wide">
@@ -115,8 +125,10 @@ export default function Header() {
 
       <div className="flex items-center gap-5">
         <button
-          className="hidden sm:inline-flex opacity-85 hover:opacity-100 transition-opacity"
+          className="inline-flex opacity-85 hover:opacity-100 transition-opacity"
           aria-label="Пошук"
+          aria-expanded={searchOpen}
+          onClick={() => setSearchOpen((v) => !v)}
         >
           <SearchIcon className="w-[19px] h-[19px]" />
         </button>
@@ -137,6 +149,7 @@ export default function Header() {
         </button>
       </div>
 
+      <SearchBar open={searchOpen} onClose={() => setSearchOpen(false)} />
       <MobileMenu open={menuOpen} onClose={() => setMenuOpen(false)} />
     </header>
   );

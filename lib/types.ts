@@ -1,5 +1,8 @@
 export type ProductBaseCategory = "t-shirts" | "sweatshirts" | "hoodies" | "basics";
 
+// Subgroup used only for t-shirts ("Класичні" / "Оверсайз" in the catalog nav).
+export type CutStyle = "classic" | "oversize";
+
 export type PrintCategory =
   | "anime"
   | "text"
@@ -42,6 +45,7 @@ export interface Product {
   name: string;
   description: string;
   baseCategory: ProductBaseCategory;
+  cutStyle?: CutStyle;
   printId: string | null;
   basePrice: number;
   // TODO: NEED REAL BUSINESS DATA — mark real sale items as onSale: true

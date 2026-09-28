@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
-import { PRINT_CATEGORIES } from "@/lib/catalog-constants";
+import { PRINT_CATEGORIES, COLOR_PALETTE } from "@/lib/catalog-constants";
 import { Fit, Size } from "@/lib/types";
 
 const SIZES: Size[] = ["XS", "S", "M", "L", "XL", "XXL", "3XL", "4XL", "5XL"];
@@ -9,13 +9,7 @@ const FITS: { value: Fit; label: string }[] = [
   { value: "unisex", label: "Унісекс" },
   { value: "women", label: "Жіночий" }
 ];
-const COLORS = [
-  { name: "Чорний", hex: "#0A0A0A" },
-  { name: "Молочний", hex: "#F2F0EB" },
-  { name: "Сірий", hex: "#8A8A8A" },
-  { name: "Теракотовий", hex: "#B3402E" },
-  { name: "Хакі", hex: "#2F3B2A" }
-];
+const COLORS = COLOR_PALETTE;
 
 /**
  * Filters are driven entirely by URL search params (?category=&size=&color=&fit=&price=)
@@ -113,6 +107,31 @@ export default function ProductFilters() {
                 }`}
               />
               {f.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div>
+        <h4 className="text-xs tracking-wide text-muted font-bold mb-3.5">КРІЙ</h4>
+        <div className="space-y-2.5">
+          {[
+            { value: "classic", label: "Класичний" },
+            { value: "oversize", label: "Оверсайз" }
+          ].map((c) => (
+            <button
+              key={c.value}
+              onClick={() => setParam("cut", c.value)}
+              className={`flex items-center gap-2.5 text-sm ${
+                active("cut", c.value) ? "text-paper" : "text-paper/85"
+              }`}
+            >
+              <span
+                className={`w-3.5 h-3.5 border rounded-sm ${
+                  active("cut", c.value) ? "bg-paper border-paper" : "border-muted"
+                }`}
+              />
+              {c.label}
             </button>
           ))}
         </div>

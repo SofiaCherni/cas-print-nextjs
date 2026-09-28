@@ -2,9 +2,14 @@ import Image from "next/image";
 import Link from "next/link";
 import Button from "@/components/Button";
 import ProductGrid from "@/components/ProductGrid";
-import { getPopularProducts, PRINT_CATEGORIES } from "@/lib/data";
+import { getHomepagePicks, getPopularProducts, PRINT_CATEGORIES } from "@/lib/data";
+
+// Ensures a fresh random pick for "ОБЕРИ СВІЙ ПРИНТ" on every request rather
+// than a single build-time snapshot getting cached and reused forever.
+export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
+  const heroPicks = await getHomepagePicks(4);
   const popular = await getPopularProducts(4);
 
   return (
@@ -64,7 +69,7 @@ export default async function HomePage() {
               </Link>
             ))}
           </div>
-          <ProductGrid products={popular} />
+          <ProductGrid products={heroPicks} />
         </div>
       </section>
 

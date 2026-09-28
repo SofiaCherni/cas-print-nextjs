@@ -19,6 +19,9 @@ export async function POST(req: NextRequest) {
   if (body.onSale && (!body.salePrice || body.salePrice <= 0)) {
     return NextResponse.json({ error: "Вкажіть акційну ціну." }, { status: 400 });
   }
+  if (body.baseCategory === "t-shirts" && !body.cutStyle) {
+    return NextResponse.json({ error: "Оберіть крій: класичний чи оверсайз." }, { status: 400 });
+  }
 
   try {
     const product = await createProduct(body);

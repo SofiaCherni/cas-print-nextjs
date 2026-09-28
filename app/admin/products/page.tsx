@@ -38,6 +38,7 @@ export default async function AdminProductsPage() {
             <thead>
               <tr className="text-left text-xs tracking-wide text-muted border-b border-line">
                 <th className="py-3">Назва</th>
+                <th className="py-3">Slug</th>
                 <th className="py-3">Категорія</th>
                 <th className="py-3">Ціна</th>
                 <th className="py-3">Варіантів</th>
@@ -49,6 +50,7 @@ export default async function AdminProductsPage() {
               {products.map((p) => (
                 <tr key={p.id} className="border-b border-line">
                   <td className="py-3.5 font-semibold">{p.name}</td>
+                  <td className="py-3.5 text-muted font-mono text-xs">{p.slug}</td>
                   <td className="py-3.5 text-muted">{categoryLabel(p.baseCategory)}</td>
                   <td className="py-3.5 text-muted">
                     {formatPrice(p.basePrice)}

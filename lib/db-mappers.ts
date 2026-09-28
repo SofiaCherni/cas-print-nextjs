@@ -2,10 +2,11 @@ import {
   Prisma,
   Variant as DbVariant,
   ProductBaseCategory as DbBaseCategory,
+  CutStyle as DbCutStyle,
   Fit as DbFit,
   PrintCategory as DbPrintCategory
 } from "@prisma/client";
-import { Fit, Print, PrintCategory, Product, ProductBaseCategory, Size, Variant } from "./types";
+import { CutStyle, Fit, Print, PrintCategory, Product, ProductBaseCategory, Size, Variant } from "./types";
 
 /**
  * Converts between Prisma's DB shapes (uppercase enums, flat colorName/
@@ -31,6 +32,9 @@ const BASE_CATEGORY_TO_DB: Record<ProductBaseCategory, DbBaseCategory> = {
 
 const FIT_FROM_DB: Record<DbFit, Fit> = { UNISEX: "unisex", WOMEN: "women" };
 const FIT_TO_DB: Record<Fit, DbFit> = { unisex: "UNISEX", women: "WOMEN" };
+
+const CUT_STYLE_FROM_DB: Record<DbCutStyle, CutStyle> = { CLASSIC: "classic", OVERSIZE: "oversize" };
+const CUT_STYLE_TO_DB: Record<CutStyle, DbCutStyle> = { classic: "CLASSIC", oversize: "OVERSIZE" };
 
 const PRINT_CATEGORY_FROM_DB: Record<DbPrintCategory, PrintCategory> = {
   ANIME: "anime",
@@ -60,6 +64,9 @@ export function baseCategoryToDb(v: ProductBaseCategory): DbBaseCategory {
 export function fitToDb(v: Fit): DbFit {
   return FIT_TO_DB[v];
 }
+export function cutStyleToDb(v: CutStyle): DbCutStyle {
+  return CUT_STYLE_TO_DB[v];
+}
 export function printCategoryToDb(v: PrintCategory): DbPrintCategory {
   return PRINT_CATEGORY_TO_DB[v];
 }
@@ -86,6 +93,7 @@ export function mapProduct(p: DbProductWithVariants): Product {
     name: p.name,
     description: p.description,
     baseCategory: BASE_CATEGORY_FROM_DB[p.baseCategory],
+    cutStyle: p.cutStyle ? CUT_STYLE_FROM_DB[p.cutStyle] : undefined,
     printId: p.printId,
     basePrice: p.basePrice,
     images: p.images,

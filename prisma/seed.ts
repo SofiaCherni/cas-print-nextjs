@@ -4,10 +4,10 @@ const prisma = new PrismaClient();
 
 const COLORS = [
   { name: "Чорний", hex: "#0A0A0A" },
-  { name: "Молочний", hex: "#F2F0EB" },
-  { name: "Сірий", hex: "#8A8A8A" },
-  { name: "Теракотовий", hex: "#B3402E" },
-  { name: "Хакі", hex: "#2F3B2A" }
+  { name: "Білий", hex: "#FFFFFF" },
+  { name: "Сірий однотон", hex: "#9B9B9B" },
+  { name: "Синій", hex: "#2255A4" },
+  { name: "Бордо", hex: "#5C0A17" }
 ];
 
 const SIZES = ["XS", "S", "M", "L", "XL", "XXL", "3XL", "4XL", "5XL"];
@@ -119,6 +119,7 @@ async function main() {
       name: "Футболка «Сакура»",
       description: "Пряма футболка щільністю 180 г/м² з принтом «Сакура». Бавовна 100%.",
       baseCategory: "T_SHIRTS" as const,
+      cutStyle: "CLASSIC" as const,
       printId: printSakura.id,
       basePrice: 890,
       images: ["/assets/placeholder-product.svg", "/assets/placeholder-product.svg"],
@@ -130,6 +131,7 @@ async function main() {
       name: "Худі «Сакура»",
       description: "Оверсайз худі з флісу 350 г/м² з принтом «Сакура».",
       baseCategory: "HOODIES" as const,
+      cutStyle: undefined as "CLASSIC" | "OVERSIZE" | undefined,
       printId: printSakura.id,
       basePrice: 1690,
       images: ["/assets/placeholder-product.svg", "/assets/placeholder-product.svg"],
@@ -142,6 +144,7 @@ async function main() {
       description:
         "Оверсайз худі з щільного флісу 350 г/м². Принт на основі авторської ілюстрації в українській тематиці.",
       baseCategory: "HOODIES" as const,
+      cutStyle: undefined as "CLASSIC" | "OVERSIZE" | undefined,
       printId: printZaraz.id,
       basePrice: 1690,
       images: ["/assets/placeholder-product.svg", "/assets/placeholder-product.svg"],
@@ -153,6 +156,7 @@ async function main() {
       name: "Футболка «Оверсайз мем»",
       description: "Оверсайзна футболка з популярним мем-принтом.",
       baseCategory: "T_SHIRTS" as const,
+      cutStyle: "OVERSIZE" as const,
       printId: printMeme.id,
       basePrice: 890,
       images: ["/assets/placeholder-product.svg", "/assets/placeholder-product.svg"],
@@ -164,6 +168,7 @@ async function main() {
       name: "Худі «Напис»",
       description: "Худі з типографічним принтом.",
       baseCategory: "HOODIES" as const,
+      cutStyle: undefined as "CLASSIC" | "OVERSIZE" | undefined,
       printId: printText.id,
       basePrice: 1690,
       images: ["/assets/placeholder-product.svg", "/assets/placeholder-product.svg"],
@@ -175,6 +180,7 @@ async function main() {
       name: "Футболка «Мультфільм»",
       description: "Футболка з принтом у мотивах улюбленого мультфільму.",
       baseCategory: "T_SHIRTS" as const,
+      cutStyle: "CLASSIC" as const,
       printId: printCartoon.id,
       basePrice: 950,
       images: ["/assets/placeholder-product.svg", "/assets/placeholder-product.svg"],
@@ -186,6 +192,7 @@ async function main() {
       name: "Футболка «Кіно»",
       description: "Футболка з кіно-принтом.",
       baseCategory: "T_SHIRTS" as const,
+      cutStyle: "OVERSIZE" as const,
       printId: printMovie.id,
       basePrice: 950,
       images: ["/assets/placeholder-product.svg", "/assets/placeholder-product.svg"],
@@ -197,6 +204,7 @@ async function main() {
       name: "Футболка класична чорна",
       description: "Базова футболка без принту, щільність 180 г/м².",
       baseCategory: "BASICS" as const,
+      cutStyle: undefined as "CLASSIC" | "OVERSIZE" | undefined,
       printId: null,
       basePrice: 690,
       images: ["/assets/placeholder-product.svg", "/assets/placeholder-product.svg"],
@@ -217,6 +225,7 @@ async function main() {
         name: p.name,
         description: p.description,
         baseCategory: p.baseCategory,
+        cutStyle: p.cutStyle,
         printId: p.printId,
         basePrice: p.basePrice,
         images: p.images,

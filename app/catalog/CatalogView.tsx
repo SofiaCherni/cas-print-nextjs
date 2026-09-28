@@ -3,7 +3,7 @@ import ProductFilters from "@/components/ProductFilters";
 import ProductGrid from "@/components/ProductGrid";
 import { BASE_CATEGORIES, queryProducts } from "@/lib/data";
 import { CatalogQuery } from "@/lib/data";
-import { Fit, ProductBaseCategory, PrintCategory, Size } from "@/lib/types";
+import { CutStyle, Fit, ProductBaseCategory, PrintCategory, Size } from "@/lib/types";
 
 const SORT_OPTIONS: { value: NonNullable<CatalogQuery["sort"]>; label: string }[] = [
   { value: "popular", label: "ЗА ПОПУЛЯРНІСТЮ" },
@@ -21,6 +21,7 @@ export default async function CatalogView({
 }) {
   const query: CatalogQuery = {
     baseCategory,
+    cutStyle: searchParams.cut as CutStyle | undefined,
     printCategory: searchParams.printCategory as PrintCategory | undefined,
     size: searchParams.size as Size | undefined,
     fit: searchParams.fit as Fit | undefined,
