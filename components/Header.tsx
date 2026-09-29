@@ -8,8 +8,8 @@ import { useCart } from "@/lib/cart-context";
 import MobileMenu from "./MobileMenu";
 import NavDropdown from "./NavDropdown";
 import { CATALOG_ITEMS, BUYERS_ITEMS } from "@/lib/nav";
-import { SearchIcon, BagIcon } from "./icons";
-import SearchBar from "./SearchBar";
+import { BagIcon } from "./icons";
+import HeaderSearch from "./HeaderSearch";
 
 function getActiveSlot(pathname: string): number {
   if (pathname.startsWith("/catalog")) return 0;
@@ -22,7 +22,6 @@ function getActiveSlot(pathname: string): number {
 export default function Header() {
   const [compact, setCompact] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [searchOpen, setSearchOpen] = useState(false);
   const { count } = useCart();
   const pathname = usePathname();
 
@@ -59,7 +58,7 @@ export default function Header() {
 
   return (
     <header
-      className={`relative sticky top-0 z-40 flex items-center justify-between transition-all ${
+      className={`relative sticky top-0 z-40 flex items-center justify-between lg:grid lg:grid-cols-[1fr_auto_1fr] transition-all ${
         compact ? "py-3 bg-bg/85 backdrop-blur border-b border-line" : "py-6"
       } px-5 md:px-8`}
     >
@@ -70,7 +69,7 @@ export default function Header() {
           width={220}
           height={64}
           priority
-          className="h-7 md:h-8 w-auto"
+          className="h-[34px] md:h-[38px] w-auto"
         />
       </Link>
 
@@ -123,15 +122,8 @@ export default function Header() {
         )}
       </nav>
 
-      <div className="flex items-center gap-5">
-        <button
-          className="inline-flex opacity-85 hover:opacity-100 transition-opacity"
-          aria-label="Пошук"
-          aria-expanded={searchOpen}
-          onClick={() => setSearchOpen((v) => !v)}
-        >
-          <SearchIcon className="w-[19px] h-[19px]" />
-        </button>
+      <div className="flex items-center gap-5 lg:justify-self-end">
+        <HeaderSearch />
         <Link
           href="/cart"
           className="relative inline-flex opacity-85 hover:opacity-100 transition-opacity"
@@ -149,7 +141,6 @@ export default function Header() {
         </button>
       </div>
 
-      <SearchBar open={searchOpen} onClose={() => setSearchOpen(false)} />
       <MobileMenu open={menuOpen} onClose={() => setMenuOpen(false)} />
     </header>
   );

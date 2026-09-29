@@ -46,12 +46,13 @@ body {
   max-height: 0;
   overflow: hidden;
   background: #111111;
-  border-bottom: 1px solid #1E1E1E;
-  transition: max-height 300ms ease;
+  border-bottom: 0 solid #1E1E1E;
+  transition: max-height 300ms ease, border-bottom-width 300ms ease;
   z-index: 55;
 }
 .search-bar.open {
   max-height: 90px;
+  border-bottom-width: 1px;
 }
 .search-bar-inner {
   display: flex;
@@ -68,14 +69,14 @@ body {
   flex: 1;
   background: none;
   border: none;
-  border-bottom: 1px solid #1E1E1E;
+  border-bottom: 1px solid rgba(242, 238, 232, 0.28);
   padding: 8px 2px;
   font-size: 15px;
   color: #F2EEE8;
 }
 .search-bar-input:focus {
   outline: none;
-  border-bottom-color: #710009;
+  border-bottom-color: rgba(242, 238, 232, 0.7);
 }
 .search-bar-input::placeholder {
   color: #A8A19A;
@@ -106,8 +107,50 @@ body {
   color: #F2EEE8;
 }
 
+/* Inline "accordion" search field (lg+): unfolds sideways next to the
+   magnifier, in the same row as the menu. Clipped container of animated
+   width around a fixed-width input — the input never reflows, it is just
+   revealed, like a concertina opening. */
+.header-search-field {
+  width: 0;
+  opacity: 0;
+  overflow: hidden;
+  visibility: hidden;
+  margin-right: 0;
+  transition:
+    width 320ms cubic-bezier(0.22, 1, 0.36, 1),
+    margin-right 320ms cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 220ms ease,
+    visibility 0s linear 320ms;
+}
+.header-search-field.open {
+  width: 200px;
+  opacity: 1;
+  visibility: visible;
+  margin-right: 12px;
+  transition-delay: 0s;
+}
+.header-search-input {
+  display: block;
+  width: 200px;
+  background: none;
+  border: none;
+  border-bottom: 1px solid rgba(242, 238, 232, 0.28);
+  padding: 5px 2px;
+  font-size: 14px;
+  color: #F2EEE8;
+}
+.header-search-input:focus {
+  outline: none;
+  border-bottom-color: rgba(242, 238, 232, 0.7);
+}
+.header-search-input::placeholder {
+  color: #A8A19A;
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .search-bar {
+  .search-bar,
+  .header-search-field {
     transition: none;
   }
 }
@@ -201,14 +244,17 @@ body {
   border-radius: 10px;
   box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
   opacity: 0;
+  visibility: hidden;
   pointer-events: none;
-  transition: opacity 220ms ease, transform 220ms ease;
+  transition: opacity 220ms ease, transform 220ms ease, visibility 0s linear 220ms;
   z-index: 60;
 }
 .nav-dropdown-panel.open {
   opacity: 1;
+  visibility: visible;
   transform: translate(-50%, 0);
   pointer-events: auto;
+  transition-delay: 0s;
 }
 
 .nav-dropdown-item {
@@ -229,8 +275,50 @@ body {
   outline: none;
 }
 
+/* Second level (e.g. "Класичні" / "Оверсайз" under "Футболки"): a flyout to
+   the right of its parent item, shown only while that item (or anything in
+   the flyout) is hovered or has keyboard focus. The ::before strip bridges
+   the small gap so the pointer can travel from the item to the flyout
+   without it closing. */
+.nav-dropdown-sub {
+  position: relative;
+}
+.nav-dropdown-subpanel {
+  position: absolute;
+  top: -11px;
+  left: calc(100% + 18px);
+  min-width: 170px;
+  padding: 10px;
+  background: #111111;
+  border: 1px solid #1E1E1E;
+  border-radius: 10px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateX(-6px);
+  transition: opacity 200ms ease, transform 200ms ease, visibility 0s linear 200ms;
+}
+.nav-dropdown-subpanel::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -20px;
+  width: 20px;
+}
+.nav-dropdown-sub:hover > .nav-dropdown-subpanel,
+.nav-dropdown-sub:focus-within > .nav-dropdown-subpanel {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: none;
+  transition-delay: 0s;
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .nav-dropdown-panel {
+  .nav-dropdown-panel,
+  .nav-dropdown-subpanel {
     transition: none;
   }
 }

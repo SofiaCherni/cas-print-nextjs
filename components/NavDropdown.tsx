@@ -2,18 +2,15 @@
 
 import Link from "next/link";
 import React, { useEffect, useRef, useState } from "react";
-
-export interface DropdownItem {
-  label: string;
-  href: string;
-}
+import type { DropdownItem } from "@/lib/nav";
 
 /**
  * Accessible dropdown for a top-level nav item (КАТАЛОГ, ПОКУПЦЯМ).
- * Opens on hover (desktop) or click/tap (touch + keyboard), closes on
- * outside click, Escape, or blur past the last item. Plain CSS
- * fade + slight translateY — no animation library, respects
- * prefers-reduced-motion (see .nav-dropdown-panel in globals.css).
+ * Opens on hover (desktop), click/tap, or keyboard focus; closes on outside
+ * click, Escape, or focus leaving. Items may have `children` — those show as
+ * a flyout beside the item (pure CSS: hover / focus-within), so e.g.
+ * "Класичні" / "Оверсайз" only appear while "Футболки" is hovered.
+ * Plain CSS transitions, respects prefers-reduced-motion (globals.css).
  */
 export default function NavDropdown({
   label,
@@ -55,6 +52,13 @@ export default function NavDropdown({
     closeTimer.current = setTimeout(() => setOpen(false), 150);
   }
 
+  // Keyboard users: opening on focus lets Tab move through the (otherwise
+  // hidden) items. Only for :focus-visible so a plain mouse click on the
+  // toggle button doesn't open-then-immediately-close it.
+  function onRootFocus(e: React.FocusEvent<HTMLDivElement>) {
+    if ((e.target as HTMLElement).matches?.(":focus-visible")) openNow();
+  }
+
   function onRootBlur(e: React.FocusEvent<HTMLDivElement>) {
     if (!rootRef.current?.contains(e.relatedTarget as Node)) {
       setOpen(false);
@@ -67,6 +71,7 @@ export default function NavDropdown({
       className="nav-dropdown-root"
       onMouseEnter={openNow}
       onMouseLeave={closeSoon}
+      onFocus={onRootFocus}
       onBlur={onRootBlur}
     >
       {triggerHref ? (
@@ -90,17 +95,44 @@ export default function NavDropdown({
         </button>
       )}
       <div className={`nav-dropdown-panel${open ? " open" : ""}`} role="menu">
-        {items.map((item) => (
-          <Link
-            key={item.href}
-            href={item.href}
-            role="menuitem"
-            className="nav-dropdown-item"
-            onClick={() => setOpen(false)}
-          >
-            {item.label}
-          </Link>
-        ))}
+        {items.map((item) =>
+          item.children && item.children.length > 0 ? (
+            <div key={item.href} className="nav-dropdown-sub">
+              <Link
+                href={item.href}
+                role="menuitem"
+                aria-haspopup="true"
+                className="nav-dropdown-item"
+                onClick={() => setOpen(false)}
+              >
+                {item.label}
+              </Link>
+              <div className="nav-dropdown-subpanel" role="menu">
+                {item.children.map((child) => (
+                  <Link
+                    key={child.href}
+                    href={child.href}
+                    role="menuitem"
+                    className="nav-dropdown-item"
+                    onClick={() => setOpen(false)}
+                  >
+                    {child.label}
+                  </Link>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <Link
+              key={item.href}
+              href={item.href}
+              role="menuitem"
+              className="nav-dropdown-item"
+              onClick={() => setOpen(false)}
+            >
+              {item.label}
+            </Link>
+          )
+        )}
       </div>
     </div>
   );

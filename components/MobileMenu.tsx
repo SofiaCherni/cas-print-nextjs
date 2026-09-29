@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { CATALOG_ITEMS, BUYERS_ITEMS } from "@/lib/nav";
+import { CATALOG_ITEMS, BUYERS_ITEMS, type DropdownItem } from "@/lib/nav";
 
 function MobileGroup({
   label,
@@ -10,7 +10,7 @@ function MobileGroup({
   onNavigate
 }: {
   label: string;
-  items: { label: string; href: string }[];
+  items: DropdownItem[];
   onNavigate: () => void;
 }) {
   const [open, setOpen] = useState(false);
@@ -27,14 +27,25 @@ function MobileGroup({
       </button>
       <div className={`mobile-group-panel${open ? " open" : ""}`}>
         {items.map((item) => (
-          <Link
-            key={item.href}
-            href={item.href}
-            onClick={onNavigate}
-            className="block py-3 text-lg text-muted"
-          >
-            {item.label}
-          </Link>
+          <div key={item.href}>
+            <Link
+              href={item.href}
+              onClick={onNavigate}
+              className="block py-3 text-lg text-muted"
+            >
+              {item.label}
+            </Link>
+            {item.children?.map((child) => (
+              <Link
+                key={child.href}
+                href={child.href}
+                onClick={onNavigate}
+                className="block py-2.5 pl-5 text-base text-muted/80"
+              >
+                {child.label}
+              </Link>
+            ))}
+          </div>
         ))}
       </div>
     </div>
