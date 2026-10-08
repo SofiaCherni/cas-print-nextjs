@@ -1,10 +1,25 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getPrints } from "@/lib/data";
-import { PrintCategory } from "@/lib/types";
+import { getPrintCategories } from "@/lib/data";
 
 export async function GET(req: NextRequest) {
-  const category = req.nextUrl.searchParams.get("category") as PrintCategory | null;
-  const all = await getPrints();
-  const items = category ? all.filter((p) => p.category === category) : all;
-  return NextResponse.json({ items });
+  try {
+    const category = req.nextUrl.searchParams.get("category");
+
+    const all = await getPrintCategories();
+
+    const items = category
+      ? all.filter(
+          (item) => item.toLowerCase() === category.toLowerCase()
+        )
+      : all;
+
+    return NextResponse.json({ items });
+  } catch (error) {
+    console.error("GET /api/prints error:", error);
+
+    return NextResponse.json(
+      { error: "Не вдалося завантажити категорії принтів." },
+      { status: 500 }
+    );
+  }
 }
