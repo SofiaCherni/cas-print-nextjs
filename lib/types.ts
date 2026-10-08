@@ -3,31 +3,11 @@ export type ProductBaseCategory = "t-shirts" | "sweatshirts" | "hoodies" | "basi
 // Subgroup used only for t-shirts ("Класичні" / "Оверсайз" in the catalog nav).
 export type CutStyle = "classic" | "oversize";
 
-export type PrintCategory =
-  | "anime"
-  | "text"
-  | "memes"
-  | "ukrainian"
-  | "cartoons"
-  | "movies"
-  | "music"
-  | "other";
-
 export type Fit = "unisex" | "women";
 
 export type Size = "XS" | "S" | "M" | "L" | "XL" | "XXL" | "3XL" | "4XL" | "5XL";
 
 export const EXTENDED_SIZES: Size[] = ["3XL", "4XL", "5XL"];
-
-export interface Print {
-  id: string;
-  name: string;
-  category: PrintCategory;
-  image: string;
-  description: string;
-  status: "active" | "hidden";
-  availableProductIds: string[];
-}
 
 export interface Variant {
   id: string;
@@ -46,7 +26,8 @@ export interface Product {
   description: string;
   baseCategory: ProductBaseCategory;
   cutStyle?: CutStyle;
-  printId: string | null;
+  // Free-text category the admin creates/reuses herself (e.g. "Аніме").
+  printCategory?: string;
   basePrice: number;
   // TODO: NEED REAL BUSINESS DATA — mark real sale items as onSale: true
   // (and set salePrice) once CAS-Print confirms which products/discounts

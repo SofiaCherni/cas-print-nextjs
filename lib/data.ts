@@ -1,13 +1,12 @@
 import { Prisma } from "@prisma/client";
 import { prisma } from "./prisma";
-import { baseCategoryToDb, cutStyleToDb, fitToDb, mapPrint, mapProduct, printCategoryToDb } from "./db-mappers";
-import { CutStyle, Fit, Print, PrintCategory, Product, ProductBaseCategory, Size } from "./types";
+import { baseCategoryToDb, cutStyleToDb, fitToDb, mapProduct } from "./db-mappers";
+import { CutStyle, Fit, Product, ProductBaseCategory, Size } from "./types";
 import {
   BASE_CATEGORIES,
   COLOR_PALETTE,
   formatPrice,
-  generateOrderNumber,
-  PRINT_CATEGORIES
+  generateOrderNumber
 } from "./catalog-constants";
 
 /**
@@ -20,7 +19,7 @@ import {
  * and are re-exported here for server-side code; client components import
  * straight from lib/catalog-constants to avoid bundling Prisma.
  */
-export { BASE_CATEGORIES, COLOR_PALETTE, formatPrice, generateOrderNumber, PRINT_CATEGORIES };
+export { BASE_CATEGORIES, COLOR_PALETTE, formatPrice, generateOrderNumber };
 
 const ALL_SIZES: Size[] = ["XS", "S", "M", "L", "XL", "XXL", "3XL", "4XL", "5XL"];
 const EXTENDED_SIZE_SURCHARGE = 50;
@@ -28,7 +27,7 @@ const EXTENDED_SIZE_SURCHARGE = 50;
 export interface CatalogQuery {
   baseCategory?: ProductBaseCategory;
   cutStyle?: CutStyle;
-  printCategory?: PrintCategory;
+  printCategory?: string;
   size?: Size;
   fit?: Fit;
   colorName?: string;
@@ -45,7 +44,7 @@ function buildWhere(query: CatalogQuery, includeHidden: boolean): Prisma.Product
   if (query.baseCategory) where.baseCategory = baseCategoryToDb(query.baseCategory);
   if (query.cutStyle) where.cutStyle = cutStyleToDb(query.cutStyle);
   if (query.printCategory) {
-    where.print = { category: printCategoryToDb(query.printCategory) };
+    where.printCategory = { equals: query.printCategory, mode: "insensitive" };
   }
   if (typeof query.minPrice === "number" || typeof query.maxPrice === "number") {
     const range: { gte?: number; lte?: number } = {};
@@ -103,15 +102,28 @@ export async function getProductBySlug(slug: string): Promise<Product | undefine
   return row ? mapProduct(row) : undefined;
 }
 
-export async function getPrint(printId: string | null): Promise<Print | undefined> {
-  if (!printId) return undefined;
-  const row = await prisma.print.findUnique({ where: { id: printId }, include: { products: true } });
-  return row ? mapPrint(row) : undefined;
-}
-
-export async function getPrints(): Promise<Print[]> {
-  const rows = await prisma.print.findMany({ include: { products: true }, orderBy: { createdAt: "desc" } });
-  return rows.map(mapPrint);
+/**
+ * Distinct print category strings already used across products — powers
+ * the admin's "Категорія принту" autocomplete (so typing "Аніме" again
+ * offers the existing one instead of creating a near-duplicate) and the
+ * public category chips on the homepage / catalog filters.
+ * `includeHidden`: admin wants to see categories used by hidden products
+ * too (so she doesn't recreate one that already exists); public call sites
+ * only care about categories currently visible in the live catalog.
+ */
+export async function getPrintCategories(includeHidden = false): Promise<string[]> {
+  const rows = await prisma.product.findMany({
+    where: {
+      printCategory: { not: null },
+      ...(includeHidden ? {} : { status: "active" })
+    },
+    select: { printCategory: true },
+    distinct: ["printCategory"]
+  });
+  return rows
+    .map((r) => r.printCategory)
+    .filter((c): c is string => !!c && c.trim().length > 0)
+    .sort((a, b) => a.localeCompare(b, "uk"));
 }
 
 export async function getPopularProducts(limit = 4): Promise<Product[]> {
@@ -198,33 +210,30 @@ export async function getAllProductSlugs(): Promise<{ slug: string; createdAt: D
 }
 
 export async function getCatalogCounts() {
-  const [products, prints] = await Promise.all([prisma.product.count(), prisma.print.count()]);
-  return { products, prints };
+  const [products, printCategories] = await Promise.all([prisma.product.count(), getPrintCategories(true)]);
+  return { products, prints: printCategories.length };
 }
 
 export async function searchCatalog(q: string) {
   const term = q.trim();
-  if (!term) return { products: [] as Product[], prints: [] as Print[], categories: [] as typeof PRINT_CATEGORIES };
-  const [productRows, printRows] = await Promise.all([
+  if (!term) return { products: [] as Product[], categories: [] as string[] };
+  const [productRows, allCategories] = await Promise.all([
     prisma.product.findMany({
       where: {
         status: "active",
         OR: [
           { name: { contains: term, mode: "insensitive" } },
-          { description: { contains: term, mode: "insensitive" } }
+          { description: { contains: term, mode: "insensitive" } },
+          { printCategory: { contains: term, mode: "insensitive" } }
         ]
       },
       include: { variants: true },
       take: 20
     }),
-    prisma.print.findMany({
-      where: { name: { contains: term, mode: "insensitive" } },
-      include: { products: true },
-      take: 20
-    })
+    getPrintCategories()
   ]);
-  const categories = PRINT_CATEGORIES.filter((c) => c.label.toLowerCase().includes(term.toLowerCase()));
-  return { products: productRows.map(mapProduct), prints: printRows.map(mapPrint), categories };
+  const categories = allCategories.filter((c) => c.toLowerCase().includes(term.toLowerCase()));
+  return { products: productRows.map(mapProduct), categories };
 }
 
 // ---------------------------------------------------------------------------
@@ -237,6 +246,7 @@ export interface CreateProductInput {
   description: string;
   baseCategory: ProductBaseCategory;
   cutStyle?: CutStyle;
+  printCategory?: string;
   basePrice: number;
   images: string[];
   fits: Fit[];
@@ -304,6 +314,7 @@ export async function createProduct(input: CreateProductInput): Promise<Product>
       description: input.description,
       baseCategory: baseCategoryToDb(input.baseCategory),
       cutStyle: input.cutStyle ? cutStyleToDb(input.cutStyle) : undefined,
+      printCategory: input.printCategory?.trim() || undefined,
       basePrice: input.basePrice,
       images: input.images,
       popular: input.popular,

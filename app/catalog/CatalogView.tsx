@@ -1,9 +1,9 @@
 import Link from "next/link";
 import ProductFilters from "@/components/ProductFilters";
 import ProductGrid from "@/components/ProductGrid";
-import { BASE_CATEGORIES, queryProducts } from "@/lib/data";
+import { BASE_CATEGORIES, getPrintCategories, queryProducts } from "@/lib/data";
 import { CatalogQuery } from "@/lib/data";
-import { CutStyle, Fit, ProductBaseCategory, PrintCategory, Size } from "@/lib/types";
+import { CutStyle, Fit, ProductBaseCategory, Size } from "@/lib/types";
 
 const SORT_OPTIONS: { value: NonNullable<CatalogQuery["sort"]>; label: string }[] = [
   { value: "popular", label: "ЗА ПОПУЛЯРНІСТЮ" },
@@ -22,7 +22,7 @@ export default async function CatalogView({
   const query: CatalogQuery = {
     baseCategory,
     cutStyle: searchParams.cut as CutStyle | undefined,
-    printCategory: searchParams.printCategory as PrintCategory | undefined,
+    printCategory: searchParams.printCategory,
     size: searchParams.size as Size | undefined,
     fit: searchParams.fit as Fit | undefined,
     colorName: searchParams.color,
@@ -31,7 +31,10 @@ export default async function CatalogView({
     sort: (searchParams.sort as CatalogQuery["sort"]) ?? "popular"
   };
 
-  const { items, total } = await queryProducts(query);
+  const [{ items, total }, printCategories] = await Promise.all([
+    queryProducts(query),
+    getPrintCategories()
+  ]);
 
   return (
     <main className="px-5 md:px-8">
@@ -64,7 +67,7 @@ export default async function CatalogView({
         </div>
 
         <div className="grid md:grid-cols-[240px_1fr] gap-11 py-11 pb-24">
-          <ProductFilters />
+          <ProductFilters printCategories={printCategories} />
           <div>
             <div className="flex justify-between items-center flex-wrap gap-3 mb-7 text-[13px] text-muted">
               <span>{total} товарів</span>

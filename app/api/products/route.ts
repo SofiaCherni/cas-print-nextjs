@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { queryProducts, CatalogQuery } from "@/lib/data";
-import { Fit, ProductBaseCategory, PrintCategory, Size } from "@/lib/types";
+import { Fit, ProductBaseCategory, Size } from "@/lib/types";
 
 /**
  * GET /api/products?category=&printCategory=&size=&color=&fit=&minPrice=&maxPrice=&sort=&page=
@@ -11,7 +11,7 @@ export async function GET(req: NextRequest) {
   const sp = req.nextUrl.searchParams;
   const query: CatalogQuery = {
     baseCategory: (sp.get("category") as ProductBaseCategory) ?? undefined,
-    printCategory: (sp.get("printCategory") as PrintCategory) ?? undefined,
+    printCategory: sp.get("printCategory") ?? undefined,
     size: (sp.get("size") as Size) ?? undefined,
     fit: (sp.get("fit") as Fit) ?? undefined,
     colorName: sp.get("color") ?? undefined,

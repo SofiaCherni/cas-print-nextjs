@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 const BASE_CATEGORIES = [
@@ -60,6 +60,8 @@ export default function NewProductPage() {
   const [description, setDescription] = useState("");
   const [baseCategory, setBaseCategory] = useState(BASE_CATEGORIES[0].value);
   const [cutStyle, setCutStyle] = useState<string>("");
+  const [printCategory, setPrintCategory] = useState("");
+  const [existingCategories, setExistingCategories] = useState<string[]>([]);
   const [basePrice, setBasePrice] = useState("");
   const [fits, setFits] = useState<string[]>(["unisex"]);
   const [colors, setColors] = useState<string[]>([COLOR_PALETTE[0].name]);
@@ -69,6 +71,13 @@ export default function NewProductPage() {
   const [images, setImages] = useState<UploadedImage[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetch("/api/admin/print-categories")
+      .then((res) => res.json())
+      .then((data) => setExistingCategories(data.categories ?? []))
+      .catch(() => {});
+  }, []);
 
   function toggle(list: string[], value: string, setList: (v: string[]) => void) {
     setList(list.includes(value) ? list.filter((v) => v !== value) : [...list, value]);
@@ -136,6 +145,7 @@ export default function NewProductPage() {
           description,
           baseCategory,
           cutStyle: baseCategory === "t-shirts" ? cutStyle : undefined,
+          printCategory: printCategory.trim() || undefined,
           basePrice: Number(basePrice),
           images: readyImages,
           fits,
@@ -211,6 +221,29 @@ export default function NewProductPage() {
             </div>
           </div>
 
+          <div>
+            <label className="block text-xs tracking-wide text-muted font-bold mb-2">
+              КАТЕГОРІЯ ПРИНТУ (необов'язково)
+            </label>
+            <input
+              list="print-category-options"
+              value={printCategory}
+              onChange={(e) => setPrintCategory(e.target.value)}
+              placeholder="Наприклад: Аніме"
+              className="w-full bg-bgSoft border border-line px-4 py-3 text-sm"
+            />
+            <datalist id="print-category-options">
+              {existingCategories.map((c) => (
+                <option key={c} value={c} />
+              ))}
+            </datalist>
+            <p className="text-xs text-muted mt-1.5">
+              {existingCategories.length > 0
+                ? `Уже є: ${existingCategories.join(", ")} — почни вводити, щоб обрати, або впиши нову.`
+                : "Категорій ще немає — введи свою, вона з'явиться в списку для наступних товарів."}
+            </p>
+          </div>
+
           {baseCategory === "t-shirts" && (
             <div>
               <label className="block text-xs tracking-wide text-muted font-bold mb-2">КРІЙ</label>
@@ -256,7 +289,18 @@ export default function NewProductPage() {
           </div>
 
           <div>
-            <label className="block text-xs tracking-wide text-muted font-bold mb-2">КОЛЬОРИ</label>
+            <div className="flex items-center justify-between mb-2">
+              <label className="block text-xs tracking-wide text-muted font-bold">КОЛЬОРИ</label>
+              <button
+                type="button"
+                onClick={() =>
+                  setColors(colors.length === COLOR_PALETTE.length ? [] : COLOR_PALETTE.map((c) => c.name))
+                }
+                className="text-xs underline text-muted hover:text-paper"
+              >
+                {colors.length === COLOR_PALETTE.length ? "Зняти всі" : "Обрати всі кольори"}
+              </button>
+            </div>
             <div className="flex flex-wrap gap-2.5">
               {COLOR_PALETTE.map((c) => (
                 <button

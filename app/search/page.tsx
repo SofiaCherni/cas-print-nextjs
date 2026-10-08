@@ -11,7 +11,7 @@ export function generateMetadata({ searchParams }: { searchParams: { q?: string 
 
 export default async function SearchPage({ searchParams }: { searchParams: { q?: string } }) {
   const q = searchParams.q ?? "";
-  const { products, prints, categories } = await searchCatalog(q);
+  const { products, categories } = await searchCatalog(q);
 
   return (
     <main className="px-5 md:px-8">
@@ -27,24 +27,15 @@ export default async function SearchPage({ searchParams }: { searchParams: { q?:
           )}
         </p>
 
-        {(prints.length > 0 || categories.length > 0) && (
+        {categories.length > 0 && (
           <div className="flex flex-wrap gap-2.5 mb-10">
             {categories.map((c) => (
               <Link
-                key={c.value}
-                href={`/catalog?printCategory=${c.value}`}
+                key={c}
+                href={`/catalog?printCategory=${encodeURIComponent(c)}`}
                 className="px-4 py-2 rounded-full text-xs font-semibold border border-line text-muted hover:text-paper hover:border-paper"
               >
-                Категорія: {c.label}
-              </Link>
-            ))}
-            {prints.map((p) => (
-              <Link
-                key={p.id}
-                href={`/catalog?printCategory=${p.category}`}
-                className="px-4 py-2 rounded-full text-xs font-semibold border border-line text-muted hover:text-paper hover:border-paper"
-              >
-                Принт: {p.name}
+                Категорія: {c}
               </Link>
             ))}
           </div>

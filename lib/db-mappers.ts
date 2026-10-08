@@ -3,10 +3,9 @@ import {
   Variant as DbVariant,
   ProductBaseCategory as DbBaseCategory,
   CutStyle as DbCutStyle,
-  Fit as DbFit,
-  PrintCategory as DbPrintCategory
+  Fit as DbFit
 } from "@prisma/client";
-import { CutStyle, Fit, Print, PrintCategory, Product, ProductBaseCategory, Size, Variant } from "./types";
+import { CutStyle, Fit, Product, ProductBaseCategory, Size, Variant } from "./types";
 
 /**
  * Converts between Prisma's DB shapes (uppercase enums, flat colorName/
@@ -36,28 +35,6 @@ const FIT_TO_DB: Record<Fit, DbFit> = { unisex: "UNISEX", women: "WOMEN" };
 const CUT_STYLE_FROM_DB: Record<DbCutStyle, CutStyle> = { CLASSIC: "classic", OVERSIZE: "oversize" };
 const CUT_STYLE_TO_DB: Record<CutStyle, DbCutStyle> = { classic: "CLASSIC", oversize: "OVERSIZE" };
 
-const PRINT_CATEGORY_FROM_DB: Record<DbPrintCategory, PrintCategory> = {
-  ANIME: "anime",
-  TEXT: "text",
-  MEMES: "memes",
-  UKRAINIAN: "ukrainian",
-  CARTOONS: "cartoons",
-  MOVIES: "movies",
-  MUSIC: "music",
-  OTHER: "other"
-};
-
-const PRINT_CATEGORY_TO_DB: Record<PrintCategory, DbPrintCategory> = {
-  anime: "ANIME",
-  text: "TEXT",
-  memes: "MEMES",
-  ukrainian: "UKRAINIAN",
-  cartoons: "CARTOONS",
-  movies: "MOVIES",
-  music: "MUSIC",
-  other: "OTHER"
-};
-
 export function baseCategoryToDb(v: ProductBaseCategory): DbBaseCategory {
   return BASE_CATEGORY_TO_DB[v];
 }
@@ -67,12 +44,8 @@ export function fitToDb(v: Fit): DbFit {
 export function cutStyleToDb(v: CutStyle): DbCutStyle {
   return CUT_STYLE_TO_DB[v];
 }
-export function printCategoryToDb(v: PrintCategory): DbPrintCategory {
-  return PRINT_CATEGORY_TO_DB[v];
-}
 
 type DbProductWithVariants = Prisma.ProductGetPayload<{ include: { variants: true } }>;
-type DbPrintWithProducts = Prisma.PrintGetPayload<{ include: { products: true } }>;
 
 export function mapVariant(v: DbVariant): Variant {
   return {
@@ -94,7 +67,7 @@ export function mapProduct(p: DbProductWithVariants): Product {
     description: p.description,
     baseCategory: BASE_CATEGORY_FROM_DB[p.baseCategory],
     cutStyle: p.cutStyle ? CUT_STYLE_FROM_DB[p.cutStyle] : undefined,
-    printId: p.printId,
+    printCategory: p.printCategory ?? undefined,
     basePrice: p.basePrice,
     images: p.images,
     variants: p.variants.map(mapVariant),
@@ -103,17 +76,5 @@ export function mapProduct(p: DbProductWithVariants): Product {
     onSale: p.onSale,
     salePrice: p.salePrice ?? undefined,
     createdAt: p.createdAt.toISOString()
-  };
-}
-
-export function mapPrint(pr: DbPrintWithProducts): Print {
-  return {
-    id: pr.id,
-    name: pr.name,
-    category: PRINT_CATEGORY_FROM_DB[pr.category],
-    image: pr.image,
-    description: pr.description,
-    status: pr.status as "active" | "hidden",
-    availableProductIds: pr.products.map((p) => p.id)
   };
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
-import { PRINT_CATEGORIES, COLOR_PALETTE } from "@/lib/catalog-constants";
+import { COLOR_PALETTE } from "@/lib/catalog-constants";
 import { Fit, Size } from "@/lib/types";
 
 const SIZES: Size[] = ["XS", "S", "M", "L", "XL", "XXL", "3XL", "4XL", "5XL"];
@@ -15,7 +15,7 @@ const COLORS = COLOR_PALETTE;
  * Filters are driven entirely by URL search params (?category=&size=&color=&fit=&price=)
  * so state survives a page reload and can be shared as a link (brief section 22).
  */
-export default function ProductFilters() {
+export default function ProductFilters({ printCategories }: { printCategories: string[] }) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -34,27 +34,29 @@ export default function ProductFilters() {
 
   return (
     <aside className="space-y-8">
-      <div>
-        <h4 className="text-xs tracking-wide text-muted font-bold mb-3.5">КАТЕГОРІЯ ПРИНТУ</h4>
-        <div className="space-y-2.5">
-          {PRINT_CATEGORIES.map((c) => (
-            <button
-              key={c.value}
-              onClick={() => setParam("printCategory", c.value)}
-              className={`flex items-center gap-2.5 text-sm ${
-                active("printCategory", c.value) ? "text-paper" : "text-paper/85"
-              }`}
-            >
-              <span
-                className={`w-3.5 h-3.5 border rounded-sm ${
-                  active("printCategory", c.value) ? "bg-paper border-paper" : "border-muted"
+      {printCategories.length > 0 && (
+        <div>
+          <h4 className="text-xs tracking-wide text-muted font-bold mb-3.5">КАТЕГОРІЯ ПРИНТУ</h4>
+          <div className="space-y-2.5">
+            {printCategories.map((c) => (
+              <button
+                key={c}
+                onClick={() => setParam("printCategory", c)}
+                className={`flex items-center gap-2.5 text-sm ${
+                  active("printCategory", c) ? "text-paper" : "text-paper/85"
                 }`}
-              />
-              {c.label}
-            </button>
-          ))}
+              >
+                <span
+                  className={`w-3.5 h-3.5 border rounded-sm ${
+                    active("printCategory", c) ? "bg-paper border-paper" : "border-muted"
+                  }`}
+                />
+                {c}
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
       <div>
         <h4 className="text-xs tracking-wide text-muted font-bold mb-3.5">РОЗМІР</h4>

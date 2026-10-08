@@ -1,21 +1,14 @@
-import { PrintCategory, ProductBaseCategory } from "./types";
+import { ProductBaseCategory } from "./types";
 
 /**
  * Pure, DB-free constants and helpers. Deliberately kept out of lib/data.ts
  * (which now imports the Prisma client) so client components can import
  * these directly without pulling Prisma into the browser bundle.
+ *
+ * Print categories are NOT listed here anymore — they're free text the
+ * admin creates herself in "Додати товар" (see lib/data.ts#getPrintCategories,
+ * which derives the current list from whatever products already use).
  */
-
-export const PRINT_CATEGORIES: { value: PrintCategory; label: string }[] = [
-  { value: "anime", label: "Аніме" },
-  { value: "text", label: "Текст" },
-  { value: "memes", label: "Меми" },
-  { value: "ukrainian", label: "Українське" },
-  { value: "cartoons", label: "Мультфільми" },
-  { value: "movies", label: "Кіно" },
-  { value: "music", label: "Музика" },
-  { value: "other", label: "Інше" }
-];
 
 export const BASE_CATEGORIES: { value: ProductBaseCategory; label: string; slug: string }[] = [
   { value: "t-shirts", label: "Футболки", slug: "t-shirts" },

@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import Button from "@/components/Button";
 import ProductGrid from "@/components/ProductGrid";
-import { getHomepagePicks, getPopularProducts, PRINT_CATEGORIES } from "@/lib/data";
+import { getHomepagePicks, getPopularProducts, getPrintCategories } from "@/lib/data";
 
 // Ensures a fresh random pick for "ОБЕРИ СВІЙ ПРИНТ" on every request rather
 // than a single build-time snapshot getting cached and reused forever.
@@ -11,6 +11,7 @@ export const dynamic = "force-dynamic";
 export default async function HomePage() {
   const heroPicks = await getHomepagePicks(4);
   const popular = await getPopularProducts(4);
+  const printCategories = await getPrintCategories();
 
   return (
     <main>
@@ -58,17 +59,19 @@ export default async function HomePage() {
               ПЕРЕГЛЯНУТИ ВСІ ПРИНТИ
             </Button>
           </div>
-          <div className="flex flex-wrap gap-2.5 mb-14">
-            {PRINT_CATEGORIES.map((c) => (
-              <Link
-                key={c.value}
-                href={`/catalog?printCategory=${c.value}`}
-                className="px-5 py-2.5 rounded-full text-sm font-semibold border border-line text-muted hover:text-paper hover:border-paper"
-              >
-                {c.label}
-              </Link>
-            ))}
-          </div>
+          {printCategories.length > 0 && (
+            <div className="flex flex-wrap gap-2.5 mb-14">
+              {printCategories.map((c) => (
+                <Link
+                  key={c}
+                  href={`/catalog?printCategory=${encodeURIComponent(c)}`}
+                  className="px-5 py-2.5 rounded-full text-sm font-semibold border border-line text-muted hover:text-paper hover:border-paper"
+                >
+                  {c}
+                </Link>
+              ))}
+            </div>
+          )}
           <ProductGrid products={heroPicks} />
         </div>
       </section>
