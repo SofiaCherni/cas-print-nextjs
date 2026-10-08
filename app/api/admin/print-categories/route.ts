@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { getPrintCategories } from "@/lib/data";
 
+export const dynamic = "force-dynamic";
+
 /** Existing print category names (across all products, hidden included) —
  * feeds the datalist in "Додати товар" so typing "Аніме" again suggests the
  * one already in use instead of creating a near-duplicate. */
