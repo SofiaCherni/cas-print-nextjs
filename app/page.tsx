@@ -118,10 +118,14 @@ export default async function HomePage() {
 
       {/* Блок 5 — СТВОРИ ВЛАСНИЙ */}
       <section className="grid md:grid-cols-[1.1fr_0.9fr]">
-        <div className="relative min-h-[340px] md:min-h-[440px] bg-gradient-to-br from-[#1a1917] to-bg flex items-center justify-center">
-          <span className="font-display font-black text-sm tracking-[0.1em] text-paper/20">
-            CUSTOM DESIGN
-          </span>
+        <div className="relative min-h-[340px] md:min-h-[440px]">
+          <Image
+            src="/assets/home/custom-design.jpg"
+            alt="Приклад власного принта, нанесеного на замовлення"
+            fill
+            sizes="(max-width: 768px) 100vw, 55vw"
+            className="object-cover"
+          />
         </div>
         <div className="bg-bgSoft flex flex-col justify-center p-10 md:p-16">
           <p className="font-display font-semibold text-2xl text-muted m-0">НЕ ЗНАЙШОВ СВІЙ?</p>
@@ -144,10 +148,14 @@ export default async function HomePage() {
             ПРИНТ, ЯКИЙ ХОЧЕТЬСЯ РОЗГЛЯДАТИ
           </h2>
           <div className="grid md:grid-cols-[1.1fr_0.9fr] border border-line">
-            <div className="min-h-[280px] md:min-h-[340px] bg-gradient-to-br from-[#1c1b18] to-bg flex items-center justify-center">
-              <span className="font-display font-black text-sm tracking-[0.1em] text-paper/20">
-                MACRO PRINT DETAIL
-              </span>
+            <div className="relative min-h-[280px] md:min-h-[340px]">
+              <Image
+                src="/assets/home/print-detail.jpg"
+                alt="Детальний вигляд якості друку принта зблизька"
+                fill
+                sizes="(max-width: 768px) 100vw, 55vw"
+                className="object-cover"
+              />
             </div>
             <div className="p-8 md:p-12 flex items-center">
               <div className="flex flex-wrap gap-9">
@@ -192,15 +200,30 @@ export default async function HomePage() {
             НОСИ СВОЄ
           </h2>
           <div className="grid grid-cols-2 md:grid-cols-6 auto-rows-[110px] md:auto-rows-[120px] gap-0.5">
-            {Array.from({ length: 6 }).map((_, i) => (
+            {[
+              { src: "/assets/home/wear-1.jpg", alt: "Дівчина в оверсайз футболці з принтом «green flag»" },
+              { src: "/assets/home/wear-2.jpg", alt: "Образ з футболкою «green flag» у місті" },
+              { src: "/assets/home/wear-3.jpg", alt: "Худі з принтом «I'm bulochka»" },
+              { src: "/assets/home/wear-4.jpg", alt: "Оверсайз футболка з текстовим принтом" },
+              { src: "/assets/home/wear-5.jpg", alt: "Дві подруги в однакових футболках на переході" },
+              { src: "/assets/home/wear-6.jpg", alt: "Дівчина в оверсайз худі VAHUE" }
+            ].map((img, i) => (
               <div
-                key={i}
-                className={`bg-gradient-to-br from-[#1c1b18] to-bg ${
+                key={img.src}
+                className={`relative overflow-hidden ${
                   i === 0 ? "md:col-span-3 md:row-span-3 col-span-1 row-span-2" :
                   i === 3 ? "md:col-span-4 md:row-span-3 col-span-1 row-span-2" :
                   "md:col-span-3 md:row-span-2 col-span-1 row-span-2"
                 }`}
-              />
+              >
+                <Image
+                  src={img.src}
+                  alt={img.alt}
+                  fill
+                  sizes="(max-width: 768px) 50vw, 33vw"
+                  className="object-cover"
+                />
+              </div>
             ))}
           </div>
         </div>
