@@ -103,17 +103,14 @@ export async function getProductBySlug(slug: string): Promise<Product | undefine
 }
 
 /**
- * Distinct print category strings already used across products — powers
- * the admin's "Категорія принту" autocomplete (so typing "Аніме" again
- * offers the existing one instead of creating a near-duplicate) and the
- * public category chips on the homepage / catalog filters.
- * `includeHidden`: admin wants to see categories used by hidden products
- * too (so she doesn't recreate one that already exists); public call sites
- * only care about categories currently visible in the live catalog.
+ * Distinct print category strings already used across products.
+ * Includes categories from products and separate prints.
  */
-export async function getPrintCategories(includeHidden = false): Promise<string[]> {
+export async function getPrintCategories(
+  includeHidden = false
+): Promise<string[]> {
   const activeOnly = includeHidden ? {} : { status: "active" };
-  // Категорії спільні: беремо і з товарів, і з окремих принтів.
+
   const [productRows, printRows] = await Promise.all([
     prisma.product.findMany({
       where: { printCategory: { not: null }, ...activeOnly },
@@ -121,22 +118,29 @@ export async function getPrintCategories(includeHidden = false): Promise<string[
       distinct: ["printCategory"]
     }),
     prisma.print.findMany({
-      where: { category: { not: null }, ...activeOnly },
+      where: { ...activeOnly },
       select: { category: true },
       distinct: ["category"]
     })
   ]);
 
-  // Дедуплікація без урахування регістру ("Аніме" == "аніме"), зберігаємо перше написання.
+  // Убираем дубликаты без учёта регистра.
   const seen = new Map<string, string>();
+
   for (const raw of [
     ...productRows.map((r) => r.printCategory),
     ...printRows.map((r) => r.category)
   ]) {
     const c = raw?.trim();
-    if (c && !seen.has(c.toLowerCase())) seen.set(c.toLowerCase(), c);
+
+    if (c && !seen.has(c.toLowerCase())) {
+      seen.set(c.toLowerCase(), c);
+    }
   }
-  return Array.from(seen.values()).sort((a, b) => a.localeCompare(b, "uk"));
+
+  return Array.from(seen.values()).sort((a, b) =>
+    a.localeCompare(b, "uk")
+  );
 }
 
 export async function getPopularProducts(limit = 4): Promise<Product[]> {
