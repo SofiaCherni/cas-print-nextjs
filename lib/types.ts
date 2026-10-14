@@ -41,6 +41,19 @@ export interface Product {
   createdAt: string;
 }
 
+export interface Print {
+  id: string;
+  slug: string;
+  name: string;
+  description: string;
+  // Той самий вільний текст, що й Product.printCategory.
+  category?: string;
+  image: string;
+  showOnHome: boolean;
+  status: "active" | "hidden";
+  createdAt: string;
+}
+
 export interface CartLineItem {
   productId: string;
   variantId: string;

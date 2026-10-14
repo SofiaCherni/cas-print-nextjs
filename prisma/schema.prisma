@@ -63,6 +63,21 @@ model Product {
   createdAt     DateTime            @default(now())
 }
 
+// Самостійний принт (окремо від товару): лише назва, опис, категорія та фото.
+// Категорія — той самий вільний текст, що й Product.printCategory, тож набір
+// категорій спільний для товарів і принтів (див. lib/data.ts#getPrintCategories).
+model Print {
+  id         String   @id @default(cuid())
+  slug       String   @unique
+  name       String
+  description String  @default("")
+  category   String?
+  image      String
+  showOnHome Boolean  @default(false)
+  status     String   @default("active")
+  createdAt  DateTime @default(now())
+}
+
 model Variant {
   id        String   @id @default(cuid())
   productId String

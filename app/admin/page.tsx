@@ -17,7 +17,11 @@ export default async function AdminHome() {
         <div className="grid sm:grid-cols-2 gap-4">
           <Link href="/admin/products" className="block border border-line p-6 hover:border-paper">
             <h3 className="font-display font-bold text-lg mb-1">Товари</h3>
-            <p className="text-muted text-sm">{products} товарів, {prints} принтів</p>
+            <p className="text-muted text-sm">{products} товарів</p>
+          </Link>
+          <Link href="/admin/prints" className="block border border-line p-6 hover:border-paper">
+            <h3 className="font-display font-bold text-lg mb-1">Принти</h3>
+            <p className="text-muted text-sm">{prints} принтів</p>
           </Link>
           <Link href="/admin/orders" className="block border border-line p-6 hover:border-paper">
             <h3 className="font-display font-bold text-lg mb-1">Замовлення</h3>

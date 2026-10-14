@@ -2,14 +2,19 @@ import Image from "next/image";
 import Link from "next/link";
 import Button from "@/components/Button";
 import ProductGrid from "@/components/ProductGrid";
-import { getHomepagePicks, getPopularProducts, getPrintCategories } from "@/lib/data";
+import PrintGrid from "@/components/PrintGrid";
+import { getHomepagePicks, getHomepagePrints, getPopularProducts, getPrintCategories } from "@/lib/data";
 
 // Ensures a fresh random pick for "ОБЕРИ СВІЙ ПРИНТ" on every request rather
 // than a single build-time snapshot getting cached and reused forever.
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
-  const heroPicks = await getHomepagePicks(4);
+  // Блок «ОБЕРИ СВІЙ ПРИНТ»: принти з галочкою «Показувати на головній».
+  // Поки жоден принт не позначено — тимчасово показуємо старий добір товарів,
+  // щоб блок не був порожнім.
+  const homePrints = await getHomepagePrints(8);
+  const fallbackPicks = homePrints.length === 0 ? await getHomepagePicks(4) : [];
   const popular = await getPopularProducts(4);
   const printCategories = await getPrintCategories();
 
@@ -55,7 +60,7 @@ export default async function HomePage() {
             <h2 className="font-display font-extrabold text-3xl md:text-5xl tracking-tight">
               ОБЕРИ СВІЙ ПРИНТ
             </h2>
-            <Button href="/catalog" variant="ghost" className="px-5 py-3">
+            <Button href="/prints" variant="ghost" className="px-5 py-3">
               ПЕРЕГЛЯНУТИ ВСІ ПРИНТИ
             </Button>
           </div>
@@ -64,7 +69,7 @@ export default async function HomePage() {
               {printCategories.map((c) => (
                 <Link
                   key={c}
-                  href={`/catalog?printCategory=${encodeURIComponent(c)}`}
+                  href={`/prints?category=${encodeURIComponent(c)}`}
                   className="px-5 py-2.5 rounded-full text-sm font-semibold border border-line text-muted hover:text-paper hover:border-paper"
                 >
                   {c}
@@ -72,7 +77,11 @@ export default async function HomePage() {
               ))}
             </div>
           )}
-          <ProductGrid products={heroPicks} />
+          {homePrints.length > 0 ? (
+            <PrintGrid prints={homePrints} />
+          ) : (
+            <ProductGrid products={fallbackPicks} />
+          )}
         </div>
       </section>
 

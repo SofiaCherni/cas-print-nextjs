@@ -1,7 +1,7 @@
 import { Prisma } from "@prisma/client";
 import { prisma } from "./prisma";
 import { baseCategoryToDb, cutStyleToDb, fitToDb, mapProduct } from "./db-mappers";
-import { CutStyle, Fit, Product, ProductBaseCategory, Size } from "./types";
+import { CutStyle, Fit, Print, Product, ProductBaseCategory, Size } from "./types";
 import {
   BASE_CATEGORIES,
   COLOR_PALETTE,
@@ -112,18 +112,31 @@ export async function getProductBySlug(slug: string): Promise<Product | undefine
  * only care about categories currently visible in the live catalog.
  */
 export async function getPrintCategories(includeHidden = false): Promise<string[]> {
-  const rows = await prisma.product.findMany({
-    where: {
-      printCategory: { not: null },
-      ...(includeHidden ? {} : { status: "active" })
-    },
-    select: { printCategory: true },
-    distinct: ["printCategory"]
-  });
-  return rows
-    .map((r) => r.printCategory)
-    .filter((c): c is string => !!c && c.trim().length > 0)
-    .sort((a, b) => a.localeCompare(b, "uk"));
+  const activeOnly = includeHidden ? {} : { status: "active" };
+  // Категорії спільні: беремо і з товарів, і з окремих принтів.
+  const [productRows, printRows] = await Promise.all([
+    prisma.product.findMany({
+      where: { printCategory: { not: null }, ...activeOnly },
+      select: { printCategory: true },
+      distinct: ["printCategory"]
+    }),
+    prisma.print.findMany({
+      where: { category: { not: null }, ...activeOnly },
+      select: { category: true },
+      distinct: ["category"]
+    })
+  ]);
+
+  // Дедуплікація без урахування регістру ("Аніме" == "аніме"), зберігаємо перше написання.
+  const seen = new Map<string, string>();
+  for (const raw of [
+    ...productRows.map((r) => r.printCategory),
+    ...printRows.map((r) => r.category)
+  ]) {
+    const c = raw?.trim();
+    if (c && !seen.has(c.toLowerCase())) seen.set(c.toLowerCase(), c);
+  }
+  return Array.from(seen.values()).sort((a, b) => a.localeCompare(b, "uk"));
 }
 
 export async function getPopularProducts(limit = 4): Promise<Product[]> {
@@ -210,8 +223,8 @@ export async function getAllProductSlugs(): Promise<{ slug: string; createdAt: D
 }
 
 export async function getCatalogCounts() {
-  const [products, printCategories] = await Promise.all([prisma.product.count(), getPrintCategories(true)]);
-  return { products, prints: printCategories.length };
+  const [products, prints] = await Promise.all([prisma.product.count(), prisma.print.count()]);
+  return { products, prints };
 }
 
 export async function searchCatalog(q: string) {
@@ -334,4 +347,95 @@ export async function setProductStatus(id: string, status: "active" | "hidden") 
 
 export async function deleteProduct(id: string) {
   await prisma.product.delete({ where: { id } });
+}
+
+// ---------------------------------------------------------------------------
+// Принти (окрема сутність: назва, опис, категорія, фото, «на головній»).
+// ---------------------------------------------------------------------------
+
+function mapPrint(p: {
+  id: string;
+  slug: string;
+  name: string;
+  description: string;
+  category: string | null;
+  image: string;
+  showOnHome: boolean;
+  status: string;
+  createdAt: Date;
+}): Print {
+  return {
+    id: p.id,
+    slug: p.slug,
+    name: p.name,
+    description: p.description,
+    category: p.category ?? undefined,
+    image: p.image,
+    showOnHome: p.showOnHome,
+    status: p.status as "active" | "hidden",
+    createdAt: p.createdAt.toISOString()
+  };
+}
+
+/** Публічний список принтів для сторінки /prints (лише активні), з фільтром за категорією. */
+export async function getPrints(category?: string): Promise<Print[]> {
+  const rows = await prisma.print.findMany({
+    where: {
+      status: "active",
+      ...(category ? { category: { equals: category, mode: "insensitive" as const } } : {})
+    },
+    orderBy: { createdAt: "desc" }
+  });
+  return rows.map(mapPrint);
+}
+
+/** Принти з увімкненою кнопкою «Показувати на головній» — блок «ОБЕРИ СВІЙ ПРИНТ». */
+export async function getHomepagePrints(limit = 8): Promise<Print[]> {
+  const rows = await prisma.print.findMany({
+    where: { status: "active", showOnHome: true },
+    orderBy: { createdAt: "desc" },
+    take: limit
+  });
+  return rows.map(mapPrint);
+}
+
+export async function getAllPrintsForAdmin(): Promise<Print[]> {
+  const rows = await prisma.print.findMany({ orderBy: { createdAt: "desc" } });
+  return rows.map(mapPrint);
+}
+
+export interface CreatePrintInput {
+  name: string;
+  description: string;
+  category?: string;
+  image: string;
+  showOnHome: boolean;
+}
+
+export async function createPrint(input: CreatePrintInput): Promise<Print> {
+  const baseSlug = slugify(input.name);
+  let slug = baseSlug;
+  let suffix = 2;
+  while (await prisma.print.findUnique({ where: { slug } })) {
+    slug = `${baseSlug}-${suffix++}`;
+  }
+  const row = await prisma.print.create({
+    data: {
+      slug,
+      name: input.name,
+      description: input.description,
+      category: input.category?.trim() || null,
+      image: input.image,
+      showOnHome: input.showOnHome
+    }
+  });
+  return mapPrint(row);
+}
+
+export async function updatePrint(id: string, data: { status?: "active" | "hidden"; showOnHome?: boolean }) {
+  await prisma.print.update({ where: { id }, data });
+}
+
+export async function deletePrint(id: string) {
+  await prisma.print.delete({ where: { id } });
 }
