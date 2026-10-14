@@ -163,14 +163,3 @@ enum OrderStatusCode {
   CANCELLED
   RETURNED
 }
-
-enum PrintCategory {
-  ANIME
-  TEXT
-  MEMES
-  UKRAINIAN
-  CARTOONS
-  MOVIES
-  MUSIC
-  OTHER
-}
