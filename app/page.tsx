@@ -86,31 +86,39 @@ export default async function HomePage() {
       </section>
 
       {/* Блок 3 — ОБЕРИ РІЧ */}
-      <section className="py-24 md:py-32 px-5 md:px-8">
-        <div className="max-w-[1360px] mx-auto">
-          <h2 className="font-display font-extrabold text-3xl md:text-5xl tracking-tight mb-10">
-            ОБЕРИ РІЧ
-          </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-0.5">
-            {[
-              { label: "ФУТБОЛКИ", href: "/catalog/t-shirts" },
-              { label: "СВІТШОТИ", href: "/catalog/sweatshirts" },
-              { label: "ХУДІ", href: "/catalog/hoodies" },
-              { label: "ІНШІ ТОВАРИ", href: "/catalog/basics" }
-            ].map((c) => (
-              <Link
-                key={c.label}
-                href={c.href}
-                className="group relative aspect-[4/5] flex items-end p-6 bg-gradient-to-br from-[#201f1b] to-bg overflow-hidden"
-              >
-                <h3 className="relative font-display font-extrabold text-2xl group-hover:text-accent transition-colors">
-                  {c.label}
-                </h3>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
+<section className="py-24 md:py-32 px-5 md:px-8">
+  <div className="max-w-[1360px] mx-auto">
+    <h2 className="font-display font-extrabold text-3xl md:text-5xl tracking-tight mb-10">
+      ОБЕРИ РІЧ
+    </h2>
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-0.5">
+      {[
+        { label: "ФУТБОЛКИ", href: "/catalog/t-shirts", img: "/assets/home/cat-tshirts.jpg" },
+        { label: "СВІТШОТИ", href: "/catalog/sweatshirts", img: "/assets/home/cat-sweatshirts.jpg" },
+        { label: "ХУДІ", href: "/catalog/hoodies", img: "/assets/home/cat-hoodies.jpg" },
+        { label: "ІНШІ ТОВАРИ", href: "/catalog/basics", img: "/assets/home/cat-basics.jpg" }
+      ].map((c) => (
+        <Link
+          key={c.label}
+          href={c.href}
+          className="group relative aspect-[4/5] flex items-end p-6 bg-bgSoft overflow-hidden"
+        >
+          <Image
+            src={c.img}
+            alt={c.label}
+            fill
+            sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, 25vw"
+            className="object-cover transition-transform duration-500 group-hover:scale-[1.045]"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-bg/80 via-bg/10 to-transparent" />
+          <h3 className="relative font-display font-extrabold text-2xl group-hover:text-accent transition-colors">
+            {c.label}
+          </h3>
+        </Link>
+      ))}
+    </div>
+  </div>
+</section>
 
       {/* Блок 4 — ПОПУЛЯРНЕ */}
       <section className="py-24 md:py-32 px-5 md:px-8">
