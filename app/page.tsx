@@ -57,7 +57,7 @@ export default async function HomePage() {
       <section className="py-24 md:py-32 px-5 md:px-8">
         <div className="max-w-[1360px] mx-auto">
           <div className="flex items-end justify-between gap-6 flex-wrap mb-10">
-            <h2 className="font-display font-extrabold text-3xl md:text-5xl tracking-tight">
+            <h2 className="font-display font-extrabold text-3xl md:text-5xl tracking-[0.015em]">
               ОБЕРИ СВІЙ ПРИНТ
             </h2>
             <Button href="/prints" variant="ghost" className="px-5 py-3">
@@ -88,7 +88,7 @@ export default async function HomePage() {
       {/* Блок 3 — ОБЕРИ РІЧ */}
       <section className="py-24 md:py-32 px-5 md:px-8">
         <div className="max-w-[1360px] mx-auto">
-          <h2 className="font-display font-extrabold text-3xl md:text-5xl tracking-tight mb-10">
+          <h2 className="font-display font-extrabold text-3xl md:text-5xl tracking-[0.015em] mb-10">
             ОБЕРИ РІЧ
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-0.5">
@@ -124,7 +124,7 @@ export default async function HomePage() {
       <section className="py-24 md:py-32 px-5 md:px-8">
         <div className="max-w-[1360px] mx-auto">
           <div className="flex items-end justify-between gap-6 flex-wrap mb-10">
-            <h2 className="font-display font-extrabold text-3xl md:text-5xl tracking-tight">ПОПУЛЯРНЕ</h2>
+            <h2 className="font-display font-extrabold text-3xl md:text-5xl tracking-[0.015em]">ПОПУЛЯРНЕ</h2>
             <Button href="/catalog" variant="ghost" className="px-5 py-3">
               ПЕРЕГЛЯНУТИ ВСІ ТОВАРИ
             </Button>
@@ -146,7 +146,7 @@ export default async function HomePage() {
         </div>
         <div className="bg-bgSoft flex flex-col justify-center p-10 md:p-16">
           <p className="font-display font-semibold text-2xl text-muted m-0">НЕ ЗНАЙШОВ СВІЙ?</p>
-          <p className="font-display font-black text-4xl md:text-6xl tracking-tight my-1.5 mb-6">
+          <p className="font-display font-black text-4xl md:text-6xl tracking-[0.015em] my-1.5 mb-6">
             СТВОРИ ВЛАСНИЙ.
           </p>
           <p className="text-paper/75 leading-relaxed max-w-sm mb-8">
@@ -161,7 +161,7 @@ export default async function HomePage() {
       {/* Блок 6 — ЯКІСТЬ ПРИНТА */}
       <section className="py-24 md:py-32 px-5 md:px-8">
         <div className="max-w-[1360px] mx-auto">
-          <h2 className="font-display font-extrabold text-3xl md:text-5xl tracking-tight max-w-2xl mb-10">
+          <h2 className="font-display font-extrabold text-3xl md:text-5xl tracking-[0.015em] max-w-2xl mb-10">
             ПРИНТ, ЯКИЙ ХОЧЕТЬСЯ РОЗГЛЯДАТИ
           </h2>
           <div className="grid md:grid-cols-[1.1fr_0.9fr] border border-line">
@@ -177,7 +177,7 @@ export default async function HomePage() {
             <div className="p-8 md:p-12 flex items-center">
               <div className="flex flex-wrap gap-9">
                 {["ЯКІСНИЙ ДРУК", "ДЕТАЛЬНЕ ЗОБРАЖЕННЯ", "СТІЙКІСТЬ ДО ПРАННЯ"].map((t) => (
-                  <div key={t} className="text-[13px] font-bold tracking-wide pt-3.5 border-t border-line min-w-[150px]">
+                  <div key={t} className="text-[13px] font-bold tracking-wide pt-3.5 border-t-2 border-accent min-w-[150px]">
                     {t}
                   </div>
                 ))}
@@ -190,7 +190,7 @@ export default async function HomePage() {
       {/* Блок 7 — ЯК ЦЕ ПРАЦЮЄ */}
       <section className="py-24 md:py-32 px-5 md:px-8">
         <div className="max-w-[1360px] mx-auto">
-          <h2 className="font-display font-extrabold text-3xl md:text-5xl tracking-tight mb-10">
+          <h2 className="font-display font-extrabold text-3xl md:text-5xl tracking-[0.015em] mb-10">
             ЯК ЦЕ ПРАЦЮЄ
           </h2>
           <div className="flex overflow-x-auto gap-6 pb-2 -mx-5 px-5 md:mx-0 md:px-0">
@@ -213,7 +213,7 @@ export default async function HomePage() {
       {/* Блок 8 — НОСИ СВОЄ */}
       <section className="py-24 md:py-32 px-5 md:px-8">
         <div className="max-w-[1360px] mx-auto">
-          <h2 className="font-display font-extrabold text-3xl md:text-5xl tracking-tight mb-10">
+          <h2 className="font-display font-extrabold text-3xl md:text-5xl tracking-[0.015em] mb-10">
             НОСИ СВОЄ
           </h2>
           <div className="grid grid-cols-2 md:grid-cols-6 auto-rows-[110px] md:auto-rows-[120px] gap-0.5">
@@ -248,7 +248,7 @@ export default async function HomePage() {
 
       {/* Блок 9 — ФІНАЛЬНИЙ CTA */}
       <section className="bg-black text-center py-28 md:py-36 px-5">
-        <h2 className="font-display font-black text-4xl md:text-7xl tracking-tight mb-9">
+        <h2 className="font-display font-black text-4xl md:text-7xl tracking-[0.015em] mb-9">
           ЗНАЙДИ ТЕ, ЩО ТВОЄ
         </h2>
         <div className="flex flex-wrap gap-3.5 justify-center">
