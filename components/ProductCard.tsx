@@ -3,9 +3,16 @@ import Link from "next/link";
 import { Product } from "@/lib/types";
 import { formatPrice } from "@/lib/data";
 
-export default function ProductCard({ product }: { product: Product }) {
+export default function ProductCard({
+  product,
+  tone = "default"
+}: {
+  product: Product;
+  tone?: "default" | "accent";
+}) {
+  const accent = tone === "accent";
   return (
-    <Link href={`/product/${product.slug}`} className="group block bg-bgSoft">
+    <Link href={`/product/${product.slug}`} className={`group block ${accent ? "bg-accent" : "bg-bgSoft"}`}>
       <div className="relative aspect-[3/4] overflow-hidden">
         <Image
           src={product.images[0]}
@@ -18,9 +25,9 @@ export default function ProductCard({ product }: { product: Product }) {
           <span className="text-xs font-bold tracking-wide">ПЕРЕГЛЯНУТИ</span>
         </div>
       </div>
-      <div className="pt-4 pb-1">
+      <div className={accent ? "p-4" : "pt-4 pb-1"}>
         <p className="text-sm font-semibold mb-1">{product.name}</p>
-        <p className="text-[13px] text-muted">від {formatPrice(product.basePrice)}</p>
+        <p className={`text-[13px] ${accent ? "text-paper/80" : "text-muted"}`}>від {formatPrice(product.basePrice)}</p>
       </div>
     </Link>
   );

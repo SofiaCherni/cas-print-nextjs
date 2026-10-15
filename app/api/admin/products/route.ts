@@ -10,9 +10,6 @@ export async function POST(req: NextRequest) {
   if (!body.images || body.images.length === 0) {
     return NextResponse.json({ error: "Додайте хоча б одне фото." }, { status: 400 });
   }
-  if (!body.fits || body.fits.length === 0) {
-    return NextResponse.json({ error: "Оберіть хоча б один фасон." }, { status: 400 });
-  }
   if (!body.colors || body.colors.length === 0) {
     return NextResponse.json({ error: "Оберіть хоча б один колір." }, { status: 400 });
   }

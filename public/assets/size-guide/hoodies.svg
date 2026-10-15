@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="400" height="400">
+  <rect width="400" height="400" fill="#111111"/>
+  <path d="M140 70 Q200 30 260 70 L300 90 L345 170 L315 195 L292 170 L292 320 L108 320 L108 170 L85 195 L55 170 L100 90 Z" fill="none" stroke="#F2EEE8" stroke-width="3"/><path d="M165 75 Q200 120 235 75" fill="none" stroke="#F2EEE8" stroke-width="3"/><line x1="108" y1="340" x2="292" y2="340" stroke="#710009" stroke-width="3"/><line x1="322" y1="90" x2="322" y2="320" stroke="#710009" stroke-width="3"/>
+  <text x="200" y="380" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" fill="#A8A19A">Худі та світшоти — заміни це зображення</text>
+</svg>

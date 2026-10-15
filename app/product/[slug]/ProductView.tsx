@@ -21,7 +21,7 @@ export default function ProductView({ product }: { product: Product }) {
   );
 
   const [fit, setFit] = useState<Fit>(fits[0]);
-  const [size, setSize] = useState<Size | null>("M");
+  const [size, setSize] = useState<Size | null>(sizes.includes("M") ? "M" : sizes[0] ?? null);
   const [colorName, setColorName] = useState(colors[0]?.name ?? "");
   const [qty, setQty] = useState(1);
   const [added, setAdded] = useState(false);

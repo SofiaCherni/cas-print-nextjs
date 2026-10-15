@@ -1,26 +1,17 @@
--- Safely extend the existing Print table without deleting its data.
-ALTER TABLE "Print"
-ADD COLUMN IF NOT EXISTS "slug" TEXT;
+-- CreateTable
+CREATE TABLE "Print" (
+    "id" TEXT NOT NULL,
+    "slug" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "description" TEXT NOT NULL DEFAULT '',
+    "category" TEXT,
+    "image" TEXT NOT NULL,
+    "showOnHome" BOOLEAN NOT NULL DEFAULT false,
+    "status" TEXT NOT NULL DEFAULT 'active',
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
-ALTER TABLE "Print"
-ADD COLUMN IF NOT EXISTS "showOnHome" BOOLEAN NOT NULL DEFAULT false;
+    CONSTRAINT "Print_pkey" PRIMARY KEY ("id")
+);
 
--- Generate unique slugs for existing prints.
-UPDATE "Print"
-SET "slug" = 'print-' || "id"
-WHERE "slug" IS NULL;
-
--- Make slug mandatory and unique.
-ALTER TABLE "Print"
-ALTER COLUMN "slug" SET NOT NULL;
-
-CREATE UNIQUE INDEX IF NOT EXISTS "Print_slug_key"
-ON "Print"("slug");
--- Allow flexible print category names.
-ALTER TABLE "Print"
-ALTER COLUMN "category" TYPE TEXT
-USING "category"::TEXT;
-
--- Print category can be empty.
-ALTER TABLE "Print"
-ALTER COLUMN "category" DROP NOT NULL;
+-- CreateIndex
+CREATE UNIQUE INDEX "Print_slug_key" ON "Print"("slug");

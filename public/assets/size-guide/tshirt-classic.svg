@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="400" height="400">
+  <rect width="400" height="400" fill="#111111"/>
+  <path d="M120 80 L160 60 Q200 90 240 60 L280 80 L330 130 L295 165 L270 145 L270 320 L130 320 L130 145 L105 165 L70 130 Z" fill="none" stroke="#F2EEE8" stroke-width="3"/><line x1="130" y1="340" x2="270" y2="340" stroke="#710009" stroke-width="3"/><line x1="300" y1="80" x2="300" y2="320" stroke="#710009" stroke-width="3"/>
+  <text x="200" y="380" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" fill="#A8A19A">Класична футболка — заміни це зображення</text>
+</svg>

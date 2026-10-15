@@ -42,11 +42,6 @@ const COLOR_PALETTE = [
   { name: "Бордо", hex: "#5C0A17" }
 ];
 
-const FITS = [
-  { value: "unisex", label: "Унісекс" },
-  { value: "women", label: "Жіночий" }
-];
-
 interface UploadedImage {
   file: File;
   url?: string;
@@ -63,7 +58,6 @@ export default function NewProductPage() {
   const [printCategory, setPrintCategory] = useState("");
   const [existingCategories, setExistingCategories] = useState<string[]>([]);
   const [basePrice, setBasePrice] = useState("");
-  const [fits, setFits] = useState<string[]>(["unisex"]);
   const [colors, setColors] = useState<string[]>([COLOR_PALETTE[0].name]);
   const [popular, setPopular] = useState(false);
   const [onSale, setOnSale] = useState(false);
@@ -148,7 +142,6 @@ export default function NewProductPage() {
           printCategory: printCategory.trim() || undefined,
           basePrice: Number(basePrice),
           images: readyImages,
-          fits,
           colors: COLOR_PALETTE.filter((c) => colors.includes(c.name)),
           popular,
           onSale,
@@ -265,28 +258,10 @@ export default function NewProductPage() {
                 ))}
               </div>
               <p className="text-xs text-muted mt-1.5">
-                Визначає підгрупу футболки в каталозі («Класичні» / «Оверсайз»).
+                Визначає підгрупу футболки в каталозі. Оверсайз має один розмір — OVERSIZE; фасон (унісекс/жіночий) клієнт обирає в картці лише для класичних футболок.
               </p>
             </div>
           )}
-
-          <div>
-            <label className="block text-xs tracking-wide text-muted font-bold mb-2">ФАСОН</label>
-            <div className="flex gap-2.5">
-              {FITS.map((f) => (
-                <button
-                  type="button"
-                  key={f.value}
-                  onClick={() => toggle(fits, f.value, setFits)}
-                  className={`px-4 py-2.5 border text-sm font-semibold ${
-                    fits.includes(f.value) ? "bg-paper text-bg border-paper" : "border-line"
-                  }`}
-                >
-                  {f.label}
-                </button>
-              ))}
-            </div>
-          </div>
 
           <div>
             <div className="flex items-center justify-between mb-2">
@@ -317,7 +292,7 @@ export default function NewProductPage() {
               ))}
             </div>
             <p className="text-xs text-muted mt-1.5">
-              Кожен розмір × фасон × колір стане окремим варіантом товару.
+              Кожен розмір × колір стане окремим варіантом товару (для оверсайзу — один розмір OVERSIZE).
             </p>
           </div>
 

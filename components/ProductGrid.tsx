@@ -2,7 +2,13 @@ import { Product } from "@/lib/types";
 import ProductCard from "./ProductCard";
 import EmptyState from "./EmptyState";
 
-export default function ProductGrid({ products }: { products: Product[] }) {
+export default function ProductGrid({
+  products,
+  tone = "default"
+}: {
+  products: Product[];
+  tone?: "default" | "accent";
+}) {
   if (products.length === 0) {
     return (
       <EmptyState
@@ -16,7 +22,7 @@ export default function ProductGrid({ products }: { products: Product[] }) {
   return (
     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-0.5">
       {products.map((p) => (
-        <ProductCard key={p.id} product={p} />
+        <ProductCard key={p.id} product={p} tone={tone} />
       ))}
     </div>
   );

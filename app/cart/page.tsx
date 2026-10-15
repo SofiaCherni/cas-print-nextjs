@@ -51,7 +51,7 @@ export default function CartPage() {
                 <div>
                   <p className="text-sm font-semibold mb-1">{product.name}</p>
                   <p className="text-xs text-muted mb-2.5">
-                    {variant.size} · {variant.fit === "unisex" ? "Унісекс" : "Жіночий"} · {variant.color.name}
+                    {[variant.size, product.variants.some((v) => v.fit !== variant.fit) ? (variant.fit === "unisex" ? "Унісекс" : "Жіночий") : null, variant.color.name].filter(Boolean).join(" · ")}
                   </p>
                   <QuantityStepper
                     value={quantity}

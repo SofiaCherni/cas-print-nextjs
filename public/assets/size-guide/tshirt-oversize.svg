@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="400" height="400">
+  <rect width="400" height="400" fill="#111111"/>
+  <path d="M100 85 L155 62 Q200 95 245 62 L300 85 L360 150 L320 190 L295 160 L295 320 L105 320 L105 160 L80 190 L40 150 Z" fill="none" stroke="#F2EEE8" stroke-width="3"/><line x1="105" y1="340" x2="295" y2="340" stroke="#710009" stroke-width="3"/><line x1="325" y1="85" x2="325" y2="320" stroke="#710009" stroke-width="3"/>
+  <text x="200" y="380" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" fill="#A8A19A">Оверсайз футболка — заміни це зображення</text>
+</svg>

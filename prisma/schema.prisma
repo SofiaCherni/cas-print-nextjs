@@ -1,3 +1,9 @@
+// Prisma schema for CAS-Print.
+// Products/variants/prints are now live — lib/data.ts queries this schema
+// directly (see lib/db-mappers.ts for the DB <-> app-type conversion).
+// After pulling schema changes: `npx prisma migrate dev --name <name>`,
+// then `npx prisma db seed` once on a fresh database to load starter data.
+
 generator client {
   provider = "prisma-client-js"
 }
@@ -7,51 +13,82 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum ProductBaseCategory {
+  T_SHIRTS
+  SWEATSHIRTS
+  HOODIES
+  BASICS
+}
+
+enum CutStyle {
+  CLASSIC
+  OVERSIZE
+}
+
+enum Fit {
+  UNISEX
+  WOMEN
+}
+
+enum OrderStatusCode {
+  NEW
+  CONFIRMED
+  PAID
+  PROCESSING
+  READY
+  SHIPPED
+  DELIVERED
+  CANCELLED
+  RETURNED
+}
+
 model Product {
   id            String              @id @default(cuid())
   slug          String              @unique
   name          String
   description   String
   baseCategory  ProductBaseCategory
-  printId       String?
+  cutStyle      CutStyle?
+  // Free-text category the admin creates/reuses herself in "Додати товар"
+  // (e.g. "Аніме") — intentionally not a fixed enum/table, see
+  // lib/data.ts#getPrintCategories() for how existing values are suggested.
+  printCategory String?
   basePrice     Int
   images        String[]            @default([])
+  variants      Variant[]
   popular       Boolean             @default(false)
-  status        String              @default("active")
-  createdAt     DateTime            @default(now())
   onSale        Boolean             @default(false)
   salePrice     Int?
-  cutStyle      CutStyle?
-  printCategory String?
-  Print         Print?              @relation(fields: [printId], references: [id])
-  variants      Variant[]
+  status        String              @default("active")
+  createdAt     DateTime            @default(now())
 }
 
+// Самостійний принт (окремо від товару): лише назва, опис, категорія та фото.
+// Категорія — той самий вільний текст, що й Product.printCategory, тож набір
+// категорій спільний для товарів і принтів (див. lib/data.ts#getPrintCategories).
 model Print {
-  id          String    @id @default(cuid())
-  slug        String    @unique
-  name        String
-  category    String?
-  image       String
-  gallery     String[]  @default([])
-  description String
-  showOnHome  Boolean   @default(false)
-  status      String    @default("active")
-  createdAt   DateTime  @default(now())
-  Product     Product[]
+  id         String   @id @default(cuid())
+  slug       String   @unique
+  name       String
+  description String  @default("")
+  category   String?
+  image      String
+  showOnHome Boolean  @default(false)
+  status     String   @default("active")
+  createdAt  DateTime @default(now())
 }
 
 model Variant {
-  id        String  @id @default(cuid())
+  id        String   @id @default(cuid())
   productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
   size      String
   fit       Fit
   colorName String
   colorHex  String
   price     Int
-  stockQty  Int     @default(0)
-  sku       String  @unique
-  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  stockQty  Int      @default(0)
+  sku       String   @unique
 
   @@index([productId])
 }
@@ -63,43 +100,43 @@ model Customer {
   patronymic String?
   phone      String    @unique
   email      String?
-  createdAt  DateTime  @default(now())
   addresses  Address[]
   orders     Order[]
+  createdAt  DateTime  @default(now())
 }
 
 model Address {
   id             String   @id @default(cuid())
   customerId     String
+  customer       Customer @relation(fields: [customerId], references: [id])
   carrier        String   @default("nova-poshta")
   city           String
   postomatNumber String
-  customer       Customer @relation(fields: [customerId], references: [id])
 }
 
 model Order {
   id            String          @id @default(cuid())
   orderNumber   String          @unique
   customerId    String
+  customer      Customer        @relation(fields: [customerId], references: [id])
   status        OrderStatusCode @default(NEW)
+  items         OrderItem[]
   subtotal      Int
   deliveryCost  Int?
   total         Int
-  contactMethod String
+  contactMethod String // "viber" | "telegram" | "whatsapp"
   comment       String?
   paymentStatus String          @default("pending")
   createdAt     DateTime        @default(now())
-  customer      Customer        @relation(fields: [customerId], references: [id])
-  items         OrderItem[]
 }
 
 model OrderItem {
-  id           String @id @default(cuid())
+  id           String  @id @default(cuid())
   orderId      String
+  order        Order   @relation(fields: [orderId], references: [id])
   variantId    String
   quantity     Int
   priceAtOrder Int
-  order        Order  @relation(fields: [orderId], references: [id])
 }
 
 model CustomPrintRequest {
@@ -133,33 +170,4 @@ model Payment {
   status     String
   externalId String?
   createdAt  DateTime @default(now())
-}
-
-enum ProductBaseCategory {
-  T_SHIRTS
-  HOODIES
-  BASICS
-  SWEATSHIRTS
-}
-
-enum CutStyle {
-  CLASSIC
-  OVERSIZE
-}
-
-enum Fit {
-  UNISEX
-  WOMEN
-}
-
-enum OrderStatusCode {
-  NEW
-  CONFIRMED
-  PAID
-  PROCESSING
-  READY
-  SHIPPED
-  DELIVERED
-  CANCELLED
-  RETURNED
 }

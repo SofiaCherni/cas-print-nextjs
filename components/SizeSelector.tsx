@@ -25,7 +25,7 @@ export default function SizeSelector({
             <button
               key={s}
               onClick={() => onSelect(s)}
-              className={`w-12 h-11 flex items-center justify-center text-xs font-bold border ${
+              className={`min-w-[48px] px-3 h-11 flex items-center justify-center text-xs font-bold border ${
                 isSelected
                   ? "bg-paper text-bg border-paper"
                   : extended
@@ -33,7 +33,7 @@ export default function SizeSelector({
                   : "border-line text-paper"
               }`}
             >
-              {s}
+              {s === "OVERSIZE" ? "OVERSIZE" : s}
             </button>
           );
         })}

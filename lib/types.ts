@@ -5,7 +5,7 @@ export type CutStyle = "classic" | "oversize";
 
 export type Fit = "unisex" | "women";
 
-export type Size = "XS" | "S" | "M" | "L" | "XL" | "XXL" | "3XL" | "4XL" | "5XL";
+export type Size = "XS" | "S" | "M" | "L" | "XL" | "XXL" | "3XL" | "4XL" | "5XL" | "OVERSIZE";
 
 export const EXTENDED_SIZES: Size[] = ["3XL", "4XL", "5XL"];
 

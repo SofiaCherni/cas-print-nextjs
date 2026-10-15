@@ -22,6 +22,20 @@ import {
 export { BASE_CATEGORIES, COLOR_PALETTE, formatPrice, generateOrderNumber };
 
 const ALL_SIZES: Size[] = ["XS", "S", "M", "L", "XL", "XXL", "3XL", "4XL", "5XL"];
+// Оверсайз-футболка має єдиний розмір.
+const OVERSIZE_SIZES: Size[] = ["OVERSIZE"];
+
+/**
+ * Фасон (унісекс/жіночий) існує лише для класичних футболок.
+ * Світшоти, худі, інше та оверсайз-футболки — один фасон (унісекс), без вибору.
+ */
+function fitsFor(baseCategory: ProductBaseCategory, cutStyle?: CutStyle): Fit[] {
+  return baseCategory === "t-shirts" && cutStyle !== "oversize" ? ["unisex", "women"] : ["unisex"];
+}
+
+function sizesFor(baseCategory: ProductBaseCategory, cutStyle?: CutStyle): Size[] {
+  return baseCategory === "t-shirts" && cutStyle === "oversize" ? OVERSIZE_SIZES : ALL_SIZES;
+}
 const EXTENDED_SIZE_SURCHARGE = 50;
 
 export interface CatalogQuery {
@@ -103,14 +117,17 @@ export async function getProductBySlug(slug: string): Promise<Product | undefine
 }
 
 /**
- * Distinct print category strings already used across products.
- * Includes categories from products and separate prints.
+ * Distinct print category strings already used across products — powers
+ * the admin's "Категорія принту" autocomplete (so typing "Аніме" again
+ * offers the existing one instead of creating a near-duplicate) and the
+ * public category chips on the homepage / catalog filters.
+ * `includeHidden`: admin wants to see categories used by hidden products
+ * too (so she doesn't recreate one that already exists); public call sites
+ * only care about categories currently visible in the live catalog.
  */
-export async function getPrintCategories(
-  includeHidden = false
-): Promise<string[]> {
+export async function getPrintCategories(includeHidden = false): Promise<string[]> {
   const activeOnly = includeHidden ? {} : { status: "active" };
-
+  // Категорії спільні: беремо і з товарів, і з окремих принтів.
   const [productRows, printRows] = await Promise.all([
     prisma.product.findMany({
       where: { printCategory: { not: null }, ...activeOnly },
@@ -118,29 +135,22 @@ export async function getPrintCategories(
       distinct: ["printCategory"]
     }),
     prisma.print.findMany({
-      where: { ...activeOnly },
+      where: { category: { not: null }, ...activeOnly },
       select: { category: true },
       distinct: ["category"]
     })
   ]);
 
-  // Убираем дубликаты без учёта регистра.
+  // Дедуплікація без урахування регістру ("Аніме" == "аніме"), зберігаємо перше написання.
   const seen = new Map<string, string>();
-
   for (const raw of [
     ...productRows.map((r) => r.printCategory),
     ...printRows.map((r) => r.category)
   ]) {
     const c = raw?.trim();
-
-    if (c && !seen.has(c.toLowerCase())) {
-      seen.set(c.toLowerCase(), c);
-    }
+    if (c && !seen.has(c.toLowerCase())) seen.set(c.toLowerCase(), c);
   }
-
-  return Array.from(seen.values()).sort((a, b) =>
-    a.localeCompare(b, "uk")
-  );
+  return Array.from(seen.values()).sort((a, b) => a.localeCompare(b, "uk"));
 }
 
 export async function getPopularProducts(limit = 4): Promise<Product[]> {
@@ -266,7 +276,6 @@ export interface CreateProductInput {
   printCategory?: string;
   basePrice: number;
   images: string[];
-  fits: Fit[];
   colors: { name: string; hex: string }[];
   popular: boolean;
   onSale: boolean;
@@ -307,8 +316,9 @@ export async function createProduct(input: CreateProductInput): Promise<Product>
   }
 
   const variantsData = [];
-  for (const fit of input.fits) {
-    for (const size of ALL_SIZES) {
+  const cutStyle = input.baseCategory === "t-shirts" ? input.cutStyle : undefined;
+  for (const fit of fitsFor(input.baseCategory, cutStyle)) {
+    for (const size of sizesFor(input.baseCategory, cutStyle)) {
       for (const color of input.colors) {
         const extended = size === "3XL" || size === "4XL" || size === "5XL";
         variantsData.push({
@@ -330,7 +340,7 @@ export async function createProduct(input: CreateProductInput): Promise<Product>
       name: input.name,
       description: input.description,
       baseCategory: baseCategoryToDb(input.baseCategory),
-      cutStyle: input.cutStyle ? cutStyleToDb(input.cutStyle) : undefined,
+      cutStyle: cutStyle ? cutStyleToDb(cutStyle) : undefined,
       printCategory: input.printCategory?.trim() || undefined,
       basePrice: input.basePrice,
       images: input.images,
