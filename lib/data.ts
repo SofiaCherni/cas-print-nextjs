@@ -1,7 +1,7 @@
 import { Prisma } from "@prisma/client";
 import { prisma } from "./prisma";
 import { baseCategoryToDb, cutStyleToDb, fitToDb, mapProduct } from "./db-mappers";
-import { getTemplate } from "./product-templates";
+import { FABRICS, getTemplate } from "./product-templates";
 import { CutStyle, Fit, Print, Product, ProductBaseCategory, Size } from "./types";
 import {
   BASE_CATEGORIES,
@@ -271,6 +271,17 @@ export async function searchCatalog(q: string) {
 // the hide/show + delete actions on /admin/products).
 // ---------------------------------------------------------------------------
 
+/**
+ * Ціна й кольори задаються окремо для кожної тканини (СТАНДАРТ / ПРЕМІУМ / ОВЕРСАЙЗ).
+ * Для типів без вибору тканини (світшот, худі…) — одна група без `fabric`.
+ */
+export interface PriceGroupInput {
+  fabric?: string;
+  price: number;
+  salePrice?: number;
+  colors: { name: string; hex: string }[];
+}
+
 export interface CreateProductInput {
   name: string;
   description: string;
@@ -279,12 +290,10 @@ export interface CreateProductInput {
   // Ключ шаблону (lib/product-templates.ts): визначає фасони та розміри.
   productType?: string;
   printCategory?: string;
-  basePrice: number;
+  groups: PriceGroupInput[];
   images: string[];
-  colors: { name: string; hex: string }[];
   popular: boolean;
   onSale: boolean;
-  salePrice?: number;
 }
 
 function slugify(name: string): string {
@@ -308,9 +317,9 @@ function slugify(name: string): string {
 }
 
 /**
- * Creates a product plus one Variant per (fit × size × color) combination —
- * same generation rule the original mock catalog used, including the
- * +50₴ surcharge on 3XL–5XL (brief section 6 / product page notice).
+ * Creates a product plus one Variant per (fabric × fit × size × color) combination —
+ * with the +50₴ surcharge on 3XL–5XL (brief section 6 / product page notice).
+ * Price (and the optional sale price) is set per fabric.
  */
 export async function createProduct(input: CreateProductInput): Promise<Product> {
   const baseSlug = slugify(input.name);
@@ -320,33 +329,47 @@ export async function createProduct(input: CreateProductInput): Promise<Product>
     slug = `${baseSlug}-${suffix++}`;
   }
 
-  const variantsData = [];
   const template = getTemplate(input.productType);
   const cutStyle = template
     ? template.cutStyle
     : input.baseCategory === "t-shirts"
     ? input.cutStyle
     : undefined;
-  // План варіантів: для кожного фасону — свій набір розмірів (за шаблоном).
-  const plan: { fit: Fit; sizes: string[] }[] = template
-    ? (Object.entries(template.sizesByFit) as [Fit, string[]][]).map(([fit, sizes]) => ({ fit, sizes }))
-    : fitsFor(input.baseCategory, cutStyle).map((fit) => ({ fit, sizes: sizesFor(input.baseCategory, cutStyle) }));
-  for (const { fit, sizes } of plan) {
-    for (const size of sizes) {
-      for (const color of input.colors) {
-        const extended = size === "3XL" || size === "4XL" || size === "5XL";
-        variantsData.push({
-          size,
-          fit: fitToDb(fit),
-          colorName: color.name,
-          colorHex: color.hex,
-          price: extended ? input.basePrice + EXTENDED_SIZE_SURCHARGE : input.basePrice,
-          stockQty: 20,
-          sku: `${slug}-${fit}-${size}-${color.name}`.toUpperCase().replace(/\s+/g, "")
-        });
+
+  const variantsData = [];
+  for (const group of input.groups) {
+    const fabric = group.fabric ? FABRICS[group.fabric as keyof typeof FABRICS] : undefined;
+    // План варіантів: для кожного фасону — свій набір розмірів (за тканиною або шаблоном).
+    const sizesByFit = fabric?.sizesByFit ?? template?.sizesByFit;
+    const plan: { fit: Fit; sizes: string[] }[] = sizesByFit
+      ? (Object.entries(sizesByFit) as [Fit, string[]][]).map(([fit, sizes]) => ({ fit, sizes }))
+      : fitsFor(input.baseCategory, cutStyle).map((fit) => ({ fit, sizes: sizesFor(input.baseCategory, cutStyle) }));
+    const hasSale = input.onSale && !!group.salePrice && group.salePrice > 0;
+
+    for (const { fit, sizes } of plan) {
+      for (const size of sizes) {
+        for (const color of group.colors) {
+          const extra = size === "3XL" || size === "4XL" || size === "5XL" ? EXTENDED_SIZE_SURCHARGE : 0;
+          variantsData.push({
+            size,
+            fit: fitToDb(fit),
+            fabric: fabric?.key ?? null,
+            colorName: color.name,
+            colorHex: color.hex,
+            price: group.price + extra,
+            salePrice: hasSale ? group.salePrice! + extra : null,
+            stockQty: 20,
+            sku: `${slug}-${fabric ? fabric.key + "-" : ""}${fit}-${size}-${color.name}`
+              .toUpperCase()
+              .replace(/\s+/g, "")
+          });
+        }
       }
     }
   }
+
+  // «Від» ціна товару = найдешевша тканина (разом з її акційною ціною).
+  const cheapest = input.groups.reduce((a, g) => (g.price < a.price ? g : a), input.groups[0]);
 
   const row = await prisma.product.create({
     data: {
@@ -357,11 +380,11 @@ export async function createProduct(input: CreateProductInput): Promise<Product>
       cutStyle: cutStyle ? cutStyleToDb(cutStyle) : undefined,
       productType: template ? template.key : undefined,
       printCategory: input.printCategory?.trim() || undefined,
-      basePrice: input.basePrice,
+      basePrice: cheapest.price,
       images: input.images,
       popular: input.popular,
       onSale: input.onSale,
-      salePrice: input.onSale ? input.salePrice : null,
+      salePrice: input.onSale ? cheapest.salePrice ?? null : null,
       variants: { create: variantsData }
     },
     include: { variants: true }

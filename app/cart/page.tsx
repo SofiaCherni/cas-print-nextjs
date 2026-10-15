@@ -1,5 +1,7 @@
 "use client";
 
+import { variantPrice, variantOldPrice } from "@/lib/pricing";
+import { FABRICS, FabricKey } from "@/lib/product-templates";
 import Image from "next/image";
 import { useCart } from "@/lib/cart-context";
 import { formatPrice } from "@/lib/catalog-constants";
@@ -51,7 +53,7 @@ export default function CartPage() {
                 <div>
                   <p className="text-sm font-semibold mb-1">{product.name}</p>
                   <p className="text-xs text-muted mb-2.5">
-                    {[variant.size, product.variants.some((v) => v.fit !== variant.fit) ? (variant.fit === "unisex" ? "Унісекс" : "Жіночий") : null, variant.color.name].filter(Boolean).join(" · ")}
+                    {[variant.fabric && FABRICS[variant.fabric as FabricKey] ? `${FABRICS[variant.fabric as FabricKey].label} ${FABRICS[variant.fabric as FabricKey].gsm} г/м²` : null, variant.size, product.variants.some((v) => v.fit !== variant.fit) ? (variant.fit === "unisex" ? "Унісекс" : "Жіночий") : null, variant.color.name].filter(Boolean).join(" · ")}
                   </p>
                   <QuantityStepper
                     value={quantity}
@@ -66,7 +68,12 @@ export default function CartPage() {
                   </button>
                 </div>
                 <div className="text-sm font-bold text-right">
-                  {formatPrice(variant.price * quantity)}
+                  {variantOldPrice(product, variant) !== null && (
+                    <div className="text-xs font-normal text-muted line-through">
+                      {formatPrice(variant.price * quantity)}
+                    </div>
+                  )}
+                  {formatPrice(variantPrice(product, variant) * quantity)}
                 </div>
               </div>
             ))}

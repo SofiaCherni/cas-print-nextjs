@@ -88,7 +88,12 @@ model Variant {
   fit       Fit
   colorName String
   colorHex  String
+  // Тип тканини (standard / premium / oversize) — див. lib/product-templates.ts#FABRICS.
+  // NULL у старих товарів, створених до появи вибору тканини.
+  fabric    String?
   price     Int
+  // Акційна ціна саме цього варіанта (діє, лише якщо Product.onSale = true).
+  salePrice Int?
   stockQty  Int      @default(0)
   sku       String   @unique
 

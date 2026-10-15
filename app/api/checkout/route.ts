@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { generateOrderNumber } from "@/lib/data";
 import { CartLineItem } from "@/lib/types";
 import { prisma } from "@/lib/prisma";
+import { mapProduct } from "@/lib/db-mappers";
+import { variantPrice } from "@/lib/pricing";
 import { sendEmail, orderNotificationEmail } from "@/lib/email";
 
 interface CheckoutBody {
@@ -64,8 +66,12 @@ export async function POST(req: NextRequest) {
         { status: 409 }
       );
     }
-    subtotal += variant.price * line.quantity; // server-computed, not client-supplied
-    validatedItems.push({ variantId: variant.id, quantity: line.quantity, price: variant.price });
+    // Ціна з урахуванням акції — рахується на сервері, не береться від клієнта.
+    const mapped = mapProduct(product);
+    const mappedVariant = mapped.variants.find((v) => v.id === variant.id)!;
+    const unitPrice = variantPrice(mapped, mappedVariant);
+    subtotal += unitPrice * line.quantity;
+    validatedItems.push({ variantId: variant.id, quantity: line.quantity, price: unitPrice });
   }
 
   const orderNumber = generateOrderNumber();

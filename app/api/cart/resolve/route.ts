@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { mapProduct } from "@/lib/db-mappers";
 import { CartLineItem } from "@/lib/types";
+import { variantPrice } from "@/lib/pricing";
 
 /**
  * Resolves the guest cart's lightweight {productId, variantId, quantity}
@@ -32,7 +33,7 @@ export async function POST(req: NextRequest) {
     })
     .filter((l): l is NonNullable<typeof l> => l !== null);
 
-  const subtotal = lines.reduce((sum, l) => sum + l.variant.price * l.quantity, 0);
+  const subtotal = lines.reduce((sum, l) => sum + variantPrice(l.product, l.variant) * l.quantity, 0);
 
   return NextResponse.json({ lines, subtotal });
 }

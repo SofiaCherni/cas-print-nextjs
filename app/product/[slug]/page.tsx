@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { getProductBySlug } from "@/lib/data";
 import ProductView from "./ProductView";
+import { productFromPrice } from "@/lib/pricing";
 
 // No generateStaticParams: products now come from the database and can be
 // added anytime through /admin — pages render on-demand per slug instead of
@@ -29,7 +30,7 @@ export default async function ProductPage({ params }: { params: { slug: string }
     offers: {
       "@type": "Offer",
       priceCurrency: "UAH",
-      price: product.basePrice,
+      price: productFromPrice(product).price,
       availability: "https://schema.org/InStock"
     }
   };

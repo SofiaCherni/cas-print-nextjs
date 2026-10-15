@@ -15,7 +15,11 @@ export interface Variant {
   size: Size;
   fit: Fit;
   color: { name: string; hex: string };
+  // Тип тканини: "standard" | "premium" | "oversize" (див. lib/product-templates.ts).
+  fabric?: string;
   price: number;
+  // Акційна ціна цього варіанта; діє, лише якщо Product.onSale.
+  salePrice?: number;
   stockQty: number;
   sku: string;
 }

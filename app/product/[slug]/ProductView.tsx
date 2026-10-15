@@ -12,7 +12,9 @@ import QuantityStepper from "@/components/QuantityStepper";
 import Accordion from "@/components/Accordion";
 import Button from "@/components/Button";
 import { useCart } from "@/lib/cart-context";
-import { getTemplate } from "@/lib/product-templates";
+import { FABRICS, FABRIC_ORDER, FabricKey, getTemplate } from "@/lib/product-templates";
+import { variantPrice, variantOldPrice } from "@/lib/pricing";
+import FabricSelector from "@/components/FabricSelector";
 import { sizeChartIdFor } from "@/lib/size-charts";
 
 const SIZE_ORDER = ["XS", "S", "M", "L", "XL", "XXL", "3XL", "4XL", "5XL", "ONE SIZE", "Подовжене", "Вкорочене"];
@@ -23,35 +25,54 @@ const sizeRank = (s: string) => {
 
 export default function ProductView({ product }: { product: Product }) {
   const template = getTemplate(product.productType);
-  const fits = Array.from(new Set(product.variants.map((v) => v.fit))) as Fit[];
 
-  const [fit, setFit] = useState<Fit>(fits[0]);
+  // --- Тканина: СТАНДАРТ / ПРЕМІУМ / ОВЕРСАЙЗ (лише ті, що є у товару) ---
+  const fabricKeys = FABRIC_ORDER.filter((k) => product.variants.some((v) => v.fabric === k));
+  const [pickedFabric, setFabric] = useState<FabricKey | null>(null);
+  const fabric: FabricKey | null =
+    pickedFabric && fabricKeys.includes(pickedFabric) ? pickedFabric : fabricKeys[0] ?? null;
 
-  // Розміри залежать від фасону (напр. у жіночої футболки немає 4XL) і йдуть у зрозумілому порядку.
-  const sizes = Array.from(new Set(product.variants.filter((v) => v.fit === fit).map((v) => v.size))).sort(
+  // Усе нижче (фасон, розміри, кольори) береться лише з варіантів обраної тканини —
+  // тож при зміні тканини розміри й кольори підтягуються самі.
+  const fabricVariants = fabric ? product.variants.filter((v) => v.fabric === fabric) : product.variants;
+
+  const fabricOptions = fabricKeys.map((k) => {
+    const vs = product.variants.filter((v) => v.fabric === k);
+    const best = vs.reduce((a, v) => (variantPrice(product, v) < variantPrice(product, a) ? v : a), vs[0]);
+    return { key: k, price: variantPrice(product, best), oldPrice: variantOldPrice(product, best) };
+  });
+
+  const fits = Array.from(new Set(fabricVariants.map((v) => v.fit))) as Fit[];
+  const [pickedFit, setFit] = useState<Fit | null>(null);
+  const fit: Fit = pickedFit && fits.includes(pickedFit) ? pickedFit : fits[0];
+
+  // Розміри залежать від тканини й фасону (напр. у преміум немає XS) і йдуть у зрозумілому порядку.
+  const sizes = Array.from(new Set(fabricVariants.filter((v) => v.fit === fit).map((v) => v.size))).sort(
     (a, b) => sizeRank(a) - sizeRank(b)
   ) as Size[];
+  const colorOrder = (fabric ? FABRICS[fabric].colors : template?.colors) ?? [];
   const colors = Array.from(
-    new Map(product.variants.map((v) => [v.color.name, v.color])).values()
+    new Map(fabricVariants.map((v) => [v.color.name, v.color])).values()
   ).sort((a, b) => {
-    const order = template?.colors ?? [];
-    const ia = order.indexOf(a.name);
-    const ib = order.indexOf(b.name);
+    const ia = colorOrder.indexOf(a.name);
+    const ib = colorOrder.indexOf(b.name);
     return (ia === -1 ? 999 : ia) - (ib === -1 ? 999 : ib);
   });
 
   const [pickedSize, setSize] = useState<Size | null>(null);
-  // Якщо обраного розміру немає для цього фасону — беремо M або перший доступний.
+  // Якщо обраного розміру немає для цієї тканини/фасону — беремо M або перший доступний.
   const size: Size | null =
     pickedSize && sizes.includes(pickedSize) ? pickedSize : sizes.includes("M") ? "M" : sizes[0] ?? null;
-  const [colorName, setColorName] = useState(colors[0]?.name ?? "");
+  const [pickedColor, setColorName] = useState("");
+  // Якщо обраного кольору немає для цієї тканини — беремо перший доступний.
+  const colorName = colors.some((c) => c.name === pickedColor) ? pickedColor : colors[0]?.name ?? "";
   const [qty, setQty] = useState(1);
   const [added, setAdded] = useState(false);
   const { addItem } = useCart();
 
   const variant = useMemo(
-    () => product.variants.find((v) => v.fit === fit && v.size === size && v.color.name === colorName),
-    [product.variants, fit, size, colorName]
+    () => fabricVariants.find((v) => v.fit === fit && v.size === size && v.color.name === colorName),
+    [fabricVariants, fit, size, colorName]
   );
 
   if (!product) return notFound();
@@ -65,13 +86,14 @@ export default function ProductView({ product }: { product: Product }) {
 
   const sizeLabel = template?.sizeLabel ?? "РОЗМІР";
   const guideId = sizeChartIdFor(product, fit);
+  const fabricNote = fabric ? ` Тканина: ${FABRICS[fabric].label} — ${FABRICS[fabric].gsm} г/м².` : "";
 
   const accordionItems = [
-    { title: "ОПИС", content: product.description },
+    { title: "ОПИС", content: product.description + fabricNote },
     { title: "ХАРАКТЕРИСТИКИ", content: "Склад, щільність, країна виробництва — TODO: NEED REAL BUSINESS DATA." },
     { title: "ДОГЛЯД", content: "Рекомендації з прання та догляду — TODO: NEED REAL BUSINESS DATA." },
     { title: "РОЗМІРНА СІТКА", content: "Таблиця відповідності розмірів у см — див. сторінку «Розмірна сітка»." },
-    { title: "ПАЛІТРА КОЛЬОРІВ", content: `Доступні кольори для цієї моделі: ${colors.map((c) => c.name).join(", ")}.` },
+    { title: "ПАЛІТРА КОЛЬОРІВ", content: `Доступні кольори${fabric ? ` (${FABRICS[fabric].label})` : " для цієї моделі"}: ${colors.map((c) => c.name).join(", ")}.` },
     { title: "ДОСТАВКА ТА ОПЛАТА", content: "Способи доставки й оплати — TODO: NEED REAL BUSINESS DATA." },
     { title: "ОБМІН ТА ПОВЕРНЕННЯ", content: "Умови обміну та повернення — TODO: NEED REAL BUSINESS DATA." }
   ];
@@ -94,10 +116,24 @@ export default function ProductView({ product }: { product: Product }) {
 
         <div>
           <h1 className="font-display font-extrabold text-3xl mb-2">{product.name}</h1>
-          <p className="text-lg mb-5">{formatPrice(variant?.price ?? product.basePrice)}</p>
+          {(() => {
+            const price = variant ? variantPrice(product, variant) : product.basePrice;
+            const old = variant ? variantOldPrice(product, variant) : null;
+            return old !== null ? (
+              <p className="text-lg mb-5 flex items-baseline gap-3">
+                <span className="text-muted line-through">{formatPrice(old)}</span>
+                <span className="font-bold text-accent">{formatPrice(price)}</span>
+              </p>
+            ) : (
+              <p className="text-lg mb-5">{formatPrice(price)}</p>
+            );
+          })()}
           <p className="text-muted text-sm leading-relaxed mb-8">{product.description}</p>
 
           <div className="space-y-7 mb-9">
+            {fabric && (
+              <FabricSelector options={fabricOptions} selected={fabric} onSelect={setFabric} />
+            )}
             <SizeSelector sizes={sizes} selected={size} onSelect={setSize} label={sizeLabel} guideId={guideId} />
             {fits.length > 1 && <FitToggle options={fits} selected={fit} onSelect={setFit} />}
             <ColorSwatches colors={colors} selected={colorName} onSelect={setColorName} />

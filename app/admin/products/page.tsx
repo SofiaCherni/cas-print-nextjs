@@ -54,7 +54,7 @@ export default async function AdminProductsPage() {
                   <td className="py-3.5 text-muted font-mono text-xs">{p.slug}</td>
                   <td className="py-3.5 text-muted">{getTemplate(p.productType)?.label ?? categoryLabel(p.baseCategory)}</td>
                   <td className="py-3.5 text-muted">
-                    {formatPrice(p.basePrice)}
+                    від {formatPrice(p.basePrice)}
                     {p.onSale && p.salePrice ? ` → ${formatPrice(p.salePrice)}` : ""}
                   </td>
                   <td className="py-3.5 text-muted">{p.variants.length}</td>

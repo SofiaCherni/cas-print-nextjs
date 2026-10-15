@@ -6,6 +6,7 @@ import {
   Fit as DbFit
 } from "@prisma/client";
 import { CutStyle, Fit, Product, ProductBaseCategory, Size, Variant } from "./types";
+import { legacyFabricFor } from "./product-templates";
 
 /**
  * Converts between Prisma's DB shapes (uppercase enums, flat colorName/
@@ -53,13 +54,18 @@ export function mapVariant(v: DbVariant): Variant {
     size: v.size as Size,
     fit: FIT_FROM_DB[v.fit],
     color: { name: v.colorName, hex: v.colorHex },
+    fabric: v.fabric ?? undefined,
     price: v.price,
+    salePrice: v.salePrice ?? undefined,
     stockQty: v.stockQty,
     sku: v.sku
   };
 }
 
 export function mapProduct(p: DbProductWithVariants): Product {
+  // Старі товари (до вибору тканини) мали окремий тип на кожну щільність —
+  // виводимо тканину з productType, щоб на картці теж показувалась щільність.
+  const legacyFabric = legacyFabricFor(p.productType);
   return {
     id: p.id,
     slug: p.slug,
@@ -71,7 +77,10 @@ export function mapProduct(p: DbProductWithVariants): Product {
     printCategory: p.printCategory ?? undefined,
     basePrice: p.basePrice,
     images: p.images,
-    variants: p.variants.map(mapVariant),
+    variants: p.variants.map((v) => {
+      const mapped = mapVariant(v);
+      return mapped.fabric || !legacyFabric ? mapped : { ...mapped, fabric: legacyFabric };
+    }),
     popular: p.popular,
     status: p.status as "active" | "hidden",
     onSale: p.onSale,
