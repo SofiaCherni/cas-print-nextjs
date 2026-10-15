@@ -103,15 +103,15 @@ function unionColors(keys: FabricKey[]): string[] {
 export const PRODUCT_TEMPLATES: ProductTemplate[] = [
   {
     key: "tshirt-classic",
-    label: "Футболка · Класична",
+    label: "Футболка · Класичні",
     baseCategory: "t-shirts",
     cutStyle: "classic",
     description:
-      "Футболка зі 100% бавовни. Доступна у двох щільностях: Стандарт 155 г/м² та Преміум 185 г/м². Два крої: унісекс та жіночий.",
+      "Футболка зі 100% бавовни. Покупець обирає тканину: Стандарт 155 г/м², Преміум 185 г/м² або Оверсайз 240 г/м².",
     sizesByFit: { unisex: UNISEX_SIZES, women: WOMEN_SIZES },
     sizeLabel: "РОЗМІР",
-    fabrics: ["standard", "premium"],
-    colors: unionColors(["standard", "premium"])
+    fabrics: ["standard", "premium", "oversize"],
+    colors: unionColors(["standard", "premium", "oversize"])
   },
   {
     key: "tshirt-oversize",
@@ -119,11 +119,11 @@ export const PRODUCT_TEMPLATES: ProductTemplate[] = [
     baseCategory: "t-shirts",
     cutStyle: "oversize",
     description:
-      "Футболка зі 100% бавовни, щільність 240 г/м². Щільна преміальна тканина та вільний крій для розслаблених, стильних образів. Розмір: ONE SIZE, рекомендовано на зріст до 180 см.",
+      "Футболка зі 100% бавовни. Покупець обирає тканину: Стандарт 155 г/м², Преміум 185 г/м² або Оверсайз 240 г/м².",
     sizesByFit: { unisex: ["ONE SIZE"] },
     sizeLabel: "РОЗМІР",
-    fabrics: ["oversize"],
-    colors: unionColors(["oversize"])
+    fabrics: ["standard", "premium", "oversize"],
+    colors: unionColors(["standard", "premium", "oversize"])
   },
   {
     key: "sweatshirt",

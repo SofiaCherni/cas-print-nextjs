@@ -85,7 +85,7 @@ export default function ProductView({ product }: { product: Product }) {
   }
 
   const sizeLabel = template?.sizeLabel ?? "РОЗМІР";
-  const guideId = sizeChartIdFor(product, fit);
+  const guideId = sizeChartIdFor(product, fit, fabric);
   const fabricNote = fabric ? ` Тканина: ${FABRICS[fabric].label} — ${FABRICS[fabric].gsm} г/м².` : "";
 
   const accordionItems = [

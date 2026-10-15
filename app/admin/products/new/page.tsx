@@ -126,16 +126,21 @@ export default function NewProductPage() {
       setError("Заповніть назву й опис.");
       return;
     }
+    if (onSale && !groups.some((g) => (salePrices[gk(g.key)] ?? "").trim() !== "")) {
+      setError("Вкажіть акційну ціну хоча б для однієї тканини (або зніми «На розпродажі»).");
+      return;
+    }
     for (const g of groups) {
       const label = g.title ? ` (${g.title})` : "";
       if (!Number(prices[gk(g.key)]) || Number(prices[gk(g.key)]) <= 0) {
         setError(`Вкажіть ціну${label}.`);
         return;
       }
-      if (onSale) {
-        const sp = Number(salePrices[gk(g.key)]);
+      const spRaw = (salePrices[gk(g.key)] ?? "").trim();
+      if (onSale && spRaw !== "") {
+        const sp = Number(spRaw);
         if (!sp || sp <= 0 || sp >= Number(prices[gk(g.key)])) {
-          setError(`Акційна ціна${label} має бути вказана й меншою за звичайну.`);
+          setError(`Акційна ціна${label} має бути меншою за звичайну.`);
           return;
         }
       }
@@ -161,7 +166,7 @@ export default function NewProductPage() {
           groups: groups.map((g) => ({
             fabric: g.key,
             price: Number(prices[gk(g.key)]),
-            salePrice: onSale ? Number(salePrices[gk(g.key)]) : undefined,
+            salePrice: onSale && (salePrices[gk(g.key)] ?? "").trim() !== "" ? Number(salePrices[gk(g.key)]) : undefined,
             colors: colorsByName(g.colors).filter((c) => (colorSel[gk(g.key)] ?? []).includes(c.name))
           })),
           popular,
@@ -254,7 +259,7 @@ export default function NewProductPage() {
 
             <p className="text-xs text-muted mt-1.5">
               {template.fabrics
-                ? "Покупець сам обере тканину в картці товару; розміри й кольори підставляються за нею."
+                ? "Покупець сам обере тканину (СТАНДАРТ / ПРЕМІУМ / ОВЕРСАЙЗ) у картці товару. «Класичні / Оверсайз» лише визначає, у якому розділі каталогу буде товар. Ціну й кольори задай для кожної тканини."
                 : `Розміри: ${describeSizes(template.sizesByFit)}. Кольори, розміри й початковий опис підставляються за типом.`}
             </p>
           </div>
@@ -305,7 +310,7 @@ export default function NewProductPage() {
                     </div>
                     {onSale && (
                       <div>
-                        <label className="block text-xs tracking-wide text-muted font-bold mb-2">АКЦІЙНА ЦІНА, ₴</label>
+                        <label className="block text-xs tracking-wide text-muted font-bold mb-2">АКЦІЙНА ЦІНА, ₴ <span className="font-normal">(лишіть порожнім, якщо акції немає)</span></label>
                         <input
                           type="number"
                           min="0"
@@ -418,7 +423,7 @@ export default function NewProductPage() {
             </label>
             {onSale && (
               <p className="text-xs text-muted pl-6">
-                Вкажи акційну ціну для кожної тканини вище. На сайті стара ціна буде закреслена, поруч — нова.
+                Акційну ціну вкажи лише для тих тканин, на які діє знижка; решта лишаться за звичайною ціною. На сайті стара ціна буде закреслена, поруч — нова.
               </p>
             )}
           </div>

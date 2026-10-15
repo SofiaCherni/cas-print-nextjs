@@ -5,11 +5,14 @@ import { Product, Variant } from "./types";
  * Використовується і на сторінках (показ ціни), і на сервері (кошик, замовлення),
  * тож ціна на екрані завжди збігається з ціною в замовленні.
  */
-type PricedProduct = Pick<Product, "onSale" | "salePrice" | "basePrice">;
+type PricedProduct = Pick<Product, "onSale" | "salePrice" | "basePrice"> & { variants?: Variant[] };
 
 export function variantPrice(p: PricedProduct, v: Variant): number {
   if (!p.onSale) return v.price;
   if (typeof v.salePrice === "number" && v.salePrice > 0) return v.salePrice;
+  // Новий формат: знижка задається на варіант (тканину). Якщо в товару є хоч одна
+  // така ціна, то варіанти без неї (напр. ПРЕМІУМ без акції) лишаються за звичайною ціною.
+  if (p.variants?.some((x) => typeof x.salePrice === "number")) return v.price;
   // Старі акційні товари: знижка була одна на весь товар (basePrice → salePrice).
   if (p.salePrice && p.salePrice > 0 && p.salePrice < p.basePrice) {
     return Math.max(0, v.price - (p.basePrice - p.salePrice));

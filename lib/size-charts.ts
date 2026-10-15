@@ -79,9 +79,9 @@ export const SIZE_CHARTS: SizeChart[] = [
 ];
 
 /** Якір на сторінці /size-guide для даного товару (null — сітки немає: подушка, кепка, шопер). */
-export function sizeChartIdFor(product: Product, fit: Fit): string | null {
+export function sizeChartIdFor(product: Product, fit: Fit, fabric?: string | null): string | null {
   if (product.baseCategory === "t-shirts") {
-    if (product.cutStyle === "oversize") return "tshirt-oversize";
+    if (fabric ? fabric === "oversize" : product.cutStyle === "oversize") return "tshirt-oversize";
     return fit === "women" ? "tshirt-women" : "tshirt-unisex";
   }
   if (product.baseCategory === "sweatshirts") return "sweatshirts";

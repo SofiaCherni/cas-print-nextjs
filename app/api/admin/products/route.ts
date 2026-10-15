@@ -21,9 +21,12 @@ export async function POST(req: NextRequest) {
     if (!g.colors || g.colors.length === 0) {
       return NextResponse.json({ error: "Оберіть хоча б один колір для кожного типу тканини." }, { status: 400 });
     }
-    if (body.onSale && (!g.salePrice || g.salePrice <= 0 || g.salePrice >= g.price)) {
-      return NextResponse.json({ error: "Акційна ціна має бути вказана й меншою за звичайну." }, { status: 400 });
+    if (g.salePrice !== undefined && g.salePrice !== null && (g.salePrice <= 0 || g.salePrice >= g.price)) {
+      return NextResponse.json({ error: "Акційна ціна має бути меншою за звичайну." }, { status: 400 });
     }
+  }
+  if (body.onSale && !body.groups.some((g) => g.salePrice && g.salePrice > 0)) {
+    return NextResponse.json({ error: "Вкажіть акційну ціну хоча б для однієї тканини." }, { status: 400 });
   }
   if (body.productType && !getTemplate(body.productType)) {
     return NextResponse.json({ error: "Невідомий тип товару." }, { status: 400 });
