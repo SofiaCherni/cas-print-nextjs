@@ -49,6 +49,8 @@ model Product {
   description   String
   baseCategory  ProductBaseCategory
   cutStyle      CutStyle?
+  // Ключ шаблону типу виробу (lib/product-templates.ts), напр. "tshirt-standard".
+  productType   String?
   // Free-text category the admin creates/reuses herself in "Додати товар"
   // (e.g. "Аніме") — intentionally not a fixed enum/table, see
   // lib/data.ts#getPrintCategories() for how existing values are suggested.

@@ -67,6 +67,7 @@ export function mapProduct(p: DbProductWithVariants): Product {
     description: p.description,
     baseCategory: BASE_CATEGORY_FROM_DB[p.baseCategory],
     cutStyle: p.cutStyle ? CUT_STYLE_FROM_DB[p.cutStyle] : undefined,
+    productType: p.productType ?? undefined,
     printCategory: p.printCategory ?? undefined,
     basePrice: p.basePrice,
     images: p.images,

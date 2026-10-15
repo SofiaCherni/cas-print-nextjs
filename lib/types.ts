@@ -5,7 +5,8 @@ export type CutStyle = "classic" | "oversize";
 
 export type Fit = "unisex" | "women";
 
-export type Size = "XS" | "S" | "M" | "L" | "XL" | "XXL" | "3XL" | "4XL" | "5XL" | "OVERSIZE";
+// Розмір — довільний рядок: "XS"…"5XL", "ONE SIZE", а для худі — "Подовжене"/"Вкорочене".
+export type Size = string;
 
 export const EXTENDED_SIZES: Size[] = ["3XL", "4XL", "5XL"];
 
@@ -26,6 +27,8 @@ export interface Product {
   description: string;
   baseCategory: ProductBaseCategory;
   cutStyle?: CutStyle;
+  // Ключ шаблону типу виробу (lib/product-templates.ts).
+  productType?: string;
   // Free-text category the admin creates/reuses herself (e.g. "Аніме").
   printCategory?: string;
   basePrice: number;

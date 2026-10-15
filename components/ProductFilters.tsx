@@ -2,6 +2,7 @@
 
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { COLOR_PALETTE } from "@/lib/catalog-constants";
+import { PRODUCT_TEMPLATES } from "@/lib/product-templates";
 import { Fit, Size } from "@/lib/types";
 
 const SIZES: Size[] = ["XS", "S", "M", "L", "XL", "XXL", "3XL", "4XL", "5XL"];
@@ -115,25 +116,22 @@ export default function ProductFilters({ printCategories }: { printCategories: s
       </div>
 
       <div>
-        <h4 className="text-xs tracking-wide text-muted font-bold mb-3.5">КРІЙ</h4>
+        <h4 className="text-xs tracking-wide text-muted font-bold mb-3.5">ТИП ТОВАРУ</h4>
         <div className="space-y-2.5">
-          {[
-            { value: "classic", label: "Класичний" },
-            { value: "oversize", label: "Оверсайз" }
-          ].map((c) => (
+          {PRODUCT_TEMPLATES.map((t) => (
             <button
-              key={c.value}
-              onClick={() => setParam("cut", c.value)}
-              className={`flex items-center gap-2.5 text-sm ${
-                active("cut", c.value) ? "text-paper" : "text-paper/85"
+              key={t.key}
+              onClick={() => setParam("type", t.key)}
+              className={`flex items-center gap-2.5 text-sm text-left ${
+                active("type", t.key) ? "text-paper" : "text-paper/85"
               }`}
             >
               <span
-                className={`w-3.5 h-3.5 border rounded-sm ${
-                  active("cut", c.value) ? "bg-paper border-paper" : "border-muted"
+                className={`w-3.5 h-3.5 shrink-0 border rounded-sm ${
+                  active("type", t.key) ? "bg-paper border-paper" : "border-muted"
                 }`}
               />
-              {c.label}
+              {t.label}
             </button>
           ))}
         </div>

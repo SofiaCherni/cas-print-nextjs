@@ -22,6 +22,7 @@ export default async function CatalogView({
   const query: CatalogQuery = {
     baseCategory,
     cutStyle: searchParams.cut as CutStyle | undefined,
+    productType: searchParams.type,
     printCategory: searchParams.printCategory,
     size: searchParams.size as Size | undefined,
     fit: searchParams.fit as Fit | undefined,

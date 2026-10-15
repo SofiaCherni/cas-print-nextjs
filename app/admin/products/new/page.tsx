@@ -2,45 +2,19 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { PRODUCT_TEMPLATES, getTemplate, templateColors } from "@/lib/product-templates";
 
-const BASE_CATEGORIES = [
-  { value: "t-shirts", label: "Футболки" },
-  { value: "sweatshirts", label: "Світшоти" },
-  { value: "hoodies", label: "Худі" },
-  { value: "basics", label: "Інші товари" }
-];
+const FIT_LABEL: Record<string, string> = { unisex: "унісекс", women: "жіноча" };
 
-const COLOR_PALETTE = [
-  { name: "Пильно жовтий", hex: "#CBB26A" },
-  { name: "Білий", hex: "#FFFFFF" },
-  { name: "Жовтий", hex: "#F5D000" },
-  { name: "Червоний", hex: "#D0021B" },
-  { name: "Сірий однотон", hex: "#9B9B9B" },
-  { name: "Графіт", hex: "#4A4A4A" },
-  { name: "Помаранчевий", hex: "#F5821F" },
-  { name: "Ультрамарин", hex: "#3F51B5" },
-  { name: "Темно-синій", hex: "#1B2A4A" },
-  { name: "Блакитний", hex: "#7EC8E3" },
-  { name: "Ківі", hex: "#8DC63F" },
-  { name: "Зелений", hex: "#2E8B33" },
-  { name: "Хакі", hex: "#707B4A" },
-  { name: "Сірий меланж", hex: "#ADA9A0" },
-  { name: "Шоколад", hex: "#4B3621" },
-  { name: "Фіолетовий", hex: "#6A0DAD" },
-  { name: "Синій", hex: "#2255A4" },
-  { name: "Кораловий", hex: "#FF7F66" },
-  { name: "Темно-зелений", hex: "#1F4620" },
-  { name: "Чорний", hex: "#0A0A0A" },
-  { name: "Глибокий темно-синій", hex: "#0B1930" },
-  { name: "Лайм", hex: "#B4E600" },
-  { name: "Марсал", hex: "#6F2232" },
-  { name: "Білий меланж", hex: "#EDEBE6" },
-  { name: "Рожевий", hex: "#F28FB2" },
-  { name: "Бежевий", hex: "#E8DCC5" },
-  { name: "Джинс", hex: "#46647A" },
-  { name: "Сталевий", hex: "#71797E" },
-  { name: "Бордо", hex: "#5C0A17" }
-];
+function describeSizes(sizesByFit: Record<string, string[] | undefined>): string {
+  const entries = Object.entries(sizesByFit) as [string, string[]][];
+  return entries
+    .map(([fit, sizes]) => {
+      const range = sizes.length > 2 ? `${sizes[0]}–${sizes[sizes.length - 1]}` : sizes.join(" / ");
+      return entries.length > 1 ? `${FIT_LABEL[fit] ?? fit} ${range}` : range;
+    })
+    .join("; ");
+}
 
 interface UploadedImage {
   file: File;
@@ -52,13 +26,14 @@ interface UploadedImage {
 export default function NewProductPage() {
   const router = useRouter();
   const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
-  const [baseCategory, setBaseCategory] = useState(BASE_CATEGORIES[0].value);
-  const [cutStyle, setCutStyle] = useState<string>("");
+  const [description, setDescription] = useState(PRODUCT_TEMPLATES[0].description);
+  const [productType, setProductType] = useState(PRODUCT_TEMPLATES[0].key);
   const [printCategory, setPrintCategory] = useState("");
   const [existingCategories, setExistingCategories] = useState<string[]>([]);
   const [basePrice, setBasePrice] = useState("");
-  const [colors, setColors] = useState<string[]>([COLOR_PALETTE[0].name]);
+  const template = getTemplate(productType) ?? PRODUCT_TEMPLATES[0];
+  const palette = templateColors(template);
+  const [colors, setColors] = useState<string[]>(palette.map((c) => c.name));
   const [popular, setPopular] = useState(false);
   const [onSale, setOnSale] = useState(false);
   const [salePrice, setSalePrice] = useState("");
@@ -72,6 +47,17 @@ export default function NewProductPage() {
       .then((data) => setExistingCategories(data.categories ?? []))
       .catch(() => {});
   }, []);
+
+  // Зміна типу: підставляємо опис і всі кольори нового шаблону.
+  // Опис перезаписуємо лише якщо він порожній або ще дефолтний від попереднього типу.
+  function changeType(key: string) {
+    const prev = getTemplate(productType);
+    const next = getTemplate(key);
+    if (!next) return;
+    setProductType(key);
+    setColors(templateColors(next).map((c) => c.name));
+    if (!description.trim() || description === prev?.description) setDescription(next.description);
+  }
 
   function toggle(list: string[], value: string, setList: (v: string[]) => void) {
     setList(list.includes(value) ? list.filter((v) => v !== value) : [...list, value]);
@@ -124,8 +110,8 @@ export default function NewProductPage() {
       setError("Заповніть назву, опис і ціну.");
       return;
     }
-    if (baseCategory === "t-shirts" && !cutStyle) {
-      setError("Оберіть крій: класичний чи оверсайз.");
+    if (colors.length === 0) {
+      setError("Оберіть хоча б один колір.");
       return;
     }
 
@@ -137,12 +123,13 @@ export default function NewProductPage() {
         body: JSON.stringify({
           name,
           description,
-          baseCategory,
-          cutStyle: baseCategory === "t-shirts" ? cutStyle : undefined,
+          productType: template.key,
+          baseCategory: template.baseCategory,
+          cutStyle: template.cutStyle,
           printCategory: printCategory.trim() || undefined,
           basePrice: Number(basePrice),
           images: readyImages,
-          colors: COLOR_PALETTE.filter((c) => colors.includes(c.name)),
+          colors: palette.filter((c) => colors.includes(c.name)),
           popular,
           onSale,
           salePrice: onSale ? Number(salePrice) : undefined
@@ -188,30 +175,32 @@ export default function NewProductPage() {
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs tracking-wide text-muted font-bold mb-2">КАТЕГОРІЯ</label>
-              <select
-                value={baseCategory}
-                onChange={(e) => setBaseCategory(e.target.value)}
-                className="w-full bg-bgSoft border border-line px-4 py-3 text-sm"
-              >
-                {BASE_CATEGORIES.map((c) => (
-                  <option key={c.value} value={c.value}>{c.label}</option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="block text-xs tracking-wide text-muted font-bold mb-2">БАЗОВА ЦІНА, ₴</label>
-              <input
-                type="number"
-                min="0"
-                value={basePrice}
-                onChange={(e) => setBasePrice(e.target.value)}
-                className="w-full bg-bgSoft border border-line px-4 py-3 text-sm"
-              />
-              <p className="text-xs text-muted mt-1.5">Розміри 3XL–5XL автоматично +50 ₴.</p>
-            </div>
+          <div>
+            <label className="block text-xs tracking-wide text-muted font-bold mb-2">ТИП ТОВАРУ</label>
+            <select
+              value={productType}
+              onChange={(e) => changeType(e.target.value)}
+              className="w-full bg-bgSoft border border-line px-4 py-3 text-sm"
+            >
+              {PRODUCT_TEMPLATES.map((t) => (
+                <option key={t.key} value={t.key}>{t.label}</option>
+              ))}
+            </select>
+            <p className="text-xs text-muted mt-1.5">
+              Розміри: {describeSizes(template.sizesByFit)}. Кольори, розміри й початковий опис підставляються за типом; опис можна змінити.
+            </p>
+          </div>
+
+          <div>
+            <label className="block text-xs tracking-wide text-muted font-bold mb-2">БАЗОВА ЦІНА, ₴</label>
+            <input
+              type="number"
+              min="0"
+              value={basePrice}
+              onChange={(e) => setBasePrice(e.target.value)}
+              className="w-full max-w-[200px] bg-bgSoft border border-line px-4 py-3 text-sm"
+            />
+            <p className="text-xs text-muted mt-1.5">Розміри 3XL–5XL автоматично +50 ₴.</p>
           </div>
 
           <div>
@@ -237,47 +226,21 @@ export default function NewProductPage() {
             </p>
           </div>
 
-          {baseCategory === "t-shirts" && (
-            <div>
-              <label className="block text-xs tracking-wide text-muted font-bold mb-2">КРІЙ</label>
-              <div className="flex gap-2.5">
-                {[
-                  { value: "classic", label: "Класичний" },
-                  { value: "oversize", label: "Оверсайз" }
-                ].map((c) => (
-                  <button
-                    type="button"
-                    key={c.value}
-                    onClick={() => setCutStyle(c.value)}
-                    className={`px-4 py-2.5 border text-sm font-semibold ${
-                      cutStyle === c.value ? "bg-paper text-bg border-paper" : "border-line"
-                    }`}
-                  >
-                    {c.label}
-                  </button>
-                ))}
-              </div>
-              <p className="text-xs text-muted mt-1.5">
-                Визначає підгрупу футболки в каталозі. Оверсайз має один розмір — OVERSIZE; фасон (унісекс/жіночий) клієнт обирає в картці лише для класичних футболок.
-              </p>
-            </div>
-          )}
-
           <div>
             <div className="flex items-center justify-between mb-2">
               <label className="block text-xs tracking-wide text-muted font-bold">КОЛЬОРИ</label>
               <button
                 type="button"
                 onClick={() =>
-                  setColors(colors.length === COLOR_PALETTE.length ? [] : COLOR_PALETTE.map((c) => c.name))
+                  setColors(colors.length === palette.length ? [] : palette.map((c) => c.name))
                 }
                 className="text-xs underline text-muted hover:text-paper"
               >
-                {colors.length === COLOR_PALETTE.length ? "Зняти всі" : "Обрати всі кольори"}
+                {colors.length === palette.length ? "Зняти всі" : "Обрати всі кольори"}
               </button>
             </div>
             <div className="flex flex-wrap gap-2.5">
-              {COLOR_PALETTE.map((c) => (
+              {palette.map((c) => (
                 <button
                   type="button"
                   key={c.name}
@@ -292,7 +255,7 @@ export default function NewProductPage() {
               ))}
             </div>
             <p className="text-xs text-muted mt-1.5">
-              Кожен розмір × колір стане окремим варіантом товару (для оверсайзу — один розмір OVERSIZE).
+              Палітра залежить від типу товару. Зніми колір, якого немає для цього принта. Кожен розмір × колір стане окремим варіантом.
             </p>
           </div>
 

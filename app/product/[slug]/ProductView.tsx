@@ -12,16 +12,38 @@ import QuantityStepper from "@/components/QuantityStepper";
 import Accordion from "@/components/Accordion";
 import Button from "@/components/Button";
 import { useCart } from "@/lib/cart-context";
+import { getTemplate } from "@/lib/product-templates";
+import { sizeChartIdFor } from "@/lib/size-charts";
+
+const SIZE_ORDER = ["XS", "S", "M", "L", "XL", "XXL", "3XL", "4XL", "5XL", "ONE SIZE", "Подовжене", "Вкорочене"];
+const sizeRank = (s: string) => {
+  const i = SIZE_ORDER.indexOf(s);
+  return i === -1 ? 999 : i;
+};
 
 export default function ProductView({ product }: { product: Product }) {
+  const template = getTemplate(product.productType);
   const fits = Array.from(new Set(product.variants.map((v) => v.fit))) as Fit[];
-  const sizes = Array.from(new Set(product.variants.map((v) => v.size))) as Size[];
-  const colors = Array.from(
-    new Map(product.variants.map((v) => [v.color.name, v.color])).values()
-  );
 
   const [fit, setFit] = useState<Fit>(fits[0]);
-  const [size, setSize] = useState<Size | null>(sizes.includes("M") ? "M" : sizes[0] ?? null);
+
+  // Розміри залежать від фасону (напр. у жіночої футболки немає 4XL) і йдуть у зрозумілому порядку.
+  const sizes = Array.from(new Set(product.variants.filter((v) => v.fit === fit).map((v) => v.size))).sort(
+    (a, b) => sizeRank(a) - sizeRank(b)
+  ) as Size[];
+  const colors = Array.from(
+    new Map(product.variants.map((v) => [v.color.name, v.color])).values()
+  ).sort((a, b) => {
+    const order = template?.colors ?? [];
+    const ia = order.indexOf(a.name);
+    const ib = order.indexOf(b.name);
+    return (ia === -1 ? 999 : ia) - (ib === -1 ? 999 : ib);
+  });
+
+  const [pickedSize, setSize] = useState<Size | null>(null);
+  // Якщо обраного розміру немає для цього фасону — беремо M або перший доступний.
+  const size: Size | null =
+    pickedSize && sizes.includes(pickedSize) ? pickedSize : sizes.includes("M") ? "M" : sizes[0] ?? null;
   const [colorName, setColorName] = useState(colors[0]?.name ?? "");
   const [qty, setQty] = useState(1);
   const [added, setAdded] = useState(false);
@@ -40,6 +62,9 @@ export default function ProductView({ product }: { product: Product }) {
     setAdded(true);
     setTimeout(() => setAdded(false), 2000);
   }
+
+  const sizeLabel = template?.sizeLabel ?? "РОЗМІР";
+  const guideId = sizeChartIdFor(product, fit);
 
   const accordionItems = [
     { title: "ОПИС", content: product.description },
@@ -73,7 +98,7 @@ export default function ProductView({ product }: { product: Product }) {
           <p className="text-muted text-sm leading-relaxed mb-8">{product.description}</p>
 
           <div className="space-y-7 mb-9">
-            <SizeSelector sizes={sizes} selected={size} onSelect={setSize} />
+            <SizeSelector sizes={sizes} selected={size} onSelect={setSize} label={sizeLabel} guideId={guideId} />
             {fits.length > 1 && <FitToggle options={fits} selected={fit} onSelect={setFit} />}
             <ColorSwatches colors={colors} selected={colorName} onSelect={setColorName} />
             <div>

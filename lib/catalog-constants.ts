@@ -46,7 +46,24 @@ export const COLOR_PALETTE: { name: string; hex: string }[] = [
   { name: "Бежевий", hex: "#E8DCC5" },
   { name: "Джинс", hex: "#46647A" },
   { name: "Сталевий", hex: "#71797E" },
-  { name: "Бордо", hex: "#5C0A17" }
+  { name: "Бордо", hex: "#5C0A17" },
+  { name: "Сірий", hex: "#9B9B9B" },
+  { name: "Коричневий", hex: "#6B4423" },
+  { name: "Беж", hex: "#D8C3A5" },
+  { name: "Кемел", hex: "#C19A6B" },
+  { name: "Лимон", hex: "#F7E26B" },
+  { name: "Олива", hex: "#6B6B2A" },
+  { name: "Вишневий", hex: "#7B1230" },
+  { name: "Шавлія", hex: "#9CAF88" },
+  { name: "Бірюза", hex: "#30B0A8" },
+  { name: "Лаванда", hex: "#B9A7D9" },
+  { name: "Світло-сірий", hex: "#D3D3D3" },
+  { name: "Молочний", hex: "#F3EFE0" },
+  { name: "М'ята", hex: "#A8E6CF" },
+  { name: "Бірюзово-синій", hex: "#1F7A8C" },
+  { name: "Ніжно-рожевий", hex: "#F8D3DC" },
+  { name: "Персиковий", hex: "#FFCBA4" },
+  { name: "Гірчичний", hex: "#D4A017" }
 ];
 
 export function formatPrice(value: number): string {

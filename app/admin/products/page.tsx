@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { getAllProductsForAdmin, formatPrice, BASE_CATEGORIES } from "@/lib/data";
+import { getTemplate } from "@/lib/product-templates";
 import ProductRowActions from "@/components/admin/ProductRowActions";
 
 export const metadata = { title: "Товари — Адмінпанель CAS-Print" };
@@ -51,7 +52,7 @@ export default async function AdminProductsPage() {
                 <tr key={p.id} className="border-b border-line">
                   <td className="py-3.5 font-semibold">{p.name}</td>
                   <td className="py-3.5 text-muted font-mono text-xs">{p.slug}</td>
-                  <td className="py-3.5 text-muted">{categoryLabel(p.baseCategory)}</td>
+                  <td className="py-3.5 text-muted">{getTemplate(p.productType)?.label ?? categoryLabel(p.baseCategory)}</td>
                   <td className="py-3.5 text-muted">
                     {formatPrice(p.basePrice)}
                     {p.onSale && p.salePrice ? ` → ${formatPrice(p.salePrice)}` : ""}

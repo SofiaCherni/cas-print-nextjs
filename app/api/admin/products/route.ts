@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createProduct, CreateProductInput } from "@/lib/data";
+import { getTemplate } from "@/lib/product-templates";
 
 export async function POST(req: NextRequest) {
   const body = (await req.json()) as CreateProductInput;
@@ -16,7 +17,10 @@ export async function POST(req: NextRequest) {
   if (body.onSale && (!body.salePrice || body.salePrice <= 0)) {
     return NextResponse.json({ error: "Вкажіть акційну ціну." }, { status: 400 });
   }
-  if (body.baseCategory === "t-shirts" && !body.cutStyle) {
+  if (body.productType && !getTemplate(body.productType)) {
+    return NextResponse.json({ error: "Невідомий тип товару." }, { status: 400 });
+  }
+  if (!body.productType && body.baseCategory === "t-shirts" && !body.cutStyle) {
     return NextResponse.json({ error: "Оберіть крій: класичний чи оверсайз." }, { status: 400 });
   }
 

@@ -110,7 +110,7 @@ export default async function HomePage() {
                    sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, 25vw"
                    className="object-cover transition-transform duration-500 group-hover:scale-[1.045]"
                  />
-		 <div className="absolute inset-0 bg-gradient-to-t from-bg/80 via-bg/10 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-bg/80 via-bg/10 to-transparent" />
                 <h3 className="relative font-display font-extrabold text-2xl group-hover:text-accent transition-colors">
                   {c.label}
                 </h3>

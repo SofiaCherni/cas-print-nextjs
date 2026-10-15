@@ -5,17 +5,26 @@ import { EXTENDED_SIZES, Size } from "@/lib/types";
 export default function SizeSelector({
   sizes,
   selected,
-  onSelect
+  onSelect,
+  label = "РОЗМІР",
+  guideId = null
 }: {
   sizes: Size[];
   selected: Size | null;
   onSelect: (s: Size) => void;
+  label?: string;
+  // Якір на сторінці /size-guide; null — сітки для цього товару немає.
+  guideId?: string | null;
 }) {
   return (
     <div>
       <div className="flex items-center justify-between mb-3">
-        <span className="text-xs tracking-wide text-muted font-bold">РОЗМІР</span>
-        <a href="/size-guide" className="text-xs underline">РОЗМІРНА СІТКА</a>
+        <span className="text-xs tracking-wide text-muted font-bold">{label}</span>
+        {guideId && (
+          <a href={`/size-guide#${guideId}`} className="text-xs underline">
+            РОЗМІРНА СІТКА
+          </a>
+        )}
       </div>
       <div className="flex flex-wrap gap-2">
         {sizes.map((s) => {
@@ -33,7 +42,7 @@ export default function SizeSelector({
                   : "border-line text-paper"
               }`}
             >
-              {s === "OVERSIZE" ? "OVERSIZE" : s}
+              {s}
             </button>
           );
         })}

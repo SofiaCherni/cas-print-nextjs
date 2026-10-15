@@ -1,6 +1,7 @@
 import { Prisma } from "@prisma/client";
 import { prisma } from "./prisma";
 import { baseCategoryToDb, cutStyleToDb, fitToDb, mapProduct } from "./db-mappers";
+import { getTemplate } from "./product-templates";
 import { CutStyle, Fit, Print, Product, ProductBaseCategory, Size } from "./types";
 import {
   BASE_CATEGORIES,
@@ -41,6 +42,7 @@ const EXTENDED_SIZE_SURCHARGE = 50;
 export interface CatalogQuery {
   baseCategory?: ProductBaseCategory;
   cutStyle?: CutStyle;
+  productType?: string;
   printCategory?: string;
   size?: Size;
   fit?: Fit;
@@ -57,6 +59,7 @@ function buildWhere(query: CatalogQuery, includeHidden: boolean): Prisma.Product
 
   if (query.baseCategory) where.baseCategory = baseCategoryToDb(query.baseCategory);
   if (query.cutStyle) where.cutStyle = cutStyleToDb(query.cutStyle);
+  if (query.productType) where.productType = query.productType;
   if (query.printCategory) {
     where.printCategory = { equals: query.printCategory, mode: "insensitive" };
   }
@@ -273,6 +276,8 @@ export interface CreateProductInput {
   description: string;
   baseCategory: ProductBaseCategory;
   cutStyle?: CutStyle;
+  // Ключ шаблону (lib/product-templates.ts): визначає фасони та розміри.
+  productType?: string;
   printCategory?: string;
   basePrice: number;
   images: string[];
@@ -316,9 +321,18 @@ export async function createProduct(input: CreateProductInput): Promise<Product>
   }
 
   const variantsData = [];
-  const cutStyle = input.baseCategory === "t-shirts" ? input.cutStyle : undefined;
-  for (const fit of fitsFor(input.baseCategory, cutStyle)) {
-    for (const size of sizesFor(input.baseCategory, cutStyle)) {
+  const template = getTemplate(input.productType);
+  const cutStyle = template
+    ? template.cutStyle
+    : input.baseCategory === "t-shirts"
+    ? input.cutStyle
+    : undefined;
+  // План варіантів: для кожного фасону — свій набір розмірів (за шаблоном).
+  const plan: { fit: Fit; sizes: string[] }[] = template
+    ? (Object.entries(template.sizesByFit) as [Fit, string[]][]).map(([fit, sizes]) => ({ fit, sizes }))
+    : fitsFor(input.baseCategory, cutStyle).map((fit) => ({ fit, sizes: sizesFor(input.baseCategory, cutStyle) }));
+  for (const { fit, sizes } of plan) {
+    for (const size of sizes) {
       for (const color of input.colors) {
         const extended = size === "3XL" || size === "4XL" || size === "5XL";
         variantsData.push({
@@ -339,8 +353,9 @@ export async function createProduct(input: CreateProductInput): Promise<Product>
       slug,
       name: input.name,
       description: input.description,
-      baseCategory: baseCategoryToDb(input.baseCategory),
+      baseCategory: baseCategoryToDb(template ? template.baseCategory : input.baseCategory),
       cutStyle: cutStyle ? cutStyleToDb(cutStyle) : undefined,
+      productType: template ? template.key : undefined,
       printCategory: input.printCategory?.trim() || undefined,
       basePrice: input.basePrice,
       images: input.images,
