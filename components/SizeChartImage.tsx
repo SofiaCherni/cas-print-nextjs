@@ -25,6 +25,8 @@ export default function SizeChartImage({ id, alt }: { id: string; alt: string })
       key={extIndex}
       src={`/assets/size-guide/${id}.${EXTENSIONS[extIndex]}`}
       alt={alt}
+      loading="lazy"
+      decoding="async"
       className="w-full h-full object-contain"
       onError={() => setExtIndex((i) => i + 1)}
     />

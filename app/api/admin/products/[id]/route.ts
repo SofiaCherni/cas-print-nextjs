@@ -1,3 +1,4 @@
+import { revalidatePath } from "next/cache";
 import { NextRequest, NextResponse } from "next/server";
 import { deleteProduct, setProductStatus } from "@/lib/data";
 
@@ -8,6 +9,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
   }
   try {
     await setProductStatus(params.id, status);
+    revalidatePath("/", "layout"); // одразу оновити кеш сайту
     return NextResponse.json({ ok: true });
   } catch (err) {
     console.error("[admin/products] status update failed:", err);
@@ -18,6 +20,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
 export async function DELETE(_req: NextRequest, { params }: { params: { id: string } }) {
   try {
     await deleteProduct(params.id);
+    revalidatePath("/", "layout"); // одразу оновити кеш сайту
     return NextResponse.json({ ok: true });
   } catch (err) {
     console.error("[admin/products] delete failed:", err);

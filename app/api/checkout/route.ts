@@ -17,6 +17,8 @@ interface CheckoutBody {
   };
   delivery: { city: string; postomatNumber: string };
   comment?: string;
+  // Згода на обробку персональних даних (обовʼязкова).
+  consent?: boolean;
 }
 
 /**
@@ -33,6 +35,9 @@ interface CheckoutBody {
 export async function POST(req: NextRequest) {
   const body = (await req.json()) as CheckoutBody;
 
+  if (body.consent !== true) {
+    return NextResponse.json({ error: "Потрібна згода на обробку персональних даних." }, { status: 400 });
+  }
   if (!body.items || body.items.length === 0) {
     return NextResponse.json({ error: "Кошик порожній." }, { status: 400 });
   }

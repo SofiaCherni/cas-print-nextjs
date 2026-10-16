@@ -1,7 +1,8 @@
 import { MetadataRoute } from "next";
 import { getAllProductSlugs, BASE_CATEGORIES } from "@/lib/data";
+import { SITE_URL } from "@/lib/site-config";
 
-const BASE_URL = "https://cas-print.example"; // TODO: NEED REAL BUSINESS DATA (production domain)
+const BASE_URL = SITE_URL; // домен задається в lib/site-config.ts
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticRoutes = [
@@ -13,7 +14,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     "/delivery-and-payment",
     "/returns",
     "/size-guide",
-    "/contacts"
+    "/contacts",
+    "/privacy"
   ].map((path) => ({ url: `${BASE_URL}${path}`, lastModified: new Date() }));
 
   const categoryRoutes = BASE_CATEGORIES.map((c) => ({

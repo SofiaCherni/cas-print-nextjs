@@ -1,4 +1,6 @@
-import Image from "next/image";
+import FadeImage from "@/components/FadeImage";
+import Reveal from "@/components/Reveal";
+import HeroVideo from "@/components/HeroVideo";
 import Link from "next/link";
 import Button from "@/components/Button";
 import ProductGrid from "@/components/ProductGrid";
@@ -22,27 +24,26 @@ export default async function HomePage() {
     <main>
       {/* Блок 1 — HERO */}
       <section className="relative h-[96vh] min-h-[560px] -mt-[88px] flex items-end overflow-hidden">
-        <video
-          autoPlay
-          muted
-          loop
-          playsInline
-          poster="/assets/poster.jpg"
-          className="absolute inset-0 w-full h-full object-cover"
-        >
-          <source src="/assets/hero.mp4" type="video/mp4" />
-        </video>
+        <div className="absolute inset-0 hero-media">
+          <HeroVideo />
+        </div>
         <div className="absolute inset-0 bg-gradient-to-b from-bg/15 via-bg/5 to-bg/85" />
         <div className="relative z-10 w-full px-5 md:px-8 pb-16 md:pb-20">
-          <h1 className="font-display font-black leading-[0.96] tracking-tight text-[38px] sm:text-6xl md:text-8xl max-w-4xl mb-5">
+          <h1
+            className="hero-in font-display font-black leading-[0.96] tracking-tight text-[38px] sm:text-6xl md:text-8xl max-w-4xl mb-5"
+            style={{ "--d": "250ms" } as React.CSSProperties}
+          >
             ОДЯГ, ЯКИЙ
             <br />
             ГОВОРИТЬ ЗА ТЕБЕ
           </h1>
-          <p className="max-w-sm text-base leading-relaxed text-paper/85 mb-8">
+          <p
+            className="hero-in max-w-sm text-base leading-relaxed text-paper/85 mb-8"
+            style={{ "--d": "450ms" } as React.CSSProperties}
+          >
             Футболки та худі з готовими принтами або твоїм власним дизайном.
           </p>
-          <div className="flex flex-wrap gap-3.5">
+          <div className="hero-in flex flex-wrap gap-3.5" style={{ "--d": "650ms" } as React.CSSProperties}>
             <Button href="/catalog" variant="accent">ЗНАЙДИ СВІЙ ПРИНТ</Button>
             <Button href="/custom-print" variant="accentGhost">СТВОРИ СВІЙ</Button>
           </div>
@@ -57,9 +58,9 @@ export default async function HomePage() {
       <section className="py-24 md:py-32 px-5 md:px-8">
         <div className="max-w-[1360px] mx-auto">
           <div className="flex items-end justify-between gap-6 flex-wrap mb-10">
-            <h2 className="font-display font-extrabold text-3xl md:text-5xl tracking-[0.015em]">
+            <Reveal><h2 className="font-display font-extrabold text-3xl md:text-5xl tracking-[0.015em]">
               ОБЕРИ СВІЙ ПРИНТ
-            </h2>
+            </h2></Reveal>
             <Button href="/prints" variant="ghost" className="px-5 py-3">
               ПЕРЕГЛЯНУТИ ВСІ ПРИНТИ
             </Button>
@@ -88,22 +89,22 @@ export default async function HomePage() {
       {/* Блок 3 — ОБЕРИ РІЧ */}
       <section className="py-24 md:py-32 px-5 md:px-8">
         <div className="max-w-[1360px] mx-auto">
-          <h2 className="font-display font-extrabold text-3xl md:text-5xl tracking-[0.015em] mb-10">
+          <Reveal><h2 className="font-display font-extrabold text-3xl md:text-5xl tracking-[0.015em] mb-10">
             ОБЕРИ РІЧ
-          </h2>
+          </h2></Reveal>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-0.5">
             {[
               { label: "ФУТБОЛКИ", href: "/catalog/t-shirts", img: "/assets/home/cat-tshirts.jpg" },
               { label: "СВІТШОТИ", href: "/catalog/sweatshirts", img: "/assets/home/cat-sweatshirts.jpg" },
               { label: "ХУДІ", href: "/catalog/hoodies", img: "/assets/home/cat-hoodies.jpg" },
               { label: "ІНШІ ТОВАРИ", href: "/catalog/basics", img: "/assets/home/cat-basics.jpg" }
-            ].map((c) => (
+            ].map((c, i) => (
+              <Reveal key={c.label} delay={i * 90}>
               <Link
-                key={c.label}
                 href={c.href}
                 className="group relative aspect-[4/5] flex items-end p-6 bg-gradient-to-br from-[#201f1b] to-bg overflow-hidden"
               >
-		<Image
+                <FadeImage
                    src={c.img}
                    alt={c.label}
                    fill
@@ -115,6 +116,7 @@ export default async function HomePage() {
                   {c.label}
                 </h3>
               </Link>
+              </Reveal>
             ))}
           </div>
         </div>
@@ -124,7 +126,7 @@ export default async function HomePage() {
       <section className="py-24 md:py-32 px-5 md:px-8">
         <div className="max-w-[1360px] mx-auto">
           <div className="flex items-end justify-between gap-6 flex-wrap mb-10">
-            <h2 className="font-display font-extrabold text-3xl md:text-5xl tracking-[0.015em]">ПОПУЛЯРНЕ</h2>
+            <Reveal><h2 className="font-display font-extrabold text-3xl md:text-5xl tracking-[0.015em]">ПОПУЛЯРНЕ</h2></Reveal>
             <Button href="/catalog" variant="ghost" className="px-5 py-3">
               ПЕРЕГЛЯНУТИ ВСІ ТОВАРИ
             </Button>
@@ -136,7 +138,7 @@ export default async function HomePage() {
       {/* Блок 5 — СТВОРИ ВЛАСНИЙ */}
       <section className="grid md:grid-cols-[1.1fr_0.9fr]">
         <div className="relative min-h-[340px] md:min-h-[440px]">
-          <Image
+          <FadeImage
             src="/assets/home/custom-design.jpg"
             alt="Приклад власного принта, нанесеного на замовлення"
             fill
@@ -161,12 +163,12 @@ export default async function HomePage() {
       {/* Блок 6 — ЯКІСТЬ ПРИНТА */}
       <section className="py-24 md:py-32 px-5 md:px-8">
         <div className="max-w-[1360px] mx-auto">
-          <h2 className="font-display font-extrabold text-3xl md:text-5xl tracking-[0.015em] max-w-2xl mb-10">
+          <Reveal><h2 className="font-display font-extrabold text-3xl md:text-5xl tracking-[0.015em] max-w-2xl mb-10">
             ПРИНТ, ЯКИЙ ХОЧЕТЬСЯ РОЗГЛЯДАТИ
-          </h2>
+          </h2></Reveal>
           <div className="grid md:grid-cols-[1.1fr_0.9fr] border border-line">
             <div className="relative min-h-[280px] md:min-h-[340px]">
-              <Image
+              <FadeImage
                 src="/assets/home/print-detail.jpg"
                 alt="Детальний вигляд якості друку принта зблизька"
                 fill
@@ -176,10 +178,14 @@ export default async function HomePage() {
             </div>
             <div className="p-8 md:p-12 flex items-center">
               <div className="flex flex-wrap gap-9">
-                {["ЯКІСНИЙ ДРУК", "ДЕТАЛЬНЕ ЗОБРАЖЕННЯ", "СТІЙКІСТЬ ДО ПРАННЯ"].map((t) => (
-                  <div key={t} className="text-[13px] font-bold tracking-wide pt-3.5 border-t-2 border-accent min-w-[150px]">
+                {["ЯКІСНИЙ ДРУК", "ДЕТАЛЬНЕ ЗОБРАЖЕННЯ", "СТІЙКІСТЬ ДО ПРАННЯ"].map((t, i) => (
+                  <Reveal
+                    key={t}
+                    delay={i * 120}
+                    className="text-[13px] font-bold tracking-wide pt-3.5 border-t-2 border-accent min-w-[150px]"
+                  >
                     {t}
-                  </div>
+                  </Reveal>
                 ))}
               </div>
             </div>
@@ -190,21 +196,21 @@ export default async function HomePage() {
       {/* Блок 7 — ЯК ЦЕ ПРАЦЮЄ */}
       <section className="py-24 md:py-32 px-5 md:px-8">
         <div className="max-w-[1360px] mx-auto">
-          <h2 className="font-display font-extrabold text-3xl md:text-5xl tracking-[0.015em] mb-10">
+          <Reveal><h2 className="font-display font-extrabold text-3xl md:text-5xl tracking-[0.015em] mb-10">
             ЯК ЦЕ ПРАЦЮЄ
-          </h2>
+          </h2></Reveal>
           <div className="flex overflow-x-auto gap-6 pb-2 -mx-5 px-5 md:mx-0 md:px-0">
             {[
               { n: "01", t: "ОБИРАЄШ ПРИНТ", d: "Обираєш готовий дизайн із каталогу або завантажуєш власний." },
               { n: "02", t: "ОБИРАЄШ РІЧ", d: "Футболка, худі чи базова річ — вирішуєш, на що нанести принт." },
               { n: "03", t: "ОБИРАЄШ РОЗМІР І КОЛІР", d: "Підбираєш фасон, розмір та колір за візуальною палітрою." },
               { n: "04", t: "ЗАМОВЛЯЄШ", d: "Оформлюєш замовлення — решту зробимо ми." }
-            ].map((s) => (
-              <div key={s.n} className="flex-none w-64 pt-8 border-t border-line">
+            ].map((s, i) => (
+              <Reveal key={s.n} className="flex-none w-64 pt-8 border-t border-line" delay={i * 110}>
                 <span className="font-display font-extrabold text-sm text-accent">{s.n}</span>
                 <h4 className="font-display font-bold text-lg my-3">{s.t}</h4>
                 <p className="text-[13px] text-muted leading-relaxed">{s.d}</p>
-              </div>
+              </Reveal>
             ))}
           </div>
         </div>
@@ -213,9 +219,9 @@ export default async function HomePage() {
       {/* Блок 8 — НОСИ СВОЄ */}
       <section className="py-24 md:py-32 px-5 md:px-8">
         <div className="max-w-[1360px] mx-auto">
-          <h2 className="font-display font-extrabold text-3xl md:text-5xl tracking-[0.015em] mb-10">
+          <Reveal><h2 className="font-display font-extrabold text-3xl md:text-5xl tracking-[0.015em] mb-10">
             НОСИ СВОЄ
-          </h2>
+          </h2></Reveal>
           <div className="grid grid-cols-2 md:grid-cols-6 auto-rows-[110px] md:auto-rows-[120px] gap-0.5">
             {[
               { src: "/assets/home/wear-1.jpg", alt: "Дівчина в оверсайз футболці з принтом «green flag»" },
@@ -225,22 +231,23 @@ export default async function HomePage() {
               { src: "/assets/home/wear-5.jpg", alt: "Дві подруги в однакових футболках на переході" },
               { src: "/assets/home/wear-6.jpg", alt: "Дівчина в оверсайз худі VAHUE" }
             ].map((img, i) => (
-              <div
+              <Reveal
                 key={img.src}
+                delay={(i % 3) * 100}
                 className={`relative overflow-hidden ${
                   i === 0 ? "md:col-span-3 md:row-span-3 col-span-1 row-span-2" :
                   i === 3 ? "md:col-span-4 md:row-span-3 col-span-1 row-span-2" :
                   "md:col-span-3 md:row-span-2 col-span-1 row-span-2"
                 }`}
               >
-                <Image
+                <FadeImage
                   src={img.src}
                   alt={img.alt}
                   fill
                   sizes="(max-width: 768px) 50vw, 33vw"
                   className="object-cover"
                 />
-              </div>
+              </Reveal>
             ))}
           </div>
         </div>
@@ -248,13 +255,15 @@ export default async function HomePage() {
 
       {/* Блок 9 — ФІНАЛЬНИЙ CTA */}
       <section className="bg-black text-center py-28 md:py-36 px-5">
-        <h2 className="font-display font-black text-4xl md:text-7xl tracking-[0.015em] mb-9">
+        <Reveal><h2 className="font-display font-black text-4xl md:text-7xl tracking-[0.015em] mb-9">
           ЗНАЙДИ ТЕ, ЩО ТВОЄ
-        </h2>
-        <div className="flex flex-wrap gap-3.5 justify-center">
-          <Button href="/catalog" variant="accent">ПЕРЕГЛЯНУТИ КАТАЛОГ</Button>
-          <Button href="/custom-print" variant="ghost">СТВОРИТИ СВІЙ ПРИНТ</Button>
-        </div>
+        </h2></Reveal>
+        <Reveal delay={150}>
+          <div className="flex flex-wrap gap-3.5 justify-center">
+            <Button href="/catalog" variant="accent">ПЕРЕГЛЯНУТИ КАТАЛОГ</Button>
+            <Button href="/custom-print" variant="ghost">СТВОРИТИ СВІЙ ПРИНТ</Button>
+          </div>
+        </Reveal>
       </section>
     </main>
   );

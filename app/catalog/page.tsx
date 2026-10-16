@@ -1,8 +1,10 @@
 import CatalogView from "./CatalogView";
 
 export const metadata = {
-  title: "Каталог — CAS-Print",
-  description: "Футболки, худі та базові речі з готовими принтами від CAS-Print."
+  title: "Каталог футболок, худі та світшотів з принтами",
+  description:
+    "Каталог CAS-Print: футболки, худі, світшоти та інші речі з готовими принтами. Обирай тканину, розмір і колір. Доставка Новою Поштою по Україні.",
+  alternates: { canonical: "/catalog" }
 };
 
 export default function CatalogPage({

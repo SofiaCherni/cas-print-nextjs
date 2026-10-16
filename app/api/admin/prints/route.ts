@@ -1,3 +1,4 @@
+import { revalidatePath } from "next/cache";
 import { NextRequest, NextResponse } from "next/server";
 import { createPrint, CreatePrintInput } from "@/lib/data";
 
@@ -19,6 +20,7 @@ export async function POST(req: NextRequest) {
       image: body.image,
       showOnHome: !!body.showOnHome
     });
+    revalidatePath("/", "layout"); // одразу оновити кеш сайту
     return NextResponse.json(print, { status: 201 });
   } catch (err) {
     console.error("[admin/prints] create failed:", err);

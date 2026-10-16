@@ -4,8 +4,9 @@ import PrintGrid from "@/components/PrintGrid";
 import { getPrintCategories, getPrints } from "@/lib/data";
 
 export const metadata = {
-  title: "Принти — CAS-Print",
-  description: "Усі готові принти CAS-Print: обери свій і нанеси на футболку чи худі."
+  title: "Готові принти для футболок і худі",
+  description: "Усі готові принти CAS-Print: обери свій дизайн і нанеси на футболку, худі чи світшот.",
+  alternates: { canonical: "/prints" }
 };
 export const dynamic = "force-dynamic";
 

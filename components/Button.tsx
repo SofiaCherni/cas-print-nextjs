@@ -10,7 +10,7 @@ interface Props extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const base =
-  "inline-flex items-center justify-center gap-2 px-7 py-4 text-sm font-bold tracking-wide rounded border transition-colors duration-300";
+  "inline-flex items-center justify-center gap-2 px-7 py-4 text-sm font-bold tracking-wide rounded border transition-[color,background-color,border-color,transform] duration-300 active:scale-[0.98]";
 
 const variants: Record<Variant, string> = {
   solid: "bg-paper text-bg border-paper hover:bg-accentHover hover:border-accentHover hover:text-paper",

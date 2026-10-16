@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import ConsentCheckbox from "@/components/ConsentCheckbox";
+import { trackLead } from "@/lib/analytics";
 import Button from "@/components/Button";
 import { FABRICS, FABRIC_ORDER, FabricKey, colorsByName, fabricTitle, getTemplate } from "@/lib/product-templates";
 import { Fit } from "@/lib/types";
@@ -37,6 +39,7 @@ export default function CustomPrintPage() {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
+  const [consent, setConsent] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -67,6 +70,10 @@ export default function CustomPrintPage() {
       setError("Заповніть контактні дані, щоб ми могли з вами зв'язатися.");
       return;
     }
+    if (!consent) {
+      setError("Потрібна згода на обробку персональних даних.");
+      return;
+    }
     setSubmitting(true);
     setError(null);
     const fd = new FormData();
@@ -81,6 +88,7 @@ export default function CustomPrintPage() {
     fd.append("customerName", name);
     fd.append("customerPhone", phone);
     fd.append("customerEmail", email);
+    fd.append("consent", "true");
     try {
       const res = await fetch("/api/custom-print-requests", { method: "POST", body: fd });
       if (!res.ok) {
@@ -88,6 +96,7 @@ export default function CustomPrintPage() {
         setError(data.error ?? "Не вдалося надіслати заявку.");
         return;
       }
+      trackLead();
       setDone(true);
     } catch {
       setError("Не вдалося звʼязатися з сервером.");
@@ -268,6 +277,11 @@ export default function CustomPrintPage() {
             </div>
           </div>
 
+          <ConsentCheckbox
+            checked={consent}
+            onChange={setConsent}
+            purpose="опрацювання заявки та звʼязку зі мною"
+          />
           {error && <p className="text-xs text-accent mt-4">{error}</p>}
           <Button type="submit" variant="accent" className="w-full py-[18px] mt-8" disabled={submitting}>
             {submitting ? "НАДСИЛАННЯ…" : "ВІДПРАВИТИ ЗАЯВКУ"}

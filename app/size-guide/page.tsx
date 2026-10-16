@@ -1,7 +1,11 @@
 import SizeChartImage from "@/components/SizeChartImage";
 import { SIZE_CHARTS } from "@/lib/size-charts";
 
-export const metadata = { title: "Розмірна сітка — CAS-Print" };
+export const metadata = {
+  title: "Розмірна сітка",
+  description: "Розмірна сітка CAS-Print: виміри футболок, світшотів і худі в сантиметрах, щоб обрати свій розмір.",
+  alternates: { canonical: "/size-guide" }
+};
 
 // Цифри таблиць — у lib/size-charts.ts. Картинки — public/assets/size-guide/<id>.jpg
 export default function SizeGuidePage() {

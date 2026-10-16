@@ -52,7 +52,7 @@ export default function Header() {
 
   useEffect(() => {
     const onScroll = () => setCompact(window.scrollY > 40);
-    window.addEventListener("scroll", onScroll);
+    window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 

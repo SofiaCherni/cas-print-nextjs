@@ -1,7 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import Image from "next/image";
+import { useEffect, useMemo, useState } from "react";
+import FadeImage from "@/components/FadeImage";
 import { notFound } from "next/navigation";
 import { Product, Size, Fit } from "@/lib/types";
 import { formatPrice } from "@/lib/catalog-constants";
@@ -13,8 +13,9 @@ import Accordion from "@/components/Accordion";
 import Button from "@/components/Button";
 import { useCart } from "@/lib/cart-context";
 import { FABRICS, FABRIC_ORDER, FabricKey, getTemplate } from "@/lib/product-templates";
-import { variantPrice, variantOldPrice } from "@/lib/pricing";
+import { variantPrice, variantOldPrice, productFromPrice } from "@/lib/pricing";
 import FabricSelector from "@/components/FabricSelector";
+import { trackAddToCart, trackViewItem } from "@/lib/analytics";
 import { sizeChartIdFor } from "@/lib/size-charts";
 
 const SIZE_ORDER = ["XS", "S", "M", "L", "XL", "XXL", "3XL", "4XL", "5XL", "ONE SIZE", "Подовжене", "Вкорочене"];
@@ -75,11 +76,25 @@ export default function ProductView({ product }: { product: Product }) {
     [fabricVariants, fit, size, colorName]
   );
 
+  // Подія «перегляд товару» — один раз на відкриття сторінки.
+  useEffect(() => {
+    if (!product) return;
+    trackViewItem({ id: product.id, name: product.name, price: productFromPrice(product).price });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [product?.id]);
+
   if (!product) return notFound();
 
   function handleAdd() {
     if (!variant) return;
     addItem(product.id, variant.id, qty);
+    trackAddToCart({
+      id: product.id,
+      name: product.name,
+      price: variantPrice(product, variant),
+      quantity: qty,
+      variant: [variant.fabric, variant.size, variant.color.name].filter(Boolean).join(" / ")
+    });
     setAdded(true);
     setTimeout(() => setAdded(false), 2000);
   }
@@ -94,8 +109,8 @@ export default function ProductView({ product }: { product: Product }) {
     { title: "ДОГЛЯД", content: "Рекомендації з прання та догляду — TODO: NEED REAL BUSINESS DATA." },
     { title: "РОЗМІРНА СІТКА", content: "Таблиця відповідності розмірів у см — див. сторінку «Розмірна сітка»." },
     { title: "ПАЛІТРА КОЛЬОРІВ", content: `Доступні кольори${fabric ? ` (${FABRICS[fabric].label})` : " для цієї моделі"}: ${colors.map((c) => c.name).join(", ")}.` },
-    { title: "ДОСТАВКА ТА ОПЛАТА", content: "Способи доставки й оплати — TODO: NEED REAL BUSINESS DATA." },
-    { title: "ОБМІН ТА ПОВЕРНЕННЯ", content: "Умови обміну та повернення — TODO: NEED REAL BUSINESS DATA." }
+    { title: "ОПЛАТА І ДОСТАВКА", content: "Оплата: повна оплата онлайн, оплата при отриманні (50% передплата), готівка або безготівковий розрахунок. Доставка тільки через Нову Пошту, термін 3–5 робочих днів, вартість за тарифами перевізника." },
+    { title: "ОБМІН ТА ПОВЕРНЕННЯ", content: "Повернути або обміняти товар належної якості (невикористаний і неушкоджений) можна протягом 14 днів з дня покупки. Кошти повертаються за вирахуванням витрат на доставку товару покупцеві." }
   ];
 
   return (
@@ -103,12 +118,25 @@ export default function ProductView({ product }: { product: Product }) {
       <div className="max-w-[1360px] mx-auto grid md:grid-cols-[1.2fr_1fr] gap-14 py-14 pb-28">
         <div>
           <div className="relative aspect-[4/5] mb-2.5 bg-bgSoft">
-            <Image src={product.images[0]} alt={product.name} fill className="object-cover" />
+            <FadeImage
+              src={product.images[0]}
+              alt={product.name}
+              fill
+              priority
+              sizes="(max-width: 768px) 100vw, 55vw"
+              className="object-cover"
+            />
           </div>
           <div className="grid grid-cols-4 gap-2">
             {product.images.map((img, i) => (
               <div key={i} className="relative aspect-square bg-bgSoft">
-                <Image src={img} alt={`${product.name} ${i + 1}`} fill className="object-cover" />
+                <FadeImage
+                  src={img}
+                  alt={`${product.name} ${i + 1}`}
+                  fill
+                  sizes="(max-width: 768px) 25vw, 12vw"
+                  className="object-cover"
+                />
               </div>
             ))}
           </div>

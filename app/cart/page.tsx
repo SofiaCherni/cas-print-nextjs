@@ -48,7 +48,7 @@ export default function CartPage() {
             {lines.map(({ product, variant, quantity }) => (
               <div key={variant.id} className="grid grid-cols-[74px_1fr_auto] gap-4 px-6 py-5 border-b border-line">
                 <div className="relative w-[74px] h-[92px] bg-bg">
-                  <Image src={product.images[0]} alt={product.name} fill className="object-cover" />
+                  <Image src={product.images[0]} alt={product.name} fill sizes="96px" className="object-cover" />
                 </div>
                 <div>
                   <p className="text-sm font-semibold mb-1">{product.name}</p>

@@ -6,7 +6,8 @@ export const dynamic = "force-dynamic";
 
 export function generateMetadata({ searchParams }: { searchParams: { q?: string } }) {
   const q = searchParams.q ?? "";
-  return { title: q ? `Пошук: ${q} — CAS-Print` : "Пошук — CAS-Print" };
+  // Сторінки пошуку не індексуємо — це нескінченна кількість дублів.
+  return { title: q ? `Пошук: ${q}` : "Пошук", robots: { index: false, follow: true } };
 }
 
 export default async function SearchPage({ searchParams }: { searchParams: { q?: string } }) {

@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { Prisma } from "@prisma/client";
 import { prisma } from "./prisma";
 import { baseCategoryToDb, cutStyleToDb, fitToDb, mapProduct } from "./db-mappers";
@@ -114,10 +115,11 @@ export async function queryProducts(query: CatalogQuery, includeHidden = false) 
   return { items: rows.map(mapProduct), total, page, pageSize };
 }
 
-export async function getProductBySlug(slug: string): Promise<Product | undefined> {
+// cache(): generateMetadata і сама сторінка викликають її двічі за один запит — у базу піде лише один.
+export const getProductBySlug = cache(async (slug: string): Promise<Product | undefined> => {
   const row = await prisma.product.findUnique({ where: { slug }, include: { variants: true } });
   return row ? mapProduct(row) : undefined;
-}
+});
 
 /**
  * Distinct print category strings already used across products — powers

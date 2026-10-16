@@ -1,10 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import ConsentCheckbox from "@/components/ConsentCheckbox";
 import { useCart } from "@/lib/cart-context";
 import { formatPrice } from "@/lib/catalog-constants";
 import Button from "@/components/Button";
 import EmptyState from "@/components/EmptyState";
+import { trackBeginCheckout, trackPurchase, TrackItem } from "@/lib/analytics";
+import { variantPrice } from "@/lib/pricing";
 
 type ContactMethod = "viber" | "telegram" | "whatsapp";
 
@@ -24,6 +27,7 @@ export default function CheckoutPage() {
   const [contactMethod, setContactMethod] = useState<ContactMethod>("viber");
   const [city, setCity] = useState("");
   const [postomatNumber, setPostomatNumber] = useState("");
+  const [consent, setConsent] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [orderNumber, setOrderNumber] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -32,11 +36,32 @@ export default function CheckoutPage() {
     if (cartPhone) setPhone(cartPhone);
   }, [cartPhone]);
 
+  const trackItems: TrackItem[] = lines.map((l) => ({
+    id: l.product.id,
+    name: l.product.name,
+    price: variantPrice(l.product, l.variant),
+    quantity: l.quantity,
+    variant: [l.variant.fabric, l.variant.size, l.variant.color.name].filter(Boolean).join(" / ")
+  }));
+
+  // Подія «початок оформлення» — один раз, коли кошик завантажився й не порожній.
+  const checkoutTracked = useRef(false);
+  useEffect(() => {
+    if (!cartReady || lines.length === 0 || checkoutTracked.current) return;
+    checkoutTracked.current = true;
+    trackBeginCheckout(trackItems, subtotal);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cartReady, lines.length]);
+
   // Delivery cost is not invented here per brief section 27 — real cost is
   // "за тарифами перевізника" (Nova Poshta), confirmed with the customer
   // after the order is placed.
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (!consent) {
+      setError("Потрібна згода на обробку персональних даних.");
+      return;
+    }
     setSubmitting(true);
     setError(null);
     try {
@@ -47,7 +72,8 @@ export default function CheckoutPage() {
           items,
           contact: { lastName, firstName, patronymic, phone, contactMethod },
           delivery: { city, postomatNumber },
-          comment
+          comment,
+          consent
         })
       });
       const data = await res.json();
@@ -55,6 +81,8 @@ export default function CheckoutPage() {
         setError(data.error ?? "Не вдалося оформити замовлення.");
         return;
       }
+      // Покупка: сума береться з відповіді сервера (з урахуванням акцій).
+      trackPurchase(String(data.orderNumber), trackItems, Number(data.subtotal ?? subtotal));
       setOrderNumber(data.orderNumber);
       clear();
     } catch {
@@ -192,6 +220,11 @@ export default function CheckoutPage() {
             Оплату узгодимо з вами в обраному месенджері після підтвердження
             замовлення — онлайн-оплата на сайті поки не підключена.
           </p>
+          <ConsentCheckbox
+            checked={consent}
+            onChange={setConsent}
+            purpose="оформлення замовлення, його доставки та звʼязку зі мною"
+          />
           {error && <p className="text-xs text-accent mt-4">{error}</p>}
           <Button type="submit" variant="accent" className="w-full py-[18px] mt-5" disabled={submitting}>
             {submitting ? "ОБРОБКА…" : "ЗАМОВИТИ"}

@@ -1,3 +1,4 @@
+import { revalidatePath } from "next/cache";
 import { NextRequest, NextResponse } from "next/server";
 import { deletePrint, updatePrint } from "@/lib/data";
 
@@ -23,6 +24,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
 
   try {
     await updatePrint(params.id, data);
+    revalidatePath("/", "layout"); // одразу оновити кеш сайту
     return NextResponse.json({ ok: true });
   } catch (err) {
     console.error("[admin/prints] update failed:", err);
@@ -33,6 +35,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
 export async function DELETE(_req: NextRequest, { params }: { params: { id: string } }) {
   try {
     await deletePrint(params.id);
+    revalidatePath("/", "layout"); // одразу оновити кеш сайту
     return NextResponse.json({ ok: true });
   } catch (err) {
     console.error("[admin/prints] delete failed:", err);

@@ -8,7 +8,13 @@ export function generateStaticParams() {
 
 export function generateMetadata({ params }: { params: { category: string } }) {
   const cat = BASE_CATEGORIES.find((c) => c.slug === params.category);
-  return { title: cat ? `${cat.label} — CAS-Print` : "Каталог — CAS-Print" };
+  if (!cat) return { title: "Каталог", robots: { index: false, follow: true } };
+  return {
+    title: `${cat.label} з принтами — купити`,
+    description: `${cat.label} з принтами від CAS-Print: готові дизайни та власний принт. Обирай розмір і колір, доставка Новою Поштою по Україні.`,
+    // Фільтри в адресі (?color=…) не створюють дублів у пошуку — canonical завжди чиста адреса розділу.
+    alternates: { canonical: `/catalog/${cat.slug}` }
+  };
 }
 
 export default function CategoryPage({

@@ -29,6 +29,9 @@ export async function POST(req: NextRequest) {
   const customerPhone = formData.get("customerPhone") as string | null;
   const customerEmail = formData.get("customerEmail") as string | null;
 
+  if (formData.get("consent") !== "true") {
+    return NextResponse.json({ error: "Потрібна згода на обробку персональних даних." }, { status: 400 });
+  }
   if (!file) {
     return NextResponse.json({ error: "Додайте зображення." }, { status: 400 });
   }

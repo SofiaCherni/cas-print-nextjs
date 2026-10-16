@@ -1,3 +1,4 @@
+import { revalidatePath } from "next/cache";
 import { NextRequest, NextResponse } from "next/server";
 import { createProduct, CreateProductInput } from "@/lib/data";
 import { getTemplate } from "@/lib/product-templates";
@@ -37,6 +38,7 @@ export async function POST(req: NextRequest) {
 
   try {
     const product = await createProduct(body);
+    revalidatePath("/", "layout"); // одразу оновити кеш сайту
     return NextResponse.json(product, { status: 201 });
   } catch (err) {
     console.error("[admin/products] create failed:", err);

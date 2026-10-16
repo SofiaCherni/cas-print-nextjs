@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { SOCIALS } from "@/lib/site-config";
 
 export default function Footer() {
   return (
@@ -24,7 +25,7 @@ export default function Footer() {
           <div>
             <h5 className="text-xs tracking-wide text-muted font-bold mb-4">ПОКУПЦЯМ</h5>
             <ul className="space-y-2.5 text-sm opacity-85">
-              <li><Link href="/delivery-and-payment">Доставка та оплата</Link></li>
+              <li><Link href="/delivery-and-payment">Оплата і доставка</Link></li>
               <li><Link href="/returns">Обмін та повернення</Link></li>
               <li><Link href="/size-guide">Розмірна сітка</Link></li>
               <li><Link href="/contacts">Контакти</Link></li>
@@ -33,14 +34,24 @@ export default function Footer() {
           <div>
             <h5 className="text-xs tracking-wide text-muted font-bold mb-4">СОЦМЕРЕЖІ</h5>
             <ul className="space-y-2.5 text-sm opacity-85">
-              <li>Instagram</li>
-              <li>TikTok</li>
+              <li>
+                <a href={SOCIALS.instagram.url} target="_blank" rel="noopener noreferrer" className="hover:text-accent transition-colors">
+                  {SOCIALS.instagram.label}
+                </a>
+              </li>
+              <li>
+                <a href={SOCIALS.telegram.url} target="_blank" rel="noopener noreferrer" className="hover:text-accent transition-colors">
+                  {SOCIALS.telegram.label}
+                </a>
+              </li>
             </ul>
           </div>
         </div>
         <div className="flex flex-wrap justify-between gap-2 text-xs text-muted">
           <span>© 2026 CAS-PRINT</span>
-          <span>Політика конфіденційності · Оферта</span>
+          <span>
+            <Link href="/privacy" className="hover:text-paper transition-colors">Політика конфіденційності</Link> · Оферта
+          </span>
         </div>
       </div>
     </footer>

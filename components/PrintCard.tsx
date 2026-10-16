@@ -1,4 +1,4 @@
-import Image from "next/image";
+import FadeImage from "./FadeImage";
 import Link from "next/link";
 import { Print } from "@/lib/types";
 
@@ -15,7 +15,7 @@ export default function PrintCard({ print }: { print: Print }) {
   return (
     <Link href={href} className="group block bg-bgSoft">
       <div className="relative aspect-[3/4] overflow-hidden">
-        <Image
+        <FadeImage
           src={print.image}
           alt={print.name}
           fill

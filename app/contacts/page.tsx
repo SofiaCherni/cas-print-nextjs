@@ -1,6 +1,12 @@
-export const metadata = { title: "Контакти — CAS-Print" };
+import { SOCIALS } from "@/lib/site-config";
 
-// TODO: NEED REAL BUSINESS DATA — replace with real phone/email/social links.
+export const metadata = {
+  title: "Контакти",
+  description: "Звʼяжіться з CAS-Print: Instagram, Telegram та інші контакти магазину.",
+  alternates: { canonical: "/contacts" }
+};
+
+// TODO: NEED REAL BUSINESS DATA — телефон і email.
 export default function ContactsPage() {
   return (
     <main className="px-5 md:px-8">
@@ -16,9 +22,15 @@ export default function ContactsPage() {
 
         <div className="py-7 border-t border-line last:border-b">
           <h2 className="font-display font-bold text-lg mb-3">СОЦМЕРЕЖІ</h2>
-          <p className="text-muted text-sm leading-relaxed">
-            Instagram, TikTok — TODO: NEED REAL BUSINESS DATA (посилання на реальні акаунти).
-          </p>
+          <ul className="text-sm leading-relaxed space-y-2">
+            {Object.values(SOCIALS).map((so) => (
+              <li key={so.label}>
+                <a href={so.url} target="_blank" rel="noopener noreferrer" className="hover:text-accent transition-colors">
+                  {so.label} — <span className="text-muted">{so.handle}</span>
+                </a>
+              </li>
+            ))}
+          </ul>
         </div>
       </div>
     </main>

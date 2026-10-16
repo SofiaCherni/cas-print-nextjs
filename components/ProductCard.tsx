@@ -1,4 +1,4 @@
-import Image from "next/image";
+import FadeImage from "./FadeImage";
 import Link from "next/link";
 import { Product } from "@/lib/types";
 import { formatPrice } from "@/lib/data";
@@ -9,7 +9,7 @@ export default function ProductCard({ product }: { product: Product }) {
   return (
     <Link href={`/product/${product.slug}`} className="group block bg-bgSoft">
       <div className="relative aspect-[3/4] overflow-hidden">
-        <Image
+        <FadeImage
           src={product.images[0]}
           alt={product.name}
           fill

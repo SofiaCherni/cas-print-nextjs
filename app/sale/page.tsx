@@ -1,7 +1,11 @@
 import { getSaleProducts } from "@/lib/data";
 import ProductGrid from "@/components/ProductGrid";
 
-export const metadata = { title: "Sale — CAS-Print" };
+export const metadata = {
+  title: "Sale — знижки на футболки та худі",
+  description: "Акційні футболки, худі та світшоти CAS-Print за зниженими цінами.",
+  alternates: { canonical: "/sale" }
+};
 export const dynamic = "force-dynamic";
 
 /**
