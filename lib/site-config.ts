@@ -4,7 +4,13 @@
 
 // 1) ДОМЕН САЙТУ (без "/" в кінці). Використовується в SEO: canonical, sitemap, Open Graph.
 //    Заміни на свій реальний домен, коли він буде готовий.
-export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://cas-print.example";
+// Якщо домен не вказано, беремо адресу, яку Vercel підставляє сам (основний домен проєкту),
+// тож canonical/sitemap ніколи не вказують на неіснуючий сайт.
+const vercelHost = process.env.VERCEL_PROJECT_PRODUCTION_URL || process.env.VERCEL_URL;
+export const SITE_URL = (
+  process.env.NEXT_PUBLIC_SITE_URL ||
+  (vercelHost ? `https://${vercelHost}` : "https://cas-print.example")
+).replace(/\/+$/, "");
 
 // 2) КОДИ АНАЛІТИКИ ТА РЕКЛАМИ — встав свої значення між лапками.
 //    Порожній рядок "" = цей інструмент вимкнено (нічого не завантажується).

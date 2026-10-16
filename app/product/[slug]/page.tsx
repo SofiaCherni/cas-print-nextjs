@@ -20,8 +20,9 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   if (!product) return { title: "Товар не знайдено", robots: { index: false, follow: false } };
 
   const { price, old } = productFromPrice(product);
+  // Ціна йде на початку, щоб її не обрізало в сніпеті Google.
   const description = shortDescription(
-    `${product.name} — ${product.description} Від ${price} ₴${old ? " (акція)" : ""}. Доставка Новою Поштою.`
+    `${product.name} від ${price} ₴${old ? " (акція)" : ""}. ${product.description}`
   );
   const image = product.images[0];
   return {
