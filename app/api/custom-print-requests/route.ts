@@ -21,6 +21,8 @@ export async function POST(req: NextRequest) {
   const productId = formData.get("productId") as string | null;
   const size = formData.get("size") as string | null;
   const colorName = formData.get("colorName") as string | null;
+  const fit = formData.get("fit") as string | null;
+  const fabric = formData.get("fabric") as string | null;
   const text = formData.get("text") as string | null;
   const comment = formData.get("comment") as string | null;
   const customerName = formData.get("customerName") as string | null;
@@ -40,6 +42,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Заповніть усі обовʼязкові поля." }, { status: 400 });
   }
 
+  // Тканину й фасон зберігаємо разом із розміром (окремих колонок у таблиці немає).
+  const sizeDetails = [fabric, fit, size].filter(Boolean).join(" · ");
+
   try {
     const blob = await put(`custom-prints/${Date.now()}-${file.name}`, file, {
       access: "public" // signed/private access requires a paid Blob tier; see README note
@@ -48,7 +53,7 @@ export async function POST(req: NextRequest) {
     const request = await prisma.customPrintRequest.create({
       data: {
         productId,
-        size,
+        size: sizeDetails,
         colorName,
         fileUrl: blob.url,
         text: text || undefined,
@@ -65,7 +70,14 @@ export async function POST(req: NextRequest) {
       await sendEmail({
         to: notifyEmail,
         subject: "Нова заявка на власний принт",
-        html: customPrintNotificationEmail(blob.url, text || "", comment || "")
+        html: customPrintNotificationEmail(blob.url, text || "", comment || "", {
+          garment: productId,
+          size: sizeDetails,
+          colorName,
+          customerName,
+          customerPhone,
+          customerEmail
+        })
       });
     }
 

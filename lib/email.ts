@@ -78,10 +78,21 @@ export function orderNotificationEmail(
     </div>`;
 }
 
-export function customPrintNotificationEmail(fileUrl: string, text: string, comment: string) {
+export function customPrintNotificationEmail(
+  fileUrl: string,
+  text: string,
+  comment: string,
+  details?: { garment: string; size: string; colorName: string; customerName: string; customerPhone: string; customerEmail: string }
+) {
   return `
     <div style="font-family:sans-serif;">
       <h2>Нова заявка на власний принт</h2>
+      ${
+        details
+          ? `<p>Річ: ${details.garment}<br/>Параметри: ${details.size}<br/>Колір: ${details.colorName}</p>
+      <p>Клієнт: ${details.customerName}, ${details.customerPhone}, ${details.customerEmail}</p>`
+          : ""
+      }
       <p>Файл: <a href="${fileUrl}">${fileUrl}</a></p>
       <p>Текст на принті: ${text || "—"}</p>
       <p>Коментар: ${comment || "—"}</p>
