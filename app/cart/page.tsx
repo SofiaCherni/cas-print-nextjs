@@ -67,7 +67,11 @@ export default function CartPage() {
                     ВИДАЛИТИ
                   </button>
                 </div>
-                <div className="text-sm font-bold text-right">
+                <div
+                  className={`text-sm font-bold text-right ${
+                    variantOldPrice(product, variant) !== null ? "text-[#A20D20]" : ""
+                  }`}
+                >
                   {variantOldPrice(product, variant) !== null && (
                     <div className="text-xs font-normal text-[#A20D20] line-through">
                       {formatPrice(variant.price * quantity)}

@@ -43,7 +43,7 @@ export default function FabricSelector({
                     {formatPrice(o.oldPrice)}
                   </span>
                 )}
-                {formatPrice(o.price)}
+                <span className={o.oldPrice !== null ? "text-[#A20D20]" : ""}>{formatPrice(o.price)}</span>
               </span>
             </button>
           );
