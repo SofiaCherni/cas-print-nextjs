@@ -55,8 +55,8 @@ export default async function HomePage() {
       </section>
 
       {/* Блок 2 — ОБЕРИ СВІЙ ПРИНТ */}
-      <section className="py-24 md:py-32 px-5 md:px-8">
-        <div className="max-w-[1360px] mx-auto">
+      <section className="py-12 md:py-16 px-5 md:px-8">
+        <div className="lg:w-[85%] xl:w-[70%] mx-auto">
           <div className="flex items-end justify-between gap-6 flex-wrap mb-10">
             <Reveal><h2 className="font-display font-extrabold text-3xl md:text-5xl tracking-[0.015em]">
               ОБЕРИ СВІЙ ПРИНТ
@@ -66,7 +66,7 @@ export default async function HomePage() {
             </Button>
           </div>
           {printCategories.length > 0 && (
-            <div className="flex flex-wrap gap-2.5 mb-14">
+            <div className="flex flex-wrap gap-2.5 mb-10">
               {printCategories.map((c) => (
                 <Link
                   key={c}
@@ -87,8 +87,8 @@ export default async function HomePage() {
       </section>
 
       {/* Блок 3 — ОБЕРИ РІЧ */}
-      <section className="py-24 md:py-32 px-5 md:px-8">
-        <div className="max-w-[1360px] mx-auto">
+      <section className="py-12 md:py-16 px-5 md:px-8">
+        <div className="lg:w-[85%] xl:w-[70%] mx-auto">
           <Reveal><h2 className="font-display font-extrabold text-3xl md:text-5xl tracking-[0.015em] mb-10">
             ОБЕРИ РІЧ
           </h2></Reveal>
@@ -112,7 +112,7 @@ export default async function HomePage() {
                    className="object-cover transition-transform duration-500 group-hover:scale-[1.045]"
                  />
                 <div className="absolute inset-0 bg-gradient-to-t from-bg/80 via-bg/10 to-transparent" />
-                <h3 className="relative font-display font-extrabold text-2xl group-hover:text-accent transition-colors">
+                <h3 className="relative font-display font-extrabold text-xl lg:text-2xl group-hover:text-accent transition-colors">
                   {c.label}
                 </h3>
               </Link>
@@ -123,7 +123,7 @@ export default async function HomePage() {
       </section>
 
       {/* Блок 4 — ПОПУЛЯРНЕ */}
-      <section className="py-24 md:py-32 px-5 md:px-8">
+      <section className="py-12 md:py-16 px-5 md:px-8">
         <div className="max-w-[1360px] mx-auto">
           <div className="flex items-end justify-between gap-6 flex-wrap mb-10">
             <Reveal><h2 className="font-display font-extrabold text-3xl md:text-5xl tracking-[0.015em]">ПОПУЛЯРНЕ</h2></Reveal>
@@ -161,12 +161,12 @@ export default async function HomePage() {
       </section>
 
       {/* Блок 6 — ЯКІСТЬ ПРИНТА */}
-      <section className="py-24 md:py-32 px-5 md:px-8">
+      <section className="py-12 md:py-16 px-5 md:px-8">
         <div className="max-w-[1360px] mx-auto">
           <Reveal><h2 className="font-display font-extrabold text-3xl md:text-5xl tracking-[0.015em] max-w-2xl mb-10">
             ПРИНТ, ЯКИЙ ХОЧЕТЬСЯ РОЗГЛЯДАТИ
           </h2></Reveal>
-          <div className="grid md:grid-cols-[1.1fr_0.9fr] border border-line">
+          <div className="grid md:grid-cols-[1.1fr_0.9fr]">
             <div className="relative min-h-[280px] md:min-h-[340px]">
               <FadeImage
                 src="/assets/home/print-detail.jpg"
@@ -194,7 +194,7 @@ export default async function HomePage() {
       </section>
 
       {/* Блок 7 — ЯК ЦЕ ПРАЦЮЄ */}
-      <section className="py-24 md:py-32 px-5 md:px-8">
+      <section className="py-12 md:py-16 px-5 md:px-8">
         <div className="max-w-[1360px] mx-auto">
           <Reveal><h2 className="font-display font-extrabold text-3xl md:text-5xl tracking-[0.015em] mb-10">
             ЯК ЦЕ ПРАЦЮЄ
@@ -217,7 +217,7 @@ export default async function HomePage() {
       </section>
 
       {/* Блок 8 — НОСИ СВОЄ */}
-      <section className="py-24 md:py-32 px-5 md:px-8">
+      <section className="py-12 md:py-16 px-5 md:px-8">
         <div className="max-w-[1360px] mx-auto">
           <Reveal><h2 className="font-display font-extrabold text-3xl md:text-5xl tracking-[0.015em] mb-10">
             НОСИ СВОЄ
@@ -254,7 +254,7 @@ export default async function HomePage() {
       </section>
 
       {/* Блок 9 — ФІНАЛЬНИЙ CTA */}
-      <section className="bg-black text-center py-28 md:py-36 px-5">
+      <section className="bg-black text-center py-20 md:py-28 px-5">
         <Reveal><h2 className="font-display font-black text-4xl md:text-7xl tracking-[0.015em] mb-9">
           ЗНАЙДИ ТЕ, ЩО ТВОЄ
         </h2></Reveal>

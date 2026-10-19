@@ -39,7 +39,7 @@ export default function FabricSelector({
               </span>
               <span className="block text-[12px] font-semibold mt-1.5">
                 {o.oldPrice !== null && (
-                  <span className={`line-through mr-1.5 font-normal ${isSelected ? "text-bg/60" : "text-muted"}`}>
+                  <span className="line-through mr-1.5 font-normal text-[#A20D20]">
                     {formatPrice(o.oldPrice)}
                   </span>
                 )}

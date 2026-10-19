@@ -29,7 +29,7 @@ export default function ProductCard({ product }: { product: Product }) {
         <p className="text-sm font-semibold mb-1">{product.name}</p>
         <p className="text-[13px] text-muted">
           від{" "}
-          {old !== null && <span className="line-through mr-1.5">{formatPrice(old)}</span>}
+          {old !== null && <span className="line-through mr-1.5 text-[#A20D20]">{formatPrice(old)}</span>}
           <span className={old !== null ? "text-accent font-bold" : ""}>{formatPrice(price)}</span>
         </p>
         <span
