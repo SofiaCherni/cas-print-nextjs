@@ -149,8 +149,8 @@ export default function ProductView({ product }: { product: Product }) {
             const old = variant ? variantOldPrice(product, variant) : null;
             return old !== null ? (
               <p className="text-lg mb-5 flex items-baseline gap-3">
-                <span className="text-[#A20D20] line-through">{formatPrice(old)}</span>
-                <span className="font-bold text-[#A20D20]">{formatPrice(price)}</span>
+                <span className="text-xl text-paper line-through">{formatPrice(old)}</span>
+                <span className="text-2xl font-bold text-[#A20D20]">{formatPrice(price)}</span>
               </p>
             ) : (
               <p className="text-lg mb-5">{formatPrice(price)}</p>

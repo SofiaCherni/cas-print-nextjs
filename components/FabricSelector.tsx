@@ -39,11 +39,11 @@ export default function FabricSelector({
               </span>
               <span className="block text-[12px] font-semibold mt-1.5">
                 {o.oldPrice !== null && (
-                  <span className="line-through mr-1.5 font-normal text-[#A20D20]">
+                  <span className={`line-through mr-1.5 font-normal text-[13px] ${isSelected ? "text-bg" : "text-paper"}`}>
                     {formatPrice(o.oldPrice)}
                   </span>
                 )}
-                <span className={o.oldPrice !== null ? "text-[#A20D20]" : ""}>{formatPrice(o.price)}</span>
+                <span className={o.oldPrice !== null ? "text-[15px] text-[#A20D20]" : ""}>{formatPrice(o.price)}</span>
               </span>
             </button>
           );

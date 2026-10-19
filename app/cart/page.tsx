@@ -68,12 +68,12 @@ export default function CartPage() {
                   </button>
                 </div>
                 <div
-                  className={`text-sm font-bold text-right ${
-                    variantOldPrice(product, variant) !== null ? "text-[#A20D20]" : ""
+                  className={`font-bold text-right ${
+                    variantOldPrice(product, variant) !== null ? "text-base text-[#A20D20]" : "text-sm"
                   }`}
                 >
                   {variantOldPrice(product, variant) !== null && (
-                    <div className="text-xs font-normal text-[#A20D20] line-through">
+                    <div className="text-sm font-normal text-paper line-through">
                       {formatPrice(variant.price * quantity)}
                     </div>
                   )}
