@@ -3,6 +3,7 @@ import { Prisma } from "@prisma/client";
 import { prisma } from "./prisma";
 import { baseCategoryToDb, cutStyleToDb, fitToDb, mapProduct } from "./db-mappers";
 import { FABRICS, getTemplate } from "./product-templates";
+import { productFromPrice } from "./pricing";
 import { CutStyle, Fit, Print, Product, ProductBaseCategory, Size } from "./types";
 import {
   BASE_CATEGORIES,
@@ -64,13 +65,6 @@ function buildWhere(query: CatalogQuery, includeHidden: boolean): Prisma.Product
   if (query.printCategory) {
     where.printCategory = { equals: query.printCategory, mode: "insensitive" };
   }
-  if (typeof query.minPrice === "number" || typeof query.maxPrice === "number") {
-    const range: { gte?: number; lte?: number } = {};
-    if (typeof query.minPrice === "number") range.gte = query.minPrice;
-    if (typeof query.maxPrice === "number") range.lte = query.maxPrice;
-    where.basePrice = range;
-  }
-
   const variantFilters: Prisma.VariantWhereInput = {};
   if (query.size) variantFilters.size = query.size;
   if (query.fit) variantFilters.fit = fitToDb(query.fit);
@@ -89,30 +83,42 @@ function buildWhere(query: CatalogQuery, includeHidden: boolean): Prisma.Product
 export async function queryProducts(query: CatalogQuery, includeHidden = false) {
   const where = buildWhere(query, includeHidden);
 
+  // Ціна для каталогу — та сама «від» ціна, яку показує ProductCard:
+  // з урахуванням акції та найдешевшого варіанта. Її не можна коректно
+  // фільтрувати/сортувати через Product.basePrice, бо це звичайна ціна.
   const orderBy =
     query.sort === "new"
       ? [{ createdAt: "desc" as const }]
-      : query.sort === "price-asc"
-      ? [{ basePrice: "asc" as const }]
-      : query.sort === "price-desc"
-      ? [{ basePrice: "desc" as const }]
       : [{ popular: "desc" as const }, { createdAt: "desc" as const }];
 
-  const page = query.page ?? 1;
-  const pageSize = query.pageSize ?? 12;
+  const page = Math.max(1, query.page ?? 1);
+  const pageSize = Math.max(1, query.pageSize ?? 12);
 
-  const [rows, total] = await Promise.all([
-    prisma.product.findMany({
-      where,
-      include: { variants: true },
-      orderBy,
-      skip: (page - 1) * pageSize,
-      take: pageSize
-    }),
-    prisma.product.count({ where })
-  ]);
+  // Для коректної ціни спершу завантажуємо всі товари, що відповідають
+  // категоріям/варіантам, а потім фільтруємо, сортуємо й розбиваємо на сторінки.
+  const rows = await prisma.product.findMany({
+    where,
+    include: { variants: true },
+    orderBy
+  });
 
-  return { items: rows.map(mapProduct), total, page, pageSize };
+  let items = rows.map(mapProduct);
+
+  if (typeof query.minPrice === "number") {
+    items = items.filter((product) => productFromPrice(product).price >= query.minPrice!);
+  }
+  if (typeof query.maxPrice === "number") {
+    items = items.filter((product) => productFromPrice(product).price <= query.maxPrice!);
+  }
+
+  if (query.sort === "price-asc" || query.sort === "price-desc") {
+    const direction = query.sort === "price-asc" ? 1 : -1;
+    items.sort((a, b) => direction * (productFromPrice(a).price - productFromPrice(b).price));
+  }
+
+  const total = items.length;
+  const start = (page - 1) * pageSize;
+  return { items: items.slice(start, start + pageSize), total, page, pageSize };
 }
 
 // cache(): generateMetadata і сама сторінка викликають її двічі за один запит — у базу піде лише один.
