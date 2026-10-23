@@ -9,7 +9,6 @@ import SizeSelector from "@/components/SizeSelector";
 import FitToggle from "@/components/FitToggle";
 import ColorSwatches from "@/components/ColorSwatches";
 import QuantityStepper from "@/components/QuantityStepper";
-import Accordion from "@/components/Accordion";
 import Button from "@/components/Button";
 import { useCart } from "@/lib/cart-context";
 import { FABRICS, FABRIC_ORDER, FabricKey, getTemplate } from "@/lib/product-templates";
@@ -101,17 +100,6 @@ export default function ProductView({ product }: { product: Product }) {
 
   const sizeLabel = template?.sizeLabel ?? "РОЗМІР";
   const guideId = sizeChartIdFor(product, fit, fabric);
-  const fabricNote = fabric ? ` Тканина: ${FABRICS[fabric].label} — ${FABRICS[fabric].gsm} г/м².` : "";
-
-  const accordionItems = [
-    { title: "ОПИС", content: product.description + fabricNote },
-    { title: "ХАРАКТЕРИСТИКИ", content: "Склад, щільність, країна виробництва — TODO: NEED REAL BUSINESS DATA." },
-    { title: "ДОГЛЯД", content: "Рекомендації з прання та догляду — TODO: NEED REAL BUSINESS DATA." },
-    { title: "РОЗМІРНА СІТКА", content: "Таблиця відповідності розмірів у см — див. сторінку «Розмірна сітка»." },
-    { title: "ПАЛІТРА КОЛЬОРІВ", content: `Доступні кольори${fabric ? ` (${FABRICS[fabric].label})` : " для цієї моделі"}: ${colors.map((c) => c.name).join(", ")}.` },
-    { title: "ОПЛАТА І ДОСТАВКА", content: "Оплата: повна оплата онлайн, оплата при отриманні (50% передплата), готівка або безготівковий розрахунок. Доставка тільки через Нову Пошту, термін 3–5 робочих днів, вартість за тарифами перевізника." },
-    { title: "ОБМІН ТА ПОВЕРНЕННЯ", content: "Повернути або обміняти товар належної якості (невикористаний і неушкоджений) можна протягом 14 днів з дня покупки. Кошти повертаються за вирахуванням витрат на доставку товару покупцеві." }
-  ];
 
   return (
     <main className="px-5 md:px-8">
@@ -156,7 +144,7 @@ export default function ProductView({ product }: { product: Product }) {
               <p className="text-lg mb-5">{formatPrice(price)}</p>
             );
           })()}
-          <p className="text-muted text-sm leading-relaxed mb-8">{product.description}</p>
+          <p className="text-muted text-sm leading-relaxed mb-8 whitespace-pre-line">{product.description}</p>
 
           <div className="space-y-7 mb-9">
             {fabric && (
@@ -183,9 +171,6 @@ export default function ProductView({ product }: { product: Product }) {
             <p className="text-xs text-accent mt-2.5">Цей варіант тимчасово недоступний.</p>
           )}
 
-          <div className="mt-10">
-            <Accordion items={accordionItems} />
-          </div>
         </div>
       </div>
     </main>

@@ -9,6 +9,9 @@ export async function POST(req: NextRequest) {
   if (!body.name || !body.description || !body.baseCategory) {
     return NextResponse.json({ error: "Заповніть назву, опис і категорію." }, { status: 400 });
   }
+  if (!body.printCategory || !body.printCategory.trim()) {
+    return NextResponse.json({ error: "Заповніть категорію принту." }, { status: 400 });
+  }
   if (!body.images || body.images.length === 0) {
     return NextResponse.json({ error: "Додайте хоча б одне фото." }, { status: 400 });
   }

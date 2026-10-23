@@ -27,6 +27,9 @@ export interface ProductTemplate {
   // Якщо задано — розміри й кольори беруться з кожного типу окремо (див. FABRICS),
   // а sizesByFit/colors шаблону — лише об'єднання для сортування й сумісності.
   fabrics?: FabricKey[];
+  // Стандартна ціна в адмінці (можна змінити при додаванні товару).
+  // Для шаблонів з тканинами ціна береться з FABRICS[...].defaultPrice.
+  defaultPrice?: number;
 }
 
 export type FabricKey = "standard" | "premium" | "oversize";
@@ -42,6 +45,8 @@ export interface FabricOption {
   sizesByFit: Partial<Record<Fit, string[]>>;
   /** Назви кольорів з COLOR_PALETTE. */
   colors: string[];
+  /** Стандартна ціна в адмінці, ₴ (можна змінити при додаванні товару). */
+  defaultPrice: number;
 }
 
 /** «СТАНДАРТ — 155 г/м²» */
@@ -63,6 +68,7 @@ export const FABRICS: Record<FabricKey, FabricOption> = {
     key: "standard",
     label: "СТАНДАРТ",
     gsm: 155,
+    defaultPrice: 600,
     hint: "Легка та комфортна футболка для щоденного носіння.",
     sizesByFit: { unisex: UNISEX_SIZES, women: WOMEN_SIZES },
     colors: [
@@ -76,6 +82,7 @@ export const FABRICS: Record<FabricKey, FabricOption> = {
     key: "premium",
     label: "ПРЕМІУМ",
     gsm: 185,
+    defaultPrice: 800,
     hint: "Щільніша тканина, яка краще тримає форму та надає футболці дорожчого вигляду.",
     sizesByFit: { unisex: UNISEX_SIZES.slice(1), women: WOMEN_SIZES.slice(1) },
     colors: [
@@ -87,6 +94,7 @@ export const FABRICS: Record<FabricKey, FabricOption> = {
     key: "oversize",
     label: "ОВЕРСАЙЗ",
     gsm: 240,
+    defaultPrice: 1150,
     hint: "Щільна преміальна тканина та вільний крій. ONE SIZE, рекомендовано на зріст до 180 см.",
     sizesByFit: { unisex: ["ONE SIZE"] },
     colors: ["Чорний", "Коричневий", "Графіт", "Білий", "Беж", "Рожевий", "Кемел", "Лимон", "Червоний"]
@@ -107,7 +115,7 @@ export const PRODUCT_TEMPLATES: ProductTemplate[] = [
     baseCategory: "t-shirts",
     cutStyle: "classic",
     description:
-      "Футболка зі 100% бавовни. Покупець обирає тканину: Стандарт 155 г/м², Преміум 185 г/м² або Оверсайз 240 г/м².",
+      "Футболки 100% бавовна. Три варіанти. Відрізняються між собою щільністю тканини, палітрою кольорів і ціною.",
     sizesByFit: { unisex: UNISEX_SIZES, women: WOMEN_SIZES },
     sizeLabel: "РОЗМІР",
     fabrics: ["standard", "premium", "oversize"],
@@ -119,7 +127,7 @@ export const PRODUCT_TEMPLATES: ProductTemplate[] = [
     baseCategory: "t-shirts",
     cutStyle: "oversize",
     description:
-      "Футболка зі 100% бавовни. Покупець обирає тканину: Стандарт 155 г/м², Преміум 185 г/м² або Оверсайз 240 г/м².",
+      "Футболки 100% бавовна. Три варіанти. Відрізняються між собою щільністю тканини, палітрою кольорів і ціною.",
     sizesByFit: { unisex: ["ONE SIZE"] },
     sizeLabel: "РОЗМІР",
     fabrics: ["standard", "premium", "oversize"],
@@ -129,7 +137,9 @@ export const PRODUCT_TEMPLATES: ProductTemplate[] = [
     key: "sweatshirt",
     label: "Світшот",
     baseCategory: "sweatshirts",
-    description: "Світшот з принтом.",
+    description:
+      "Світшоти унісекс 80% бавовна / 20% поліестер; 280 щільність, підкладка з флісу з начосом; м’яка, приємна тканина. Принт витримує 60 циклів прання, і більше. Інструкція по догляду додається до замовлення.",
+    defaultPrice: 1170,
     sizesByFit: { unisex: ["XS", "S", "M", "L", "XL", "XXL"] },
     sizeLabel: "РОЗМІР",
     colors: [
@@ -143,7 +153,8 @@ export const PRODUCT_TEMPLATES: ProductTemplate[] = [
     label: "Худі (на флісі, оверсайз)",
     baseCategory: "hoodies",
     description:
-      "Худі на флісі, оверсайз, один розмір. Подовжене: півобхват грудей 65 см, довжина 75 см, рукав від шва 58 см. Вкорочене: півобхват грудей 65 см, довжина 67 см, рукав від шва 44 см. Допустима похибка ±2 см.",
+      "Склад 80% бавовна та 20% поліестер на флісі;\nЩільність 320 гр;\nПодовжена модель та вкорочена;\nРукави на еластичних манжетах;\nСтійкість до вицвітання.\nПринт витримує 60 циклів прання, і більше.\nІнструкція по догляду додається до замовлення.",
+    defaultPrice: 1650,
     sizesByFit: { unisex: ["Подовжене", "Вкорочене"] },
     sizeLabel: "ДОВЖИНА",
     colors: [

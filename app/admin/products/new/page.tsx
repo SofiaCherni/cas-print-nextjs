@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { PRODUCT_TEMPLATES, getTemplate, templateGroups, colorsByName } from "@/lib/product-templates";
+import { PRODUCT_TEMPLATES, FABRICS, FabricKey, getTemplate, templateGroups, colorsByName } from "@/lib/product-templates";
 import { BASE_CATEGORIES } from "@/lib/catalog-constants";
 import { ProductBaseCategory } from "@/lib/types";
 
@@ -48,11 +48,17 @@ export default function NewProductPage() {
   const [description, setDescription] = useState(getTemplate("tshirt-classic")!.description);
   const [productType, setProductType] = useState("tshirt-classic");
   const [printCategory, setPrintCategory] = useState("");
+  const [printCategoryError, setPrintCategoryError] = useState(false);
+  const printCategoryRef = useRef<HTMLInputElement>(null);
   const [existingCategories, setExistingCategories] = useState<string[]>([]);
   const template = getTemplate(productType)!;
   const groups = templateGroups(template);
   // Ціна, акційна ціна та кольори — окремо для кожної тканини.
+  // Порожнє значення = стандартна ціна шаблону (див. priceOf), яку можна змінити.
   const [prices, setPrices] = useState<Record<string, string>>({});
+  const defaultPriceOf = (g: { key: FabricKey | undefined }) =>
+    String(g.key ? FABRICS[g.key].defaultPrice : template.defaultPrice ?? "");
+  const priceOf = (g: { key: FabricKey | undefined }) => prices[gk(g.key)] ?? defaultPriceOf(g);
   const [salePrices, setSalePrices] = useState<Record<string, string>>({});
   const [colorSel, setColorSel] = useState<Record<string, string[]>>(() => initialColors("tshirt-classic"));
   const [popular, setPopular] = useState(false);
@@ -76,6 +82,7 @@ export default function NewProductPage() {
     if (!next || key === productType) return;
     setProductType(key);
     setColorSel(initialColors(key));
+    if (next.baseCategory !== prev?.baseCategory) setPrices({});
     if (!description.trim() || description === prev?.description) setDescription(next.description);
   }
 
@@ -126,20 +133,27 @@ export default function NewProductPage() {
       setError("Заповніть назву й опис.");
       return;
     }
+    if (!printCategory.trim()) {
+      setPrintCategoryError(true);
+      setError("Заповніть категорію принту.");
+      printCategoryRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+      printCategoryRef.current?.focus();
+      return;
+    }
     if (onSale && !groups.some((g) => (salePrices[gk(g.key)] ?? "").trim() !== "")) {
       setError("Вкажіть акційну ціну хоча б для однієї тканини (або зніми «На розпродажі»).");
       return;
     }
     for (const g of groups) {
       const label = g.title ? ` (${g.title})` : "";
-      if (!Number(prices[gk(g.key)]) || Number(prices[gk(g.key)]) <= 0) {
+      if (!Number(priceOf(g)) || Number(priceOf(g)) <= 0) {
         setError(`Вкажіть ціну${label}.`);
         return;
       }
       const spRaw = (salePrices[gk(g.key)] ?? "").trim();
       if (onSale && spRaw !== "") {
         const sp = Number(spRaw);
-        if (!sp || sp <= 0 || sp >= Number(prices[gk(g.key)])) {
+        if (!sp || sp <= 0 || sp >= Number(priceOf(g))) {
           setError(`Акційна ціна${label} має бути меншою за звичайну.`);
           return;
         }
@@ -161,11 +175,11 @@ export default function NewProductPage() {
           productType: template.key,
           baseCategory: template.baseCategory,
           cutStyle: template.cutStyle,
-          printCategory: printCategory.trim() || undefined,
+          printCategory: printCategory.trim(),
           images: readyImages,
           groups: groups.map((g) => ({
             fabric: g.key,
-            price: Number(prices[gk(g.key)]),
+            price: Number(priceOf(g)),
             salePrice: onSale && (salePrices[gk(g.key)] ?? "").trim() !== "" ? Number(salePrices[gk(g.key)]) : undefined,
             colors: colorsByName(g.colors).filter((c) => (colorSel[gk(g.key)] ?? []).includes(c.name))
           })),
@@ -208,7 +222,7 @@ export default function NewProductPage() {
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              rows={3}
+              rows={template.baseCategory === "hoodies" ? 8 : 4}
               className="w-full bg-bgSoft border border-line px-4 py-3 text-sm"
             />
           </div>
@@ -266,15 +280,23 @@ export default function NewProductPage() {
 
           <div>
             <label className="block text-xs tracking-wide text-muted font-bold mb-2">
-              КАТЕГОРІЯ ПРИНТУ (необов'язково)
+              КАТЕГОРІЯ ПРИНТУ <span className="text-accent">*</span>
             </label>
             <input
+              ref={printCategoryRef}
               list="print-category-options"
               value={printCategory}
-              onChange={(e) => setPrintCategory(e.target.value)}
+              onChange={(e) => {
+                setPrintCategory(e.target.value);
+                if (e.target.value.trim()) setPrintCategoryError(false);
+              }}
               placeholder="Наприклад: Аніме"
-              className="w-full bg-bgSoft border border-line px-4 py-3 text-sm"
+              aria-invalid={printCategoryError}
+              className={`w-full bg-bgSoft border px-4 py-3 text-sm ${printCategoryError ? "border-accent" : "border-line"}`}
             />
+            {printCategoryError && (
+              <p className="text-xs text-accent mt-1.5 font-bold">Обов'язкове поле — обери або впиши категорію принту.</p>
+            )}
             <datalist id="print-category-options">
               {existingCategories.map((c) => (
                 <option key={c} value={c} />
@@ -303,7 +325,7 @@ export default function NewProductPage() {
                       <input
                         type="number"
                         min="0"
-                        value={prices[k] ?? ""}
+                        value={priceOf(g)}
                         onChange={(e) => setPrices((p) => ({ ...p, [k]: e.target.value }))}
                         className="w-full max-w-[200px] bg-bgSoft border border-line px-4 py-3 text-sm"
                       />
