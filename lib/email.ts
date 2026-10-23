@@ -46,6 +46,14 @@ export async function sendEmail({ to, subject, html }: SendEmailInput) {
   return { skipped: false, error: null };
 }
 
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
 export function orderConfirmationEmail(orderNumber: string, total: number) {
   return `
     <div style="font-family:sans-serif;">
@@ -71,9 +79,9 @@ export function orderNotificationEmail(
     <div style="font-family:sans-serif;">
       <h2>Нове замовлення №${orderNumber}</h2>
       <p>Сума: ${total} ₴</p>
-      <p>Телефон клієнта: ${phone}</p>
+      <p>Телефон клієнта: ${escapeHtml(phone)}</p>
       <p>Звʼязатися через: ${methodLabel[contactMethod] ?? contactMethod}</p>
-      ${comment ? `<p>Коментар: ${comment}</p>` : ""}
+      ${comment ? `<p>Коментар: ${escapeHtml(comment)}</p>` : ""}
       <p>Деталі — в адмінці / базі даних.</p>
     </div>`;
 }

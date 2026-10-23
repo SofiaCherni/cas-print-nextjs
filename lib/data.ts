@@ -3,6 +3,7 @@ import { Prisma } from "@prisma/client";
 import { prisma } from "./prisma";
 import { baseCategoryToDb, cutStyleToDb, fitToDb, mapProduct } from "./db-mappers";
 import { FABRICS, getTemplate } from "./product-templates";
+import { productFromPrice } from "./pricing";
 import { CutStyle, Fit, Print, Product, ProductBaseCategory, Size } from "./types";
 import {
   BASE_CATEGORIES,
@@ -64,12 +65,8 @@ function buildWhere(query: CatalogQuery, includeHidden: boolean): Prisma.Product
   if (query.printCategory) {
     where.printCategory = { equals: query.printCategory, mode: "insensitive" };
   }
-  if (typeof query.minPrice === "number" || typeof query.maxPrice === "number") {
-    const range: { gte?: number; lte?: number } = {};
-    if (typeof query.minPrice === "number") range.gte = query.minPrice;
-    if (typeof query.maxPrice === "number") range.lte = query.maxPrice;
-    where.basePrice = range;
-  }
+  // Фільтр за ціною тут не застосовується: Product.basePrice не враховує акцію та доплати за розміри,
+  // тому діапазон «від / до» перевіряється в queryProducts за фактичною ціною (lib/pricing.ts).
 
   const variantFilters: Prisma.VariantWhereInput = {};
   if (query.size) variantFilters.size = query.size;
@@ -82,44 +79,80 @@ function buildWhere(query: CatalogQuery, includeHidden: boolean): Prisma.Product
   return where;
 }
 
+function validPrice(value: number | undefined): number | undefined {
+  return typeof value === "number" && Number.isFinite(value) && value >= 0 ? value : undefined;
+}
+
+function validInt(value: number | undefined, fallback: number, min: number, max: number): number {
+  const n = typeof value === "number" && Number.isFinite(value) ? Math.floor(value) : fallback;
+  return Math.min(max, Math.max(min, n));
+}
+
 /**
  * Server-side filtering + pagination against Postgres — mirrors the same
  * filter shape the catalog URL query params and /api/products already use.
+ *
+ * Сортування за ціною та фільтр «від / до» працюють за тією ціною, яку бачить покупець
+ * (productFromPrice: акційна ціна + найдешевший варіант з урахуванням доплат за розміри),
+ * а не за Product.basePrice. Ціни, введені в адмінці, не змінюються — лише читаються.
  */
 export async function queryProducts(query: CatalogQuery, includeHidden = false) {
   const where = buildWhere(query, includeHidden);
 
+  const minPrice = validPrice(query.minPrice);
+  const maxPrice = validPrice(query.maxPrice);
+  const byPrice = query.sort === "price-asc" || query.sort === "price-desc";
+
+  const page = validInt(query.page, 1, 1, 100000);
+  const pageSize = validInt(query.pageSize, 12, 1, 100);
+
   const orderBy =
-    query.sort === "new"
+    query.sort === "new" || byPrice
       ? [{ createdAt: "desc" as const }]
-      : query.sort === "price-asc"
-      ? [{ basePrice: "asc" as const }]
-      : query.sort === "price-desc"
-      ? [{ basePrice: "desc" as const }]
       : [{ popular: "desc" as const }, { createdAt: "desc" as const }];
 
-  const page = query.page ?? 1;
-  const pageSize = query.pageSize ?? 12;
+  if (!byPrice && minPrice === undefined && maxPrice === undefined) {
+    const [rows, total] = await Promise.all([
+      prisma.product.findMany({
+        where,
+        include: { variants: true },
+        orderBy,
+        skip: (page - 1) * pageSize,
+        take: pageSize
+      }),
+      prisma.product.count({ where })
+    ]);
+    return { items: rows.map(mapProduct), total, page, pageSize };
+  }
 
-  const [rows, total] = await Promise.all([
-    prisma.product.findMany({
-      where,
-      include: { variants: true },
-      orderBy,
-      skip: (page - 1) * pageSize,
-      take: pageSize
-    }),
-    prisma.product.count({ where })
-  ]);
+  // Ціна залежить від акції та варіантів, тож рахуємо на сервері в коді. Каталог невеликий.
+  // Сортування стабільне: товари з однаковою ціною лишаються в порядку orderBy.
+  const rows = await prisma.product.findMany({ where, include: { variants: true }, orderBy });
+  const priced = rows
+    .map(mapProduct)
+    .map((product) => ({ product, price: productFromPrice(product).price }))
+    .filter(
+      ({ price }) =>
+        (minPrice === undefined || price >= minPrice) && (maxPrice === undefined || price <= maxPrice)
+    );
 
-  return { items: rows.map(mapProduct), total, page, pageSize };
+  if (query.sort === "price-asc") priced.sort((a, b) => a.price - b.price);
+  if (query.sort === "price-desc") priced.sort((a, b) => b.price - a.price);
+
+  const items = priced.slice((page - 1) * pageSize, page * pageSize).map((x) => x.product);
+  return { items, total: priced.length, page, pageSize };
 }
 
 // cache(): generateMetadata і сама сторінка викликають її двічі за один запит — у базу піде лише один.
-export const getProductBySlug = cache(async (slug: string): Promise<Product | undefined> => {
-  const row = await prisma.product.findUnique({ where: { slug }, include: { variants: true } });
-  return row ? mapProduct(row) : undefined;
-});
+// Приховані товари (status !== "active") публічно не віддаємо — ні сторінка, ні /api/products/[slug].
+// `includeHidden` — лише для адмінських викликів (перегляд/редагування прихованого товару).
+export const getProductBySlug = cache(
+  async (slug: string, includeHidden = false): Promise<Product | undefined> => {
+    const row = await prisma.product.findUnique({ where: { slug }, include: { variants: true } });
+    if (!row || (!includeHidden && row.status !== "active")) return undefined;
+    return mapProduct(row);
+  }
+);
 
 /**
  * Distinct print category strings already used across products — powers
@@ -318,18 +351,24 @@ function slugify(name: string): string {
   );
 }
 
+/** Унікальний slug: додає -2, -3… поки такий уже існує (спільна логіка для товарів і принтів). */
+async function uniqueSlug(name: string, exists: (slug: string) => Promise<boolean>): Promise<string> {
+  const baseSlug = slugify(name);
+  let slug = baseSlug;
+  let suffix = 2;
+  while (await exists(slug)) {
+    slug = `${baseSlug}-${suffix++}`;
+  }
+  return slug;
+}
+
 /**
  * Creates a product plus one Variant per (fabric × fit × size × color) combination —
  * with the +50₴ surcharge on 3XL–5XL (brief section 6 / product page notice).
  * Price (and the optional sale price) is set per fabric.
  */
 export async function createProduct(input: CreateProductInput): Promise<Product> {
-  const baseSlug = slugify(input.name);
-  let slug = baseSlug;
-  let suffix = 2;
-  while (await prisma.product.findUnique({ where: { slug } })) {
-    slug = `${baseSlug}-${suffix++}`;
-  }
+  const slug = await uniqueSlug(input.name, async (s) => !!(await prisma.product.findUnique({ where: { slug: s } })));
 
   const template = getTemplate(input.productType);
   const cutStyle = template
@@ -467,12 +506,7 @@ export interface CreatePrintInput {
 }
 
 export async function createPrint(input: CreatePrintInput): Promise<Print> {
-  const baseSlug = slugify(input.name);
-  let slug = baseSlug;
-  let suffix = 2;
-  while (await prisma.print.findUnique({ where: { slug } })) {
-    slug = `${baseSlug}-${suffix++}`;
-  }
+  const slug = await uniqueSlug(input.name, async (s) => !!(await prisma.print.findUnique({ where: { slug: s } })));
   const row = await prisma.print.create({
     data: {
       slug,

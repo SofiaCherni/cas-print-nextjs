@@ -1,8 +1,7 @@
 import Link from "next/link";
 import ProductFilters from "@/components/ProductFilters";
 import ProductGrid from "@/components/ProductGrid";
-import { BASE_CATEGORIES, getPrintCategories, queryProducts } from "@/lib/data";
-import { CatalogQuery } from "@/lib/data";
+import { BASE_CATEGORIES, CatalogQuery, getPrintCategories, queryProducts } from "@/lib/data";
 import { CutStyle, Fit, ProductBaseCategory, Size } from "@/lib/types";
 
 const SORT_OPTIONS: { value: NonNullable<CatalogQuery["sort"]>; label: string }[] = [
@@ -19,6 +18,22 @@ export default async function CatalogView({
   baseCategory?: ProductBaseCategory;
   searchParams: Record<string, string | undefined>;
 }) {
+  const SORT_VALUES = SORT_OPTIONS.map((o) => o.value);
+  const sort = SORT_VALUES.includes(searchParams.sort as NonNullable<CatalogQuery["sort"]>)
+    ? (searchParams.sort as NonNullable<CatalogQuery["sort"]>)
+    : "popular";
+  const basePath = baseCategory ? `/catalog/${baseCategory}` : "/catalog";
+
+  // Посилання сортування зберігає всі інші фільтри з адреси.
+  const sortHref = (value: string) => {
+    const params = new URLSearchParams();
+    for (const [k, v] of Object.entries(searchParams)) {
+      if (v && k !== "sort" && k !== "page") params.set(k, v);
+    }
+    params.set("sort", value);
+    return `${basePath}?${params.toString()}`;
+  };
+
   const query: CatalogQuery = {
     baseCategory,
     cutStyle: searchParams.cut as CutStyle | undefined,
@@ -29,7 +44,7 @@ export default async function CatalogView({
     colorName: searchParams.color,
     minPrice: searchParams.minPrice ? Number(searchParams.minPrice) : undefined,
     maxPrice: searchParams.maxPrice ? Number(searchParams.maxPrice) : undefined,
-    sort: (searchParams.sort as CatalogQuery["sort"]) ?? "popular"
+    sort
   };
 
   const [{ items, total }, printCategories] = await Promise.all([
@@ -74,9 +89,13 @@ export default async function CatalogView({
               <span>{total} товарів</span>
               <div className="flex gap-4">
                 {SORT_OPTIONS.map((s) => (
-                  <a key={s.value} className="hover:text-paper cursor-pointer">
+                  <Link
+                    key={s.value}
+                    href={sortHref(s.value)}
+                    className={`hover:text-paper ${sort === s.value ? "text-paper" : ""}`}
+                  >
                     {s.label}
-                  </a>
+                  </Link>
                 ))}
               </div>
             </div>

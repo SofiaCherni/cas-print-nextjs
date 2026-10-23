@@ -33,6 +33,21 @@ export default function ProductFilters({ printCategories }: { printCategories: s
 
   const active = (key: string, value: string) => searchParams.get(key) === value;
 
+  // Діапазон ціни: повторний клік по активному діапазону знімає його.
+  function setPriceRange(min: string | null, max: string | null) {
+    const params = new URLSearchParams(searchParams.toString());
+    const isActive = params.get("minPrice") === min && params.get("maxPrice") === max;
+    params.delete("minPrice");
+    params.delete("maxPrice");
+    if (!isActive) {
+      if (min) params.set("minPrice", min);
+      if (max) params.set("maxPrice", max);
+    }
+    router.push(`${pathname}?${params.toString()}`);
+  }
+  const rangeActive = (min: string | null, max: string | null) =>
+    searchParams.get("minPrice") === min && searchParams.get("maxPrice") === max;
+
   return (
     <aside className="space-y-8">
       {printCategories.length > 0 && (
@@ -141,27 +156,27 @@ export default function ProductFilters({ printCategories }: { printCategories: s
         <h4 className="text-xs tracking-wide text-muted font-bold mb-3.5">ЦІНА</h4>
         <div className="space-y-2.5">
           <button
-            onClick={() => setParam("maxPrice", "1000")}
+            onClick={() => setPriceRange(null, "1000")}
             className={`flex items-center gap-2.5 text-sm ${
-              active("maxPrice", "1000") ? "text-paper" : "text-paper/85"
+              rangeActive(null, "1000") ? "text-paper" : "text-paper/85"
             }`}
           >
             <span
               className={`w-3.5 h-3.5 border rounded-sm ${
-                active("maxPrice", "1000") ? "bg-paper border-paper" : "border-muted"
+                rangeActive(null, "1000") ? "bg-paper border-paper" : "border-muted"
               }`}
             />
             до 1000 ₴
           </button>
           <button
-            onClick={() => setParam("minPrice", "1000")}
+            onClick={() => setPriceRange("1000", "2000")}
             className={`flex items-center gap-2.5 text-sm ${
-              active("minPrice", "1000") ? "text-paper" : "text-paper/85"
+              rangeActive("1000", "2000") ? "text-paper" : "text-paper/85"
             }`}
           >
             <span
               className={`w-3.5 h-3.5 border rounded-sm ${
-                active("minPrice", "1000") ? "bg-paper border-paper" : "border-muted"
+                rangeActive("1000", "2000") ? "bg-paper border-paper" : "border-muted"
               }`}
             />
             1000–2000 ₴

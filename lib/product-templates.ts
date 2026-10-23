@@ -231,10 +231,3 @@ export function colorsByName(names: string[]): { name: string; hex: string }[] {
     .map((name) => COLOR_PALETTE.find((c) => c.name === name))
     .filter((c): c is { name: string; hex: string } => !!c);
 }
-
-/** Кольори шаблону з hex-кодами (назви, яких немає в палітрі, пропускаються). */
-export function templateColors(t: ProductTemplate): { name: string; hex: string }[] {
-  return t.colors
-    .map((name) => COLOR_PALETTE.find((c) => c.name === name))
-    .filter((c): c is { name: string; hex: string } => !!c);
-}
