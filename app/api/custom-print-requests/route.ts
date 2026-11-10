@@ -18,6 +18,7 @@ const MAX_SIZE_BYTES = 15 * 1024 * 1024; // 15MB — adjust to real business lim
 export async function POST(req: NextRequest) {
   const formData = await req.formData();
   const file = formData.get("file") as File | null;
+  const fileBack = formData.get("fileBack") as File | null;
   const productId = formData.get("productId") as string | null;
   const size = formData.get("size") as string | null;
   const colorName = formData.get("colorName") as string | null;
@@ -32,14 +33,18 @@ export async function POST(req: NextRequest) {
   if (formData.get("consent") !== "true") {
     return NextResponse.json({ error: "Потрібна згода на обробку персональних даних." }, { status: 400 });
   }
-  if (!file) {
-    return NextResponse.json({ error: "Додайте зображення." }, { status: 400 });
+  // Файл не обов'язковий, якщо замовлення — лише напис.
+  if (!file && !text?.trim()) {
+    return NextResponse.json({ error: "Додайте зображення або напис." }, { status: 400 });
   }
-  if (!ALLOWED_TYPES.includes(file.type)) {
-    return NextResponse.json({ error: "Непідтримуваний тип файлу." }, { status: 415 });
-  }
-  if (file.size > MAX_SIZE_BYTES) {
-    return NextResponse.json({ error: "Файл завеликий." }, { status: 413 });
+  for (const f of [file, fileBack]) {
+    if (!f) continue;
+    if (!ALLOWED_TYPES.includes(f.type)) {
+      return NextResponse.json({ error: "Непідтримуваний тип файлу." }, { status: 415 });
+    }
+    if (f.size > MAX_SIZE_BYTES) {
+      return NextResponse.json({ error: "Файл завеликий." }, { status: 413 });
+    }
   }
   if (!productId || !size || !colorName || !customerName || !customerPhone || !customerEmail) {
     return NextResponse.json({ error: "Заповніть усі обовʼязкові поля." }, { status: 400 });
@@ -49,18 +54,23 @@ export async function POST(req: NextRequest) {
   const sizeDetails = [fabric, fit, size].filter(Boolean).join(" · ");
 
   try {
-    const blob = await put(`custom-prints/${Date.now()}-${file.name}`, file, {
-      access: "public" // signed/private access requires a paid Blob tier; see README note
-    });
+    const upload = (f: File) =>
+      put(`custom-prints/${Date.now()}-${f.name}`, f, {
+        access: "public" // signed/private access requires a paid Blob tier; see README note
+      });
+    const blob = file ? await upload(file) : null;
+    const blobBack = fileBack ? await upload(fileBack) : null;
+    const fileUrl = blob?.url ?? "";
+    const commentFull = [comment, blobBack ? `Файл для спини: ${blobBack.url}` : ""].filter(Boolean).join("\n");
 
     const request = await prisma.customPrintRequest.create({
       data: {
         productId,
         size: sizeDetails,
         colorName,
-        fileUrl: blob.url,
+        fileUrl,
         text: text || undefined,
-        comment: comment || undefined,
+        comment: commentFull || undefined,
         customerName,
         customerPhone,
         customerEmail,
@@ -73,7 +83,7 @@ export async function POST(req: NextRequest) {
       await sendEmail({
         to: notifyEmail,
         subject: "Нова заявка на власний принт",
-        html: customPrintNotificationEmail(blob.url, text || "", comment || "", {
+        html: customPrintNotificationEmail(fileUrl, text || "", commentFull, {
           garment: productId,
           size: sizeDetails,
           colorName,

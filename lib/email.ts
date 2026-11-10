@@ -101,8 +101,8 @@ export function customPrintNotificationEmail(
       <p>Клієнт: ${details.customerName}, ${details.customerPhone}, ${details.customerEmail}</p>`
           : ""
       }
-      <p>Файл: <a href="${fileUrl}">${fileUrl}</a></p>
+      <p>Файл: ${fileUrl ? `<a href="${fileUrl}">${fileUrl}</a>` : "— (лише напис)"}</p>
       <p>Текст на принті: ${text || "—"}</p>
-      <p>Коментар: ${comment || "—"}</p>
+      <p>Коментар: ${comment ? escapeHtml(comment).replace(/\n/g, "<br/>") : "—"}</p>
     </div>`;
 }
