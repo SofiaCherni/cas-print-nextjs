@@ -91,9 +91,18 @@ export default function GarmentMockup({ garment, side, colorHex, printed, format
         </clipPath>
       </defs>
 
-      <path d={body} fill={colorHex} stroke="rgba(0,0,0,0.35)" strokeWidth="1.5" strokeLinejoin="round" />
+      <ellipse cx="200" cy="414" rx="118" ry="9" fill="rgba(0,0,0,0.18)" />
+      <path d={body} fill={colorHex} stroke="rgba(0,0,0,0.45)" strokeWidth="1.5" strokeLinejoin="round" />
       <path d={body} fill="url(#shade)" />
-      <path d={collar} fill="none" stroke={dark ? "rgba(255,255,255,0.18)" : "rgba(0,0,0,0.25)"} strokeWidth="5" strokeLinecap="round" />
+      {dark && (
+        <g stroke="rgba(255,255,255,0.10)" strokeWidth="2" fill="none" strokeLinecap="round">
+          <path d="M104 150 Q112 280 108 396" />
+          <path d="M296 150 Q288 280 292 396" />
+          <path d="M140 44 Q122 60 92 66" />
+          <path d="M260 44 Q278 60 308 66" />
+        </g>
+      )}
+      <path d={collar} fill="none" stroke={dark ? "rgba(255,255,255,0.28)" : "rgba(0,0,0,0.25)"} strokeWidth="5" strokeLinecap="round" />
 
       {printed && (
         <g
