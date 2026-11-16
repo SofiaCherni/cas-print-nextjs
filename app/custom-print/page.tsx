@@ -177,7 +177,7 @@ export default function CustomPrintPage() {
       <form onSubmit={handleSubmit} className="max-w-6xl mx-auto md:px-8 md:py-10 md:grid md:grid-cols-[1fr_minmax(0,460px)] md:gap-10 md:items-start">
         {/* ---------- МАКЕТ (липне нагорі) ---------- */}
         <div className="sticky top-[60px] md:top-[84px] z-30 bg-gradient-to-b from-[#E9E4DC] to-[#CFC8BC] text-bg md:rounded border-b md:border border-[#B9B1A4] shadow-[0_8px_24px_rgba(0,0,0,0.45)] md:shadow-none">
-          <div className="mx-auto w-full max-w-[300px] aspect-[400/385] max-h-[34vh] md:max-w-none md:aspect-auto md:max-h-none md:h-[clamp(240px,calc(100vh-270px),420px)]">
+          <div className="mx-auto w-full max-w-[300px] aspect-[400/440] max-h-[34vh] md:max-w-none md:aspect-auto md:max-h-none md:h-[clamp(320px,calc(100vh-170px),560px)]">
             <GarmentMockup
               garment={garment}
               side={side}
@@ -190,18 +190,18 @@ export default function CustomPrintPage() {
               onOffset={(o) => patch(side, { offset: o })}
             />
           </div>
-          <div className="text-center px-5 pb-3">
+          <div className="text-center px-5 pb-3 md:absolute md:bottom-4 md:left-1/2 md:-translate-x-1/2 md:w-[86%] md:px-4 md:py-3 md:pb-3 md:rounded-2xl md:bg-bg/80 md:backdrop-blur md:text-paper">
             <p className="font-display font-bold text-sm">{cur.printed ? `Принт ${cur.format}` : "Без принта"}</p>
-            <p className="text-[11px] text-bg/60 leading-snug mt-0.5">
+            <p className="text-[11px] text-bg/60 md:text-paper/70 leading-snug mt-0.5">
               {cur.printed ? "Принт можна рухати по макету — надрукуємо так, як на макеті" : `${SIDE_LABEL[side]}: без нанесення`}
             </p>
-            <div className="inline-flex mt-3 p-1 bg-bg/10 rounded-full">
+            <div className="inline-flex mt-3 md:mt-2 p-1 bg-bg/10 md:bg-paper/10 rounded-full">
               {(["front", "back"] as Side[]).map((k) => (
                 <button
                   type="button"
                   key={k}
                   onClick={() => setSide(k)}
-                  className={`px-5 py-2 rounded-full text-sm font-semibold ${side === k ? "bg-bg text-paper" : "text-bg"}`}
+                  className={`px-5 py-2 rounded-full text-sm font-semibold ${side === k ? "bg-bg text-paper md:bg-paper md:text-bg" : "text-bg md:text-paper"}`}
                 >
                   {SIDE_LABEL[k]}
                 </button>
