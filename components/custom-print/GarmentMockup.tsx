@@ -14,7 +14,7 @@ export const FORMAT_BOX: Record<PrintFormat, { w: number; h: number }> = {
 };
 export const PRINT_TOP = 120; // верхній край області принта від коміра
 export const VIEW_W = 400;
-export const VIEW_H = 440;
+export const VIEW_H = 385;
 
 function isDark(hex: string) {
   const h = hex.replace("#", "");
@@ -48,7 +48,7 @@ export default function GarmentMockup({ garment, side, colorHex, printed, format
   // Ліміти руху: принт не виходить за тулуб (x: 100…300).
   const limX = Math.max(0, (192 - w) / 2);
   const minY = 70 - PRINT_TOP;
-  const maxY = 395 - (PRINT_TOP + h);
+  const maxY = 340 - (PRINT_TOP + h);
   const clamp = (o: { x: number; y: number }) => ({
     x: Math.max(-limX, Math.min(limX, o.x)),
     y: Math.max(minY, Math.min(maxY, o.y))
@@ -59,14 +59,17 @@ export default function GarmentMockup({ garment, side, colorHex, printed, format
 
   function toSvg(e: React.PointerEvent) {
     const svg = svgRef.current!;
-    const r = svg.getBoundingClientRect();
-    return { px: ((e.clientX - r.left) / r.width) * VIEW_W, py: ((e.clientY - r.top) / r.height) * VIEW_H };
+    const pt = svg.createSVGPoint();
+    pt.x = e.clientX;
+    pt.y = e.clientY;
+    const p = pt.matrixTransform(svg.getScreenCTM()!.inverse());
+    return { px: p.x, py: p.y };
   }
 
   const neckY = side === "front" ? 92 : 62;
   const body = long
-    ? `M140 40 L92 62 L46 270 L86 282 L104 170 L104 398 Q200 410 296 398 L296 170 L314 282 L354 270 L308 62 L260 40 Q200 ${neckY} 140 40 Z`
-    : `M140 40 L92 62 L34 132 L70 168 L104 142 L104 398 Q200 410 296 398 L296 142 L330 168 L366 132 L308 62 L260 40 Q200 ${neckY} 140 40 Z`;
+    ? `M140 40 L92 62 L46 270 L86 282 L104 170 L104 350 Q200 362 296 350 L296 170 L314 282 L354 270 L308 62 L260 40 Q200 ${neckY} 140 40 Z`
+    : `M140 40 L92 62 L34 132 L70 168 L104 142 L104 350 Q200 362 296 350 L296 142 L330 168 L366 132 L308 62 L260 40 Q200 ${neckY} 140 40 Z`;
   const collar = `M140 40 Q200 ${neckY} 260 40`;
 
   const empty = !imageUrl && !text.trim();
@@ -91,13 +94,13 @@ export default function GarmentMockup({ garment, side, colorHex, printed, format
         </clipPath>
       </defs>
 
-      <ellipse cx="200" cy="414" rx="118" ry="9" fill="rgba(0,0,0,0.18)" />
+      <ellipse cx="200" cy="366" rx="118" ry="8" fill="rgba(0,0,0,0.18)" />
       <path d={body} fill={colorHex} stroke="rgba(0,0,0,0.45)" strokeWidth="1.5" strokeLinejoin="round" />
       <path d={body} fill="url(#shade)" />
       {dark && (
         <g stroke="rgba(255,255,255,0.10)" strokeWidth="2" fill="none" strokeLinecap="round">
-          <path d="M104 150 Q112 280 108 396" />
-          <path d="M296 150 Q288 280 292 396" />
+          <path d="M104 150 Q112 260 108 346" />
+          <path d="M296 150 Q288 260 292 346" />
           <path d="M140 44 Q122 60 92 66" />
           <path d="M260 44 Q278 60 308 66" />
         </g>

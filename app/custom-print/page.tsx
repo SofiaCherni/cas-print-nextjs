@@ -177,7 +177,7 @@ export default function CustomPrintPage() {
       <form onSubmit={handleSubmit} className="max-w-6xl mx-auto md:px-8 md:py-10 md:grid md:grid-cols-[1fr_minmax(0,460px)] md:gap-10 md:items-start">
         {/* ---------- МАКЕТ (липне нагорі) ---------- */}
         <div className="sticky top-[60px] md:top-[84px] z-30 bg-gradient-to-b from-[#E9E4DC] to-[#CFC8BC] text-bg md:rounded border-b md:border border-[#B9B1A4] shadow-[0_8px_24px_rgba(0,0,0,0.45)] md:shadow-none">
-          <div className="mx-auto w-full max-w-[300px] md:max-w-[460px] aspect-[400/440] max-h-[34vh] md:max-h-none">
+          <div className="mx-auto w-full max-w-[300px] aspect-[400/385] max-h-[34vh] md:max-w-none md:aspect-auto md:max-h-none md:h-[clamp(240px,calc(100vh-270px),420px)]">
             <GarmentMockup
               garment={garment}
               side={side}
